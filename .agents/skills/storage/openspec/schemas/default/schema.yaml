@@ -1,0 +1,118 @@
+name: my-workflow
+version: 1
+description: Default OpenSpec workflow - requirements-first inception artifacts
+artifacts:
+  - id: Vision and Business Case
+    generates: vision.md
+    description: Stored under 02 Requirements; describes the high-level goals and constraints, the business case, and provides an executive summary.
+    template: vision.md
+    instruction: INVOKE this link -> "./instructions/Vision.md"
+    requires: []
+  - id: Supplementary Specification
+    generates: supplementary-specification.md
+    description: Stored under 02 Requirements; captures non-functional, cross-cutting, and constraint-oriented requirements.
+    template: suplementary-specification.md
+    instruction: INVOKE this link -> "./instructions/suplementary-specification.md"
+    requires: [vision, use-case-model]
+  - id: Glossary
+    generates: glosary.md
+    description: Stored under 02 Requirements; captures key domain terminology and data dictionary entries.
+    template: glosary.md
+    instruction: INVOKE this link -> "./instructions/glosary.md"
+    requires: [vision]
+  - id: Domain Rules
+    generates: domain-rules.md
+    description: Stored under 02 Requirements; captures long-lived domain and policy rules.
+    template: domain-rules.md
+    instruction: INVOKE this link -> "./instructions/domain-rules.md"
+    requires: [vision]
+  - id: Domain Model
+    generates: Domain Model.md
+    description: Stored under 01 Business Modeling; captures conceptual domain classes, attributes, and associations for the current iteration.
+    template: domain-model.md
+    instruction: INVOKE this link -> "./instructions/domain-model.md"
+    requires: [vision, use-case-model, supplementary-specification, glosary]
+  - id: Use Case Model
+    generates: Use Case Model.md
+    description: Stored under 02 Requirements; captures the use case diagram and catalog.
+    template: use-case-model.md
+    instruction: INVOKE this link -> "./instructions/use-case-model.md"
+    requires: [vision]
+  - id: Requirements Ranking
+    generates: Requirements Ranking.md
+    description: Stored under 08 Project Management; ranks use cases or features by risk, coverage, and business criticality to guide iteration focus.
+    template: requirements-ranking.md
+    instruction: INVOKE this link -> "./instructions/requirements-ranking.md"
+    requires: [vision, use-case-model]
+  - id: Iteration Plan
+    generates: '{{#}} {Iteration} Plan.md'
+    description: Stored under 08 Project Management; captures the goal, capacity, selected scope, task breakdown, estimates, risks, and exit criteria for one elaboration iteration.
+    template: iteration-plan.md
+    instruction: INVOKE this link -> "./instructions/iteration-plan.md"
+    requires: [requirements-ranking, use-case-model]
+  - id: Use Case fully dressed
+    generates: UC{{#}}.md
+    description: Stored under 02 Requirements/use-cases; describes the functional requirements in fully dressed format.
+    template: use-case-fully-dressed.md
+    instruction: INVOKE this link -> "./instructions/use-case-model.md"
+    requires: [vision]
+  - id: Use Case brief
+    generates: UC{{#}}.md
+    description: Stored under 02 Requirements/use-cases; describes the functional requirements in brief format.
+    template: use-case-brief.md
+    instruction: INVOKE this link -> "./instructions/use-case-model.md"
+    requires: [vision]
+  - id: System Sequence Diagram
+    generates: SSD UC{{#}} {{use-case.name}}.md
+    description: Stored under 02 Requirements/SSDs; captures actor-system message flow for a use case scenario.
+    template: system-sequence-diagram.md
+    instruction: INVOKE this link -> "./instructions/system-sequence-diagram.md"
+    requires: [use-case-model]
+  - id: Operation Contracts
+    generates: UC{{#}} {{use-case.name}} - Operation Contracts.md
+    description: Stored under 02 Requirements/Operation Contracts; defines postconditions for system operations identified from SSDs.
+    template: operation-contracts.md
+    instruction: INVOKE this link -> "./instructions/operation-contracts.md"
+    requires: [use-case-model]
+  - id: Design Sequence Diagram
+    generates: DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml
+    description: Stored under 03 Design/Logical View; models software object interactions for one use case scenario, satisfying operation contract postconditions. Bridges SSD (actor-system) to class design.
+    template: plantuml.plantuml
+    instruction: 
+    requires: [system-sequence-diagram, operation-contracts, glosary]
+  - id: Technical Memo
+    generates: 'Issue - {{FURPS+ category}} - {{issue.name}}.md'
+    description: Stored under 02 Requirements/Technical memos; captures a technical decision for a specific quality-related issue.
+    template: technical-memo.md
+    instruction: INVOKE this link -> "./instructions/technical-memo.md"
+    requires: [supplementary-specification]
+  - id: Use Case Realization
+    generates: UCR UC{{#}} {{use-case.name}}.md
+    description: Stored under 03 Design/Use Case Realization; maps each use case scenario to design sequence and design class diagrams with traceability to SSDs and operation contracts.
+    template: use-case-realization.md
+    instruction: INVOKE this link -> "./instructions/use-case-realization.md", and load the skill "/design-principles/SKILL.md" and the instructions "class-diagram.md" before elaborating.
+    requires: [use-case-model, system-sequence-diagram, operation-contracts, supplementary-specification, glosary, domain-model, design-sequence-diagram]
+  - id: Logical View Package Diagram
+    generates: '{{fully.qualified.package}}.packageDiagram.plantuml'
+    description: Stored under 03 Design/Logical View; captures package-level logical structure and dependencies using PlantUML.
+    template: plantuml.plantuml
+    instruction:
+    requires: [supplementary-specification, technical-memo, use-case-model, domain-model, design-sequence-diagram]
+  - id: Logical View Class Diagram
+    generates: '{{fully.qualified.package}}.classDiagram.plantuml'
+    description: Stored under 03 Design/Logical View; captures class-level static structure, members, and relationships using PlantUML.
+    template: plantuml.plantuml
+    instruction:
+    requires: [supplementary-specification, technical-memo, use-case-model, domain-model, design-sequence-diagram]
+  - id: Test Plan
+    generates: '{{#}} {Iteration} Test plan.md'
+    description: Stored under 05 Test; captures the TDD Step 1 test planning output for a single elaboration iteration (factors, classes, boundaries, selected cases, execution mode policy, and traceability to iteration and design artifacts).
+    template: test-plan.md
+    instruction: INVOKE this link -> "./instructions/test-plan.md"
+    requires: [use-case-realization, iteration-plan]
+  - id: SW Architecture Document
+    generates: SW Architecture Document.md
+    description: Stored under 03 Design; documents architecture drivers, significant decisions, 4+1 views, quality scenarios, and evolution strategy.
+    template: SW Architecture Document.md
+    instruction: INVOKE this link -> "./instructions/SW Architecture Document.md"
+    requires: [vision, supplementary-specification, use-case-model, domain-model]

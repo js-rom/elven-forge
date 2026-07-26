@@ -1,0 +1,163 @@
+# =============================================================================
+# LIVE State Tracking - survives compaction
+# =============================================================================
+# This file tracks the current position in the Unified Process workflow.
+# It is updated by the active phase skill (up-inception / up-elaboration).
+# After compaction, the orchestrator reads this file to recover position.
+#
+# HOW TO MAINTAIN:
+#   1. Phase skill initializes this file at phase start (before step 1).
+#   2. At each step start: update current_step, mark step artifacts as in_progress.
+#   3. After each OK PASO N: move N from pending_steps to approved_steps,
+#      update last_approved_step, mark step artifacts as approved.
+#   4. After each storage invocation: mark persisted artifacts as persisted.
+#   5. On phase close: set status to completed.
+# =============================================================================
+
+# --- Phase & Step Tracking ---
+
+phase: ""                             # inception | elaboration | construction | transition
+iteration: ""                         # iteration identifier (I1, E1..En, C1..Cn, T1..T2)
+domain: ""                            # project domain as defined in inception
+status: ""                            # in_progress | completed
+date: ""                              # last update date
+
+current_step: 0                       # step currently being worked on
+last_approved_step: 0                 # last step with OK PASO N approval
+approved_steps: []                    # steps that have received OK PASO N
+pending_steps: []                     # steps yet to be completed (populated at phase init)
+
+# --- Iteration Scope ---
+scope: ""                             # brief description of iteration focus
+notes: ""                             # additional context, decisions, open issues
+
+# --- Artifact Lifecycle Tracking ---
+# Populated from schema.yaml at phase start.
+# Organized by UP discipline. Each discipline groups its artifacts.
+# Status lifecycle: not_started -> in_progress -> approved -> persisted -> refined
+artifacts:
+  01 Business Modeling:
+    - id: Glossary
+      path: 01 Business Modeling/Glossary.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Vision and Business Case]
+
+  02 Requirements:
+    - id: Vision and Business Case
+      path: 02 Requirements/vision.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: []
+
+    - id: Supplementary Specification
+      path: 02 Requirements/supplementary-specification.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Vision and Business Case]
+
+    - id: Domain Rules
+      path: 02 Requirements/domain-rules.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Vision and Business Case]
+
+    - id: Use Case Model
+      path: 02 Requirements/Use Case Model.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Vision and Business Case]
+
+    - id: Use Case brief
+      path: 02 Requirements/use-cases/UC{{#}}.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Vision and Business Case]
+
+    - id: Use Case fully dressed
+      path: 02 Requirements/use-cases/UC{{#}}.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Vision and Business Case]
+
+    - id: System Sequence Diagram
+      path: 02 Requirements/SSDs/SSD UC{{#}} {{use-case.name}}.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Use Case Model]
+
+    - id: Operation Contracts
+      path: 02 Requirements/Operation Contracts/UC{{#}} {{use-case.name}} - Operation Contracts.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Use Case Model]
+
+  03 Design:
+    - id: Logical View Package Diagram
+      path: 03 Design/Logical View/{{fully.qualified.package}}.packageDiagram.plantuml
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Supplementary Specification, Use Case Model]
+
+    - id: Design Sequence Diagram
+      path: 03 Design/Logical View/DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [System Sequence Diagram, Operation Contracts, Glossary]
+
+    - id: Logical View Class Diagram
+      path: 03 Design/Logical View/{{fully.qualified.package}}.classDiagram.plantuml
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Supplementary Specification, Use Case Model, Design Sequence Diagram]
+
+    - id: Use Case Realization
+      path: 03 Design/Use Case Realization/UCR UC{{#}} {{use-case.name}}.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Use Case Model, System Sequence Diagram, Operation Contracts, Supplementary Specification, Glossary, Design Sequence Diagram]
+
+    - id: SW Architecture Document
+      path: 03 Design/SW Architecture Document.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Vision and Business Case, Supplementary Specification, Use Case Model]
+
+  04 Implementation: []
+
+  05 Test:
+    - id: Test Plan
+      path: 05 Test/{{#}} {Iteration} Test plan.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Use Case Realization, Iteration Plan]
+
+  08 Project Management:
+    - id: Requirements Ranking
+      path: 08 Project Management/Requirements Ranking.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Vision and Business Case, Use Case Model]
+
+    - id: Iteration Plan
+      path: 08 Project Management/{{#}} {Iteration} Plan.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Requirements Ranking, Use Case Model]

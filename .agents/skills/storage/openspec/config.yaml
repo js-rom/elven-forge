@@ -1,0 +1,26 @@
+﻿schema: default
+
+context: |
+  Tech stack: {detected}
+  Architecture: {detected}
+  Testing: {detected}
+  Style: {detected}
+
+rules:
+  chat language: Spanish
+  artifacts language: Spanish, except for domain objects, source code, tests, identifiers, and code comments which MUST be in English.
+  inception:
+    - use project defined [schema](./schemas/default/schema.yaml)
+  elaboration:
+    - use project defined [schema](./schemas/default/schema.yaml)
+  tdd:
+    test_command: ""
+    build_command: ""
+    coverage_threshold: 80%
+  persistence:
+    mode: master-only
+    write_path: openspec/artifacts/{domain}/
+    archive_iterations: false
+    merge_deltas: false
+  archive:
+    - Disabled in master-only mode. Do not create iterations or merge deltas.
