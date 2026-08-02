@@ -173,9 +173,10 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
 | 6 | (TBD) Reports Design | N/A |
 | 7 | `Architectural Analysis`, `Technical Memos`, `Supplementary Specification` (refine) | Yes |
 | 8 | Logical View packages (`packageDiagram.plantuml`) | Yes |
-| 9 | `Design Sequence Diagram`, Design Class Diagrams (`classDiagram.plantuml`) | Yes |
+| 9A | `Domain-to-Design Transition Map` (transformation map, responsibility matrix, postcondition traceability, pattern candidates) | Yes |
+| 9B | `Design Sequence Diagram`, Design Class Diagrams (`classDiagram.plantuml`) | Yes |
 | 10 | `Use Case Realization` (per UC in scope) | Yes |
-| 11 | Reviewer pass — refines artifacts from steps 8, 9, 10 (no new artifact) | Yes (refactored artifacts) |
+| 11 | Reviewer pass — refines artifacts from steps 8, 9A, 9B, 10 (no new artifact) | Yes (refactored artifacts) |
 | 12 | `Data Model`, `JPA Mapping` | Yes |
 | 13 | `SW Architecture Document` | Yes |
 | 14 | `Test Plan`, Code + Unit/Integration Tests (TDD) | Yes (`Test Plan` only; code/tests remain file-based) |
@@ -282,69 +283,90 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
     c. inbound and outbound dependency rules,
     d. use cases or scenarios that are expected to touch that package.
   - Create or refine UML package diagrams per package/subsystem using PlantUML.
-  - Create an explicit package-to-scenario traceability list so step 9 can process scenarios without redesigning boundaries.
+  - Create an explicit package-to-scenario traceability list so step 9A can process scenarios without redesigning boundaries.
   - MUST stay at package, subsystem, and layer level only.
   - MUST NOT include class-level design detail, method design, or sequence design in this step.
-  - If a scenario cannot be placed cleanly into the current package boundaries, resolve that now in step 8 before moving to step 9.
+  - If a scenario cannot be placed cleanly into the current package boundaries, resolve that now in step 8 before moving to step 9A.
   - Stop and request `OK PASO 8` before continuing.
   - After approval,
    - update the `Logical View` artifact in the master files with the incremental changes for the current iteration, using the storage skill and following the active Artifact Store Policy. It should be stored under `openspec/artifacts/{domain}/03 Design/Logical View/{{fully.qualified.package}}.packageDiagram.plantuml`.
    - if new discoveries during logical view design require changes to supplementary specification or technical memos, update them in collaboration with the user. They should be stored under `openspec/artifacts/{domain}/02 Requirements/supplementary-specification.md` and `openspec/artifacts/{domain}/02 Requirements/Technical memos/Issue - {{FURPS+ category}} - {{issue.name}}.md` respectively, using the storage skill and following the active Artifact Store Policy.
 
-9. Design sequence diagrams and class diagrams for the Logical View, mapping each approved scenario in scope to object design without changing the package structure approved in step 8.
+9A. Elaborate the Domain-to-Design Transition: bridge the conceptual Domain Model to the software Design Model with an explicit mapping that makes every design decision traceable to domain concepts and operation contracts.
+  - Artifacts in progress: `Logical View` (domain-to-design transition map and responsibility assignments).
+  - Before elaborating, load the skills `/design-principles/SKILL.md`, the active schema instruction `domain-to-design-transition.md`, and the active schema template `domain-to-design-transition.md`.
+  - Required inputs: Domain Model from step 2 (conceptual classes, attributes, associations, invariants), SSDs from step 3 (system operations per scenario), Operation Contracts from step 4 (postconditions in domain vocabulary), Logical View packages from step 8 (package boundaries and dependency rules), Supplementary Specification, and Glossary.
+  - This step produces the transformation contract that step 9B will use as fixed input. It does NOT produce sequence or class diagrams yet.
+  - Build an explicit scenario queue from the approved iteration plan and process all scenarios together in this step:
+    a. Domain-to-Software Transformation Map: for every domain concept referenced by the scenarios in scope, produce a table mapping DomainModelConcept → SoftwareClass/Interface. Note where the software model diverges from the domain model and why.
+    b. Responsibility Assignment Matrix: assign knowing/doing responsibilities to each software class using Information Expert, using the Operation Contract postconditions as the primary driver. Walk through each postcondition and identify which software class(es) must collaborate to satisfy it.
+    c. Postcondition Traceability Matrix: map every Operation Contract postcondition to the software design element(s) that will satisfy it. If a postcondition cannot yet be assigned, mark it as TBD with a rationale.
+    d. Pattern Candidate List: identify hotspots (versioning, state machines, policy variation, etc.) and propose pattern candidates (Memento, State, Strategy, Composite, etc.) with problem evidence, intent fit, and participant mapping to domain concepts.
+    e. Transformation Rationale: document decisions where the software model diverges from the domain model, with explicit justification aligned with `/design-principles/SKILL.md`.
+  - MUST NOT design sequence diagrams, class diagram deltas, or method-level collaborations in this step.
+  - MUST keep the transformation map at the class-and-responsibility level; do not descend into method signatures or algorithmic design.
+  - If the transformation reveals a mismatch that requires changing package boundaries, stop and route the issue back to step 8.
+  - Stop and request `OK PASO 9A` before continuing.
+  - After approval, persist the transition artifacts using the storage skill, following the active Artifact Store Policy:
+    - Domain-to-Design Transition Map under: `openspec/artifacts/{domain}/03 Design/Logical View/domain-to-design-transition.md`
+
+9B. Design sequence diagrams and class diagrams for the Logical View, mapping each approved scenario in scope to object design using the transition map from step 9A as a fixed contract.
   - Artifacts in progress: `Logical View` (design sequence diagrams and design class diagrams).
-  - Before designing, load the skills `/design-principles/SKILL.md`, `/sequence-diagram/SKILL.md` and `/class-diagram/SKILL.md`.
-  - Required inputs: approved iteration plan, SSDs from step 3, Operation Contracts from step 4, Domain Model from step 2, Logical View packages from step 8, Supplementary Specification, and Glossary.
-  - Build an explicit scenario queue from the approved iteration plan and process it one scenario at a time.
-  - This step is the scenario-level design step. Use the package boundaries from step 8 as fixed constraints.
+  - Before designing, load the skills `/sequence-diagram/SKILL.md` and `/class-diagram/SKILL.md`, and re-load the approved `domain-to-design-transition.md` from step 9A.
+  - Required inputs: approved iteration plan, SSDs from step 3, Operation Contracts from step 4, approved Domain-to-Design Transition Map from step 9A, Logical View packages from step 8, Supplementary Specification, and Glossary.
+  - Use the scenario queue already built in step 9A; do NOT rebuild it.
+  - This step is the scenario-level design step. Use the package boundaries from step 8 and the transition map from step 9A as fixed constraints.
   - For each scenario in scope, execute these phases in order:
-    a. Responsibility Ledger: identify participating packages, key collaborating objects, system-operation handlers, persistence touchpoints, and the responsibility assignment rationale from `/design-principles/SKILL.md`.
-    b. Design Sequence Diagram (DSD): design one DSD for that scenario starting from the SSD system operations and the Operation Contract events and postconditions.
-    c. Design Class Diagram Delta (DCD Delta): update only the class diagrams of the packages touched by that scenario, adding or refining classes, associations, responsibilities, and interfaces needed by the DSD.
-    d. Validation: verify that every Operation Contract postcondition is satisfied in the proposed design.
-    e. Rationale: document concise design rationale aligned with `/design-principles/SKILL.md`, including Information Expert, cohesion/coupling checks, controller/view separation, and pattern decisions when hotspots appear.
-    f. Constraint alignment: reflect Supplementary Specification constraints and Glossary terminology in the scenario mapping.
-  - Use Business Modeling as inspiration for software domain object names.
+    a. Design Sequence Diagram (DSD): design one DSD for that scenario starting from the SSD system operations, the Operation Contract events and postconditions, and the responsibility assignments from step 9A.
+    b. Design Class Diagram Delta (DCD Delta): update only the class diagrams of the packages touched by that scenario, adding or refining classes, associations, responsibilities, and interfaces needed by the DSD. Use the Domain-to-Software Transformation Map from step 9A as the naming and structure contract.
+    c. Validation: verify that every Operation Contract postcondition is satisfied in the proposed design, using the Postcondition Traceability Matrix from step 9A as the checklist.
+    d. Rationale: document concise design rationale aligned with the transformation decisions from step 9A, including cohesion/coupling checks, controller/view separation, and pattern realization details.
+    e. Constraint alignment: reflect Supplementary Specification constraints and Glossary terminology in the scenario mapping.
+  - Use the Domain-to-Software Transformation Map from step 9A as the authoritative source for software class names.
   - MUST keep one scenario per DSD.
   - MUST update only the package class diagrams touched by the current scenario.
   - MUST NOT redesign package boundaries, subsystem boundaries, or layer rules in this step.
+  - MUST NOT override transformation decisions from step 9A; if a transformation issue is discovered, stop and route it back to step 9A.
   - If a package or layer problem is discovered, stop scenario design and route the issue back to step 8.
-  - Stop and request `OK PASO 9` before continuing.
+  - Stop and request `OK PASO 9B` before continuing.
   - After approval, persist class and sequence diagrams using the storage skill, following the active Artifact Store Policy:
     - Design Sequence Diagrams under: `openspec/artifacts/{domain}/03 Design/Logical View/DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml`
     - Design Class Diagrams under: `openspec/artifacts/{domain}/03 Design/Logical View/{{fully.qualified.package}}.classDiagram.plantuml`
 
-10. Assemble Use Case Realization documents for each use case in scope, referencing and validating the designs already produced in step 9.
+10. Assemble Use Case Realization documents for each use case in scope, referencing and validating the designs already produced in steps 9A and 9B.
   - Artifacts in progress: `Use Case Realization`
   - Before assembling, load the active schema instruction `use-case-realization.md`, the active schema template `use-case-realization.md`, and the skill `/design-principles/SKILL.md`.
   - This step is assembly and validation only. It does not introduce new design elements.
-  - Required inputs (already designed in step 9; reference only):
-    - Design Sequence Diagrams and Design Class Diagrams from Logical View
+  - Required inputs (already designed in steps 9A and 9B; reference only):
+    - Domain-to-Design Transition Map from step 9A
+    - Design Sequence Diagrams and Design Class Diagrams from Logical View (step 9B)
     - SSDs from step 3
     - Operation Contracts from step 4
   - For each use case:
-    a. Build the scenario mapping table (UC steps → SSD → OC → Design reference from step 9).
-    b. Reference, and do not recreate, the design diagrams from Logical View.
-    c. Fill the operation contract postcondition satisfaction checklist.
+    a. Build the scenario mapping table (UC steps → SSD → OC → Design reference from steps 9A/9B).
+    b. Reference, and do not recreate, the design diagrams and transition map from Logical View.
+    c. Fill the operation contract postcondition satisfaction checklist, cross-referencing the Postcondition Traceability Matrix from step 9A.
     d. Verify and document alignment with Supplementary Specification and Glossary.
-    e. Add design rationale notes drawing from `/design-principles/SKILL.md` validation already produced in step 9.
+    e. Add design rationale notes drawing from `/design-principles/SKILL.md` validation already produced in step 9B.
   - MUST NOT introduce new classes, new responsibilities, new package decisions, or new interactions in this step.
   - If documentation is incomplete but the design already exists, complete it here.
-  - If a missing design element is discovered, route the issue back to step 9 instead of solving it inside step 10.
+  - If a missing design element is discovered, route the issue back to step 9A or 9B instead of solving it inside step 10.
   - Stop and request `OK PASO 10` before continuing.
   - After approval, store each `Use Case Realization` artifact using the storage skill, following the active Artifact Store Policy. It should be stored under `openspec/artifacts/{domain}/03 Design/Use Case Realization/UCR UC{{#}} {{use-case.name}}.md`.
 
-11. Reviewer pass for Logical View quality gate (steps 8, 9, and 10).
+11. Reviewer pass for Logical View quality gate (steps 8, 9A, 9B, and 10).
   - Artifacts in progress: `Logical View` and `Use Case Realization`.
   - Before reviewing, load the skills `/design-principles/SKILL.md` and `/architectural-design/SKILL.md`, and re-load `use-case-realization.md` to validate both design quality and artifact structure.
   - This step is a readiness gate before persistence design. Do not continue to PASO 12 until the logical design is explicitly accepted.
-  - Required inputs: approved Logical View outputs from steps 8 and 9, approved Use Case Realization outputs from step 10, Domain Model from step 2, SSDs from step 3, Operation Contracts from step 4, Supplementary Specification, Glossary, and Architectural Analysis from step 7.
+  - Required inputs: approved Logical View outputs from steps 8, 9A, and 9B, approved Use Case Realization outputs from step 10, Domain Model from step 2, SSDs from step 3, Operation Contracts from step 4, Supplementary Specification, Glossary, and Architectural Analysis from step 7.
   - Run these review passes in order:
     a. Structural review of step 8: verify package catalog, package-to-scenario traceability, layer rules, dependency direction rules, and absence of boundary violations.
-    b. Scenario design review of step 9: verify Responsibility Ledger evidence, one DSD per scenario, DCD deltas only in touched packages, object collaborations, controller/view separation, cohesion/coupling rationale, pattern selection rationale, persistence touchpoints, and explicit fulfillment of every Operation Contract postcondition.
-    c. Documentation review of step 10: verify complete scenario mapping (UC steps → SSD → OC → design references), correct references to design diagrams from Logical View, alignment with Supplementary Specification and Glossary, and confirmation that PASO 10 did not introduce new design elements.
+    b. Transition review of step 9A: verify Domain-to-Software Transformation Map completeness, Responsibility Assignment Matrix coverage and Information Expert justification, Postcondition Traceability Matrix coverage (no missing postconditions), pattern candidate evidence and rationale, and transformation divergence justifications.
+    c. Scenario design review of step 9B: verify one DSD per scenario, DCD deltas only in touched packages, object collaborations consistent with 9A responsibility assignments, controller/view separation, cohesion/coupling rationale, pattern realization aligned with 9A candidates, persistence touchpoints, and explicit fulfillment of every Operation Contract postcondition against the 9A traceability matrix.
+    d. Documentation review of step 10: verify complete scenario mapping (UC steps → SSD → OC → design references from 9A/9B), correct references to design diagrams and transition map from Logical View, alignment with Supplementary Specification and Glossary, and confirmation that PASO 10 did not introduce new design elements.
   - If any package, layer, or dependency issue is found, route the issue back to step 8.
-  - If any responsibility, collaboration, or postcondition issue is found, route the issue back to step 9.
+  - If any transformation, responsibility mapping, or traceability issue is found, route the issue back to step 9A.
+  - If any scenario design, collaboration, or diagram issue is found, route the issue back to step 9B.
   - If any traceability or UCR assembly issue is found, route the issue back to step 10.
   - For each use case in scope, produce a concise review summary including:
     - principles applied,
@@ -355,6 +377,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - MUST NOT allow PASO 12 to start while any use case is marked `NO`.
   - Stop and request `OK PASO 11` before continuing.
   - After approval, persist each reviewed or refactored artifact using the storage skill, following the active Artifact Store Policy:
+    - Domain-to-Design Transition Map under: `openspec/artifacts/{domain}/03 Design/Logical View/domain-to-design-transition.md`
     - Package diagrams under: `openspec/artifacts/{domain}/03 Design/Logical View/{{fully.qualified.package}}.packageDiagram.plantuml`
     - Design Sequence Diagrams under: `openspec/artifacts/{domain}/03 Design/Logical View/DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml`
     - Design Class Diagrams under: `openspec/artifacts/{domain}/03 Design/Logical View/{{fully.qualified.package}}.classDiagram.plantuml`
@@ -368,7 +391,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - First, use `/data-model/SKILL.md` to draft or refine the framework-agnostic physical data model in PlantUML.
   - Then, use `/jpa-mapping/SKILL.md` to translate that model into an implementable Spring Data JPA design and rationale document.
   - Keep both artifacts in master-only mode: apply the current iteration delta to the same files instead of creating iteration-specific copies.
-  - If PASO 12 discovers a mismatch that requires changing the logical design, stop and route the issue back to steps 8, 9, or 10 through the PASO 11 review gate before finalizing persistence design.
+  - If PASO 12 discovers a mismatch that requires changing the logical design, stop and route the issue back to steps 8, 9A, 9B, or 10 through the PASO 11 review gate before finalizing persistence design.
   - If the iteration has no data scope, document the skip rationale and still request approval for the step.
   - Stop and request `OK PASO 12` before continuing.
   - After approval, store the `Data Model` and `JPA Mapping` artifacts using the storage skill, following the active Artifact Store Policy:
@@ -475,7 +498,8 @@ Map `state.yaml` fields to visual indicators:
 ### ⬜ Paso 6 — Reports Design (TBD)
 ### ⬜ Paso 7 — Architectural Analysis
 ### ⬜ Paso 8 — Logical View (packages)
-### ⬜ Paso 9 — Logical View (sequence + class)
+### ⬜ Paso 9A — Domain-to-Design Transition
+### ⬜ Paso 9B — Scenario Design (sequence + class)
 ### ⬜ Paso 10 — Use Case Realization
 ### ⬜ Paso 11 — Reviewer pass
 ### ⬜ Paso 12 — Data Model + JPA Mapping
