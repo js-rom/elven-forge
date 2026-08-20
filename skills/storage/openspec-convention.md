@@ -53,14 +53,18 @@ openspec/
 │       ├── 05 Test/
 │       │   └── {{#}} {Iteration} Test plan.md
 │       ├── 06 Deployment/
-│       │   └── .gitkeep
+│       │   ├── deployment-view.plantuml
+│       │   ├── release-plan.md
+│       │   ├── data-migration-plan.md
+│       │   └── deployment-plan.md
 │       ├── 07 Configuration & CM/
-│       │   └── .gitkeep
+│       │   ├── cm-plan.md
+│       │   └── change-control.md
 │       ├── 08 Project Management/
 │       │   ├── {{#}} {Iteration} Plan.md
 │       │   └── Requirements Ranking.md
 │       └── 09 Enviroment/
-│           └── .gitkeep
+│           └── environment-setup.md
 ```
 
 ## Discipline Directories
@@ -72,10 +76,10 @@ openspec/
 | `03 Design` | Logical design and architecture artifacts | `Design Model.md`, `SW Architecture Document.md`, `Data Model/data-model.plantuml`, `Data Model/jpa-mapping.md`, `UI/Design System.md`, `UI/Abstract DSL/UC{{#}} {{use-case.name}} - UI DSL.yaml`, `UI/Technology Mapping/UC{{#}} {{use-case.name}} - Vaadin Mapping.md`, `Logical View/{{fully.qualified.package}}.packageDiagram.plantuml` (template: `plantuml.plantuml`), `Logical View/{{fully.qualified.package}}.classDiagram.plantuml` (template: `plantuml.plantuml`), `Logical View/DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml` (template: `plantuml.plantuml`), `Use Case Realization/UCR UC{{#}} {{use-case.name}}.md` |
 | `04 Implementation` | Implementation-level artifacts | Reserved |
 | `05 Test` | Test artifacts | `{{#}} {Iteration} Test plan.md` |
-| `06 Deployment` | Deployment artifacts | Reserved |
-| `07 Configuration & CM` | Configuration and change-management artifacts | Reserved |
+| `06 Deployment` | Deployment artifacts | `deployment-view.plantuml`, `release-plan.md`, `data-migration-plan.md`, `deployment-plan.md` |
+| `07 Configuration & CM` | Configuration and change-management artifacts | `cm-plan.md`, `change-control.md` |
 | `08 Project Management` | Project planning and tracking artifacts | `Requirements Ranking.md`, `Iteration Plan` |
-| `09 Enviroment` | Environment setup and support artifacts | Reserved |
+| `09 Enviroment` | Environment setup and support artifacts | `environment-setup.md` |
 
 ## Artifact File Paths
 
@@ -107,6 +111,13 @@ openspec/
 | storage | Creates (required) | `openspec/artifacts/{domain}/03 Design/UI/Technology Mapping/UC{{#}} {{use-case.name}} - Vaadin Mapping.md` |
 | storage | Creates (required) | `openspec/artifacts/{domain}/05 Test/{{#}} {Iteration} Test plan.md` |
 | storage | Creates (required) | `openspec/artifacts/{domain}/08 Project Management/Requirements Ranking.md`, `openspec/artifacts/{domain}/08 Project Management/{{#}} {Iteration} Plan.md` |
+| storage | Creates (required) | `openspec/artifacts/{domain}/06 Deployment/deployment-view.plantuml` (from template `openspec/schemas/default/templates/plantuml.plantuml`) |
+| storage | Creates (required) | `openspec/artifacts/{domain}/06 Deployment/release-plan.md` |
+| storage | Creates (required) | `openspec/artifacts/{domain}/06 Deployment/data-migration-plan.md` |
+| storage | Creates (required) | `openspec/artifacts/{domain}/06 Deployment/deployment-plan.md` |
+| storage | Creates (required) | `openspec/artifacts/{domain}/07 Configuration & CM/cm-plan.md` |
+| storage | Creates (required) | `openspec/artifacts/{domain}/07 Configuration & CM/change-control.md` |
+| storage | Creates (required) | `openspec/artifacts/{domain}/09 Enviroment/environment-setup.md` |
 | storage | Updates | `openspec/artifacts/{domain}/{discipline}/...` (direct master update; no archive merge) |
 
 ## Path Placeholder Rules
@@ -121,6 +132,7 @@ openspec/
 - Use `openspec/schemas/default/templates/plantuml.plantuml` for `03 Design/Logical View/{{fully.qualified.package}}.packageDiagram.plantuml`.
 - Use `openspec/schemas/default/templates/plantuml.plantuml` for `03 Design/Logical View/{{fully.qualified.package}}.classDiagram.plantuml`.
 - Use `openspec/schemas/default/templates/plantuml.plantuml` for `03 Design/Logical View/DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml`.
+- Use `openspec/schemas/default/templates/plantuml.plantuml` for `06 Deployment/deployment-view.plantuml`.
 
 ## Reading Artifacts
 
@@ -150,6 +162,13 @@ ui technology mapping: openspec/artifacts/{domain}/03 Design/UI/Technology Mappi
 requirements-ranking: openspec/artifacts/{domain}/08 Project Management/Requirements Ranking.md
 Iteration Plan: openspec/artifacts/{domain}/08 Project Management/{{#}} {Iteration} Plan.md
 test plan: openspec/artifacts/{domain}/05 Test/{{#}} {Iteration} Test plan.md
+deployment view: openspec/artifacts/{domain}/06 Deployment/deployment-view.plantuml
+release plan: openspec/artifacts/{domain}/06 Deployment/release-plan.md
+data migration plan: openspec/artifacts/{domain}/06 Deployment/data-migration-plan.md
+deployment plan: openspec/artifacts/{domain}/06 Deployment/deployment-plan.md
+configuration management plan: openspec/artifacts/{domain}/07 Configuration & CM/cm-plan.md
+change control: openspec/artifacts/{domain}/07 Configuration & CM/change-control.md
+environment setup: openspec/artifacts/{domain}/09 Enviroment/environment-setup.md
 artifacts: openspec/artifacts/{domain}/  (all discipline subdirectories)
 config: openspec/config.yaml
 ```

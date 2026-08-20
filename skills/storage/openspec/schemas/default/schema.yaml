@@ -116,3 +116,45 @@ artifacts:
     template: SW Architecture Document.md
     instruction: INVOKE this link -> "./instructions/SW Architecture Document.md"
     requires: [vision, supplementary-specification, use-case-model, domain-model]
+  - id: Deployment View
+    generates: deployment-view.plantuml
+    description: Stored under 06 Deployment; models the physical deployment topology (nodes, containers, network) as the 4+1 Deployment View.
+    template: plantuml.plantuml
+    instruction: 
+    requires: [sw-architecture-document]
+  - id: Release Plan
+    generates: release-plan.md
+    description: Stored under 06 Deployment; groups completed iterations into a shippable increment with scope traceable to use cases.
+    template: release-plan.md
+    instruction: INVOKE this link -> "./instructions/release-plan.md"
+    requires: [requirements-ranking, use-case-model]
+  - id: Data Migration Plan
+    generates: data-migration-plan.md
+    description: Stored under 06 Deployment; defines how data is transformed to the target schema when a release changes persistence or identity semantics.
+    template: data-migration-plan.md
+    instruction: INVOKE this link -> "./instructions/data-migration-plan.md"
+    requires: [data-model, jpa-mapping]
+  - id: Deployment Plan
+    generates: deployment-plan.md
+    description: Stored under 06 Deployment; turns the release into concrete, reversible deployment steps with verification, rollback, and go/no-go criteria.
+    template: deployment-plan.md
+    instruction: INVOKE this link -> "./instructions/deployment-plan.md"
+    requires: [release-plan, deployment-view, data-migration-plan]
+  - id: Configuration Management Plan
+    generates: cm-plan.md
+    description: Stored under 07 Configuration & CM; defines versioning, branching, baselines, auditing, and what artifacts are under configuration control.
+    template: cm-plan.md
+    instruction: INVOKE this link -> "./instructions/cm-plan.md"
+    requires: [vision]
+  - id: Change Control
+    generates: change-control.md
+    description: Stored under 07 Configuration & CM; defines the change-request lifecycle, record, log, traceability, and emergency-change process.
+    template: change-control.md
+    instruction: INVOKE this link -> "./instructions/change-control.md"
+    requires: [vision]
+  - id: Environment Setup
+    generates: environment-setup.md
+    description: Stored under 09 Enviroment; documents the tools, versions, dependencies, local infrastructure, and run commands for the development environment.
+    template: environment-setup.md
+    instruction: INVOKE this link -> "./instructions/environment-setup.md"
+    requires: []

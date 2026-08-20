@@ -147,6 +147,50 @@ artifacts:
       refined_at_steps: []
       depends_on: [Use Case Realization, Iteration Plan]
 
+  06 Deployment:
+    - id: Deployment View
+      path: 06 Deployment/deployment-view.plantuml
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [SW Architecture Document]
+
+    - id: Release Plan
+      path: 06 Deployment/release-plan.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Requirements Ranking, Use Case Model]
+
+    - id: Data Migration Plan
+      path: 06 Deployment/data-migration-plan.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Data Model, JPA Mapping]
+
+    - id: Deployment Plan
+      path: 06 Deployment/deployment-plan.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Release Plan, Deployment View, Data Migration Plan]
+
+  07 Configuration & CM:
+    - id: Configuration Management Plan
+      path: 07 Configuration & CM/cm-plan.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Vision and Business Case]
+
+    - id: Change Control
+      path: 07 Configuration & CM/change-control.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Vision and Business Case]
+
   08 Project Management:
     - id: Requirements Ranking
       path: 08 Project Management/Requirements Ranking.md
@@ -161,3 +205,11 @@ artifacts:
       created_at_step: null
       refined_at_steps: []
       depends_on: [Requirements Ranking, Use Case Model]
+
+  09 Enviroment:
+    - id: Environment Setup
+      path: 09 Enviroment/environment-setup.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: []
