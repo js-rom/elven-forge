@@ -4,7 +4,7 @@
 
 - Domain: {{domain}}
 - Iteration: {{iteration}}
-- Source physical model: [data-model.plantuml](openspec/artifacts/{{domain}}/03%20Design/Data%20Model/data-model.plantuml)
+- Source physical model: [data-model.plantuml](./data-model.plantuml)
 
 ## Master Decisions
 

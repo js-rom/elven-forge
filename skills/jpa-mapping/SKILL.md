@@ -15,13 +15,13 @@ This skill does not write Java code by default. Its output is the master markdow
 
 ## Required Inputs
 
-- The master physical data model `openspec/artifacts/{domain}/03 Design/Data Model/data-model.plantuml` or the draft produced in the current step.
+- The master physical data model (`Data Model` artifact) or the draft produced in the current step. Resolve its path through the storage skill's Path Resolution Contract (domain config `artifacts_root` + active schema `path`); do not hardcode paths.
 - Domain Model.
 - SSDs and Operation Contracts that impose persistence invariants.
 - Logical View and Use Case Realization when they already exist.
 - Existing Spring Boot conventions from the repository, when available.
 - The template `templates/jpa-mapping.md`.
-- The current master markdown artifact `openspec/artifacts/{domain}/03 Design/Data Model/jpa-mapping.md`, if it already exists.
+- The current master markdown artifact (`JPA Mapping` artifact), if it already exists.
 
 ## Source Baseline
 

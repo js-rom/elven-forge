@@ -1,160 +1,239 @@
+# =============================================================================
+# OpenSpec Schema — default
+# =============================================================================
+# This file is the authority for WHERE artifacts live. Each artifact declares
+# its `path` relative to the domain artifacts root, which is declared by the
+# domain config at `openspec/artifacts/{domain}/config.yaml` (`artifacts_root`).
+#
+# PATH RESOLUTION:
+#   final_path = {artifacts_root}/{path}
+#   The storage skill resolves the placeholders with values supplied by the
+#   caller (see storage SKILL.md "Path Resolution Contract").
+#
+# PLACEHOLDERS:
+#   {{#}}                       zero-padded numeric part of the iteration
+#                               (E1 -> 01, E11 -> 11)
+#   {{use-case.name}}           use case name without the UC number
+#                               (e.g. "Registrar Fichaje")
+#   {{scenario.#}}              scenario number (S1, S2, ...)
+#   {{FURPS+ category}}         FURPS+ category for technical memos
+#   {{issue.name}}              technical memo issue name
+#   {{fully.qualified.package}} dot-separated Java package
+#   {{Iteration}}               full iteration identifier (E1, E11, ...)
+#
+# SCENARIO VARIANTS:
+#   Artifacts whose content is split per scenario MAY append the suffix
+#   " - S{{scenario.#}}" right before the file extension when a use case has
+#   more than one scenario (e.g. "SSD UC12 Gestionar Políticas de Horario - S1.md").
+#   The canonical path below shows the unscoped form; the suffix applies when
+#   the caller passes {{scenario.#}}.
+# =============================================================================
+
 name: my-workflow
-version: 1
-description: Default OpenSpec workflow - requirements-first inception artifacts
+version: 2
+description: Default OpenSpec workflow - Unified Process artifacts with schema-driven paths
 artifacts:
   - id: Vision and Business Case
-    generates: vision.md
-    description: Stored under 02 Requirements; describes the high-level goals and constraints, the business case, and provides an executive summary.
+    path: 02 Requirements/vision.md
+    description: High-level goals and constraints, the business case, and an executive summary.
     template: vision.md
     instruction: INVOKE this link -> "./instructions/Vision.md"
     requires: []
+  - id: Architectural Analysis
+    path: 02 Requirements/Architectural Analysis.md
+    description: FURPS+ factor tables, prioritized factors, architectural decisions with trade-offs and rationale, variation/evolution points, unresolved issues. Excludes technical memos.
+    template: architectural-analysis.md
+    instruction: INVOKE this link -> "./instructions/architectural-analysis.md"
+    requires: [vision, use-case-model, supplementary-specification]
+  - id: Technical Memo
+    path: 02 Requirements/Technical memos/Issue - {{FURPS+ category}} - {{issue.name}}.md
+    description: One memo per significant architectural decision (quality attribute, issue title, solution summary, factors, detailed solution, motivation, unresolved issues, rejected alternatives).
+    template: technical-memo.md
+    instruction: ""
+    requires: [architectural-analysis]
   - id: Supplementary Specification
-    generates: supplementary-specification.md
-    description: Stored under 02 Requirements; captures non-functional, cross-cutting, and constraint-oriented requirements.
+    path: 02 Requirements/supplementary-specification.md
+    description: Non-functional, cross-cutting, and constraint-oriented requirements.
     template: suplementary-specification.md
     instruction: INVOKE this link -> "./instructions/suplementary-specification.md"
-    requires: [vision, use-case-model]
+    requires: [vision]
   - id: Glossary
-    generates: glosary.md
-    description: Stored under 02 Requirements; captures key domain terminology and data dictionary entries.
+    path: 02 Requirements/glosary.md
+    description: Key domain terminology and data dictionary entries.
     template: glosary.md
     instruction: INVOKE this link -> "./instructions/glosary.md"
     requires: [vision]
   - id: Domain Rules
-    generates: domain-rules.md
-    description: Stored under 02 Requirements; captures long-lived domain and policy rules.
+    path: 02 Requirements/domain-rules.md
+    description: Long-lived domain and policy rules.
     template: domain-rules.md
     instruction: INVOKE this link -> "./instructions/domain-rules.md"
     requires: [vision]
   - id: Domain Model
-    generates: Domain Model.md
-    description: Stored under 01 Business Modeling; captures conceptual domain classes, attributes, and associations for the current iteration.
+    path: 01 Business Modeling/Domain Model.md
+    description: Conceptual domain classes, attributes, and associations for the current iteration.
     template: domain-model.md
     instruction: INVOKE this link -> "./instructions/domain-model.md"
     requires: [vision, use-case-model, supplementary-specification, glosary]
   - id: Use Case Model
-    generates: Use Case Model.md
-    description: Stored under 02 Requirements; captures the use case diagram and catalog.
+    path: 02 Requirements/Use Case Model.md
+    description: Use case diagram and catalog.
     template: use-case-model.md
     instruction: INVOKE this link -> "./instructions/use-case-model.md"
     requires: [vision]
   - id: Requirements Ranking
-    generates: Requirements Ranking.md
-    description: Stored under 08 Project Management; ranks use cases or features by risk, coverage, and business criticality to guide iteration focus.
+    path: 08 Project Management/Requirements Ranking.md
+    description: Ranks use cases or features by risk, coverage, and business criticality to guide iteration focus.
     template: requirements-ranking.md
     instruction: INVOKE this link -> "./instructions/requirements-ranking.md"
     requires: [vision, use-case-model]
   - id: Iteration Plan
-    generates: '{{#}} {Iteration} Plan.md'
-    description: Stored under 08 Project Management; captures the goal, capacity, selected scope, task breakdown, estimates, risks, and exit criteria for one elaboration iteration.
+    path: 08 Project Management/{{#}} {{Iteration}} Plan.md
+    description: Goal, capacity, selected scope, task breakdown, estimates, risks, and exit criteria for one elaboration iteration.
     template: iteration-plan.md
     instruction: INVOKE this link -> "./instructions/iteration-plan.md"
     requires: [requirements-ranking, use-case-model]
   - id: Use Case fully dressed
-    generates: UC{{#}}.md
-    description: Stored under 02 Requirements/use-cases; describes the functional requirements in fully dressed format.
+    path: 02 Requirements/use-cases/UC{{#}} {{use-case.name}}.md
+    description: Functional requirements in fully dressed format.
     template: use-case-fully-dressed.md
     instruction: INVOKE this link -> "./instructions/use-case-model.md"
     requires: [vision]
   - id: Use Case brief
-    generates: UC{{#}}.md
-    description: Stored under 02 Requirements/use-cases; describes the functional requirements in brief format.
+    path: 02 Requirements/use-cases/UC{{#}} {{use-case.name}}.md
+    description: Functional requirements in brief format.
     template: use-case-brief.md
     instruction: INVOKE this link -> "./instructions/use-case-model.md"
     requires: [vision]
   - id: System Sequence Diagram
-    generates: SSD UC{{#}} {{use-case.name}}.md
-    description: Stored under 02 Requirements/SSDs; captures actor-system message flow for a use case scenario.
+    path: 02 Requirements/SSDs/SSD UC{{#}} {{use-case.name}}.md
+    description: Actor-system message flow for a use case scenario.
     template: system-sequence-diagram.md
     instruction: INVOKE this link -> "./instructions/system-sequence-diagram.md"
     requires: [use-case-model]
   - id: Operation Contracts
-    generates: UC{{#}} {{use-case.name}} - Operation Contracts.md
-    description: Stored under 02 Requirements/Operation Contracts; defines postconditions for system operations identified from SSDs.
+    path: 02 Requirements/Operation Contracts/UC{{#}} {{use-case.name}} - Operation Contracts.md
+    description: Postconditions for system operations identified from SSDs.
     template: operation-contracts.md
     instruction: INVOKE this link -> "./instructions/operation-contracts.md"
     requires: [use-case-model]
   - id: Design Sequence Diagram
-    generates: DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml
-    description: Stored under 03 Design/Logical View; models software object interactions for one use case scenario, satisfying operation contract postconditions. Bridges SSD (actor-system) to class design.
+    path: 03 Design/Logical View/DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml
+    description: Software object interactions for one use case scenario, satisfying operation contract postconditions. Bridges SSD (actor-system) to class design.
     template: plantuml.plantuml
-    instruction: 
+    instruction: INVOKE this link -> "./instructions/design-sequence-diagram.md"
     requires: [system-sequence-diagram, operation-contracts, glosary]
-  - id: Technical Memo
-    generates: 'Issue - {{FURPS+ category}} - {{issue.name}}.md'
-    description: Stored under 02 Requirements/Technical memos; captures a technical decision for a specific quality-related issue.
-    template: technical-memo.md
-    instruction: INVOKE this link -> "./instructions/technical-memo.md"
-    requires: [supplementary-specification]
   - id: Use Case Realization
-    generates: UCR UC{{#}} {{use-case.name}}.md
-    description: Stored under 03 Design/Use Case Realization; maps each use case scenario to design sequence and design class diagrams with traceability to SSDs and operation contracts.
+    path: 03 Design/Use Case Realization/UCR UC{{#}} {{use-case.name}}.md
+    description: Maps each use case scenario to design sequence and design class diagrams with traceability to SSDs and operation contracts.
     template: use-case-realization.md
-    instruction: INVOKE this link -> "./instructions/use-case-realization.md", and load the skill "/design-principles/SKILL.md" and the instructions "class-diagram.md" before elaborating.
+    instruction: INVOKE this link -> "./instructions/use-case-realization.md"
     requires: [use-case-model, system-sequence-diagram, operation-contracts, supplementary-specification, glosary, domain-model, design-sequence-diagram]
-  - id: Logical View Package Diagram
-    generates: '{{fully.qualified.package}}.packageDiagram.plantuml'
-    description: Stored under 03 Design/Logical View; captures package-level logical structure and dependencies using PlantUML.
+  - id: Data Model
+    path: 03 Design/Data Model/data-model.plantuml
+    description: Master physical data model in PlantUML, incrementally refined across elaboration iterations.
     template: plantuml.plantuml
-    instruction:
-    requires: [supplementary-specification, technical-memo, use-case-model, domain-model, design-sequence-diagram]
-  - id: Logical View Class Diagram
-    generates: '{{fully.qualified.package}}.classDiagram.plantuml'
-    description: Stored under 03 Design/Logical View; captures class-level static structure, members, and relationships using PlantUML.
-    template: plantuml.plantuml
-    instruction:
-    requires: [supplementary-specification, technical-memo, use-case-model, domain-model, design-sequence-diagram]
+    instruction: ""
+    requires: [domain-model, system-sequence-diagram, operation-contracts, supplementary-specification, glosary]
+  - id: JPA Mapping
+    path: 03 Design/Data Model/jpa-mapping.md
+    description: Maps the physical data model to an implementable Spring Data JPA design and records the rationale for the mapping decisions.
+    template: jpa-mapping.md
+    instruction: ""
+    requires: [data-model, domain-model, supplementary-specification, operation-contracts, use-case-realization]
   - id: Test Plan
-    generates: '{{#}} {Iteration} Test plan.md'
-    description: Stored under 05 Test; captures the TDD Step 1 test planning output for a single elaboration iteration (factors, classes, boundaries, selected cases, execution mode policy, and traceability to iteration and design artifacts).
+    path: 05 Test/{{#}} {{Iteration}} Test plan.md
+    description: TDD Step 1 test planning output for a single elaboration iteration (factors, classes, boundaries, selected cases, execution mode policy, and traceability to iteration and design artifacts).
     template: test-plan.md
     instruction: INVOKE this link -> "./instructions/test-plan.md"
     requires: [use-case-realization, iteration-plan]
   - id: SW Architecture Document
-    generates: SW Architecture Document.md
-    description: Stored under 03 Design; documents architecture drivers, significant decisions, 4+1 views, quality scenarios, and evolution strategy.
+    path: 03 Design/SW Architecture Document.md
+    description: Architecture drivers, significant decisions, 4+1 views, quality scenarios, and evolution strategy.
     template: SW Architecture Document.md
     instruction: INVOKE this link -> "./instructions/SW Architecture Document.md"
     requires: [vision, supplementary-specification, use-case-model, domain-model]
-  - id: Deployment View
-    generates: deployment-view.plantuml
-    description: Stored under 06 Deployment; models the physical deployment topology (nodes, containers, network) as the 4+1 Deployment View.
+  - id: Logical View Package Diagram
+    path: 03 Design/Logical View/{{fully.qualified.package}}.packageDiagram.plantuml
+    description: Package boundaries, subsystems, layers, and dependency rules of the logical view.
     template: plantuml.plantuml
-    instruction: 
+    instruction: ""
+    requires: [supplementary-specification, use-case-model]
+  - id: Logical View Class Diagram
+    path: 03 Design/Logical View/{{fully.qualified.package}}.classDiagram.plantuml
+    description: Static design class structure per package slice of the logical view.
+    template: plantuml.plantuml
+    instruction: ""
+    requires: [supplementary-specification, use-case-model, design-sequence-diagram]
+  - id: Domain-to-Design Transition Map
+    path: 03 Design/Logical View/domain-to-design-transition.md
+    description: Bridges the conceptual Domain Model to the software Design Model (transformation map, responsibility matrix, postcondition traceability, pattern candidates, rationale).
+    template: domain-to-design-transition.md
+    instruction: INVOKE this link -> "./instructions/domain-to-design-transition.md"
+    requires: [domain-model, system-sequence-diagram, operation-contracts]
+  - id: Design System
+    path: 03 Design/UI/design-system.yaml
+    description: Project-level design tokens and component rules consumed by the UI visual specs and mappings.
+    template: ""
+    instruction: ""
+    requires: [supplementary-specification, vision]
+  - id: Visual Specs
+    path: 03 Design/UI/Visual Specs/UC{{#}} {{use-case.name}}/
+    description: State-based visual specs per use case view (one bundle per UI state).
+    template: ""
+    instruction: ""
+    requires: [design-system, use-case-model, system-sequence-diagram]
+  - id: Interaction Spec
+    path: 03 Design/UI/Interaction Specs/UC{{#}} {{use-case.name}} - Interaction Spec.yaml
+    description: State transitions and behavior per use case view, traceable to SSDs and operation contracts.
+    template: ""
+    instruction: ""
+    requires: [visual-specs, system-sequence-diagram, operation-contracts]
+  - id: UI Technology Mapping
+    path: 03 Design/UI/Technology Mapping/UC{{#}} {{use-case.name}} - Vaadin Mapping.md
+    description: Maps the approved visual and interaction specs to the concrete UI technology (Vaadin).
+    template: ""
+    instruction: ""
+    requires: [visual-specs, interaction-spec, design-system]
+  - id: Deployment View
+    path: 06 Deployment/deployment-view.plantuml
+    description: Physical deployment topology (nodes, containers, network) as the 4+1 Deployment View.
+    template: plantuml.plantuml
+    instruction: ""
     requires: [sw-architecture-document]
   - id: Release Plan
-    generates: release-plan.md
-    description: Stored under 06 Deployment; groups completed iterations into a shippable increment with scope traceable to use cases.
+    path: 06 Deployment/release-plan.md
+    description: Groups completed iterations into a shippable increment with scope traceable to use cases.
     template: release-plan.md
     instruction: INVOKE this link -> "./instructions/release-plan.md"
     requires: [requirements-ranking, use-case-model]
   - id: Data Migration Plan
-    generates: data-migration-plan.md
-    description: Stored under 06 Deployment; defines how data is transformed to the target schema when a release changes persistence or identity semantics.
+    path: 06 Deployment/data-migration-plan.md
+    description: Defines how data is transformed to the target schema when a release changes persistence or identity semantics.
     template: data-migration-plan.md
     instruction: INVOKE this link -> "./instructions/data-migration-plan.md"
     requires: [data-model, jpa-mapping]
   - id: Deployment Plan
-    generates: deployment-plan.md
-    description: Stored under 06 Deployment; turns the release into concrete, reversible deployment steps with verification, rollback, and go/no-go criteria.
+    path: 06 Deployment/deployment-plan.md
+    description: Turns the release into concrete, reversible deployment steps with verification, rollback, and go/no-go criteria.
     template: deployment-plan.md
     instruction: INVOKE this link -> "./instructions/deployment-plan.md"
     requires: [release-plan, deployment-view, data-migration-plan]
   - id: Configuration Management Plan
-    generates: cm-plan.md
-    description: Stored under 07 Configuration & CM; defines versioning, branching, baselines, auditing, and what artifacts are under configuration control.
+    path: 07 Configuration & CM/cm-plan.md
+    description: Versioning, branching, baselines, auditing, and what artifacts are under configuration control.
     template: cm-plan.md
     instruction: INVOKE this link -> "./instructions/cm-plan.md"
     requires: [vision]
   - id: Change Control
-    generates: change-control.md
-    description: Stored under 07 Configuration & CM; defines the change-request lifecycle, record, log, traceability, and emergency-change process.
+    path: 07 Configuration & CM/change-control.md
+    description: Change-request lifecycle, record, log, traceability, and emergency-change process.
     template: change-control.md
     instruction: INVOKE this link -> "./instructions/change-control.md"
     requires: [vision]
   - id: Environment Setup
-    generates: environment-setup.md
-    description: Stored under 09 Enviroment; documents the tools, versions, dependencies, local infrastructure, and run commands for the development environment.
+    path: 09 Enviroment/environment-setup.md
+    description: Tools, versions, dependencies, local infrastructure, and run commands for the development environment.
     template: environment-setup.md
     instruction: INVOKE this link -> "./instructions/environment-setup.md"
     requires: []

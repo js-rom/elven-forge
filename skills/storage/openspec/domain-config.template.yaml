@@ -18,6 +18,11 @@ domain: ""                              # kebab-case domain identifier, must mat
 
 schema: default                         # active schema under openspec/schemas/{schema}/
 
+# Root directory where this domain's artifacts live. Artifact paths are
+# resolved as {artifacts_root}/{path} where {path} comes from the active
+# schema's `path` field (see storage SKILL.md "Path Resolution Contract").
+artifacts_root: openspec/artifacts/{domain}/
+
 context: |
   Tech stack: {detected}
   Architecture: {detected}
@@ -37,7 +42,6 @@ rules:
     coverage_threshold: 0
   persistence:
     mode: master-only
-    write_path: openspec/artifacts/{domain}/
     archive_iterations: false
     merge_deltas: false
   archive:

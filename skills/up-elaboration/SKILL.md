@@ -51,7 +51,7 @@ The orchestrator will give you:
 - Resolve schema assets in this order:
   1. `openspec/schemas/{schema}/...`
   2. `.agents/skills/storage/openspec/schemas/{schema}/...`
-- Read `schema.yaml` from the active schema and build a working map of `artifact -> instruction -> template`.
+- Read `schema.yaml` from the active schema and build a working map of `artifact -> path -> instruction -> template`. The schema is the authority for WHERE each artifact lives (`path` field); never hardcode artifact paths.
 - If a schema entry is incomplete but the matching file exists in the active schema folders, use the file that exists and keep going. Do not ignore existing instructions or templates just because the schema metadata is incomplete.
 - Before each step, load every instruction and template required for that step and treat them as the contract for headings, tables, diagrams, and minimum content.
 - When an instruction and a template overlap, apply this precedence:
@@ -92,7 +92,7 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
 ### Initialization / Resume (before PASO 1)
 
 **First elaboration iteration (no prior state or phase=inception):**
-1. Read `openspec/schemas/{schema}/schema.yaml` and map every artifact `id` to the structure expected by the domain state file.
+1. Read `openspec/schemas/{schema}/schema.yaml` and map every artifact `id` to the structure expected by the domain state file, copying each `path` from the schema.
 2. Initialize `openspec/artifacts/{domain}/state.yaml` with:
    - `phase: elaboration`
    - `iteration: E1`
@@ -133,8 +133,7 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
 
 **Exception — Step 14 (TDD):**
 - `OK PASO 14` marks the test-case slice and `Test Plan` content as approved; update `Test Plan` to `status: approved` but do NOT move step to `approved_steps` yet (the implementation phase follows)
-- Immediately after `OK PASO 14`, the TDD skill MUST persist `Test Plan` using the storage skill at `openspec/artifacts/{domain}/05 Test/{{#}} {Iteration} Test plan.md`
-- In that file name, `{{#}}` is the zero-padded numeric part of `iteration` (`E1 -> 01`, `E11 -> 11`)
+- Immediately after `OK PASO 14`, the TDD skill MUST persist `Test Plan` using the storage skill by artifact id (passing `{{#}}` and `{{Iteration}}`; storage resolves the path)
 - After the storage invocation succeeds, update `Test Plan` to `status: persisted`
 - If TDD persists additional documentation artifacts because it discovers scope, design, persistence, UI, or architecture issues, update only those artifacts that were part of that additional storage batch
 - `OK PASO 14 IMPLEMENTAR` authorizes code edits and test execution; keep `current_step: 14`
@@ -214,30 +213,29 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
 
 0. At any step, suggest to add relevant domain concepts to the Glossary.
  - Before starting step 1, load the active schema instruction for glossary and the active schema template `glossary.md` to check if there are any specific rules or structure to follow.
- - if new additions are made, update the Glossary artifact using the storage skill, following the active Artifact Store Policy. It should be stored under `openspec/artifacts/{domain}/01 Business Modeling/Glossary.md`.
+ - if new additions are made, update the `Glossary` artifact using the storage skill (by artifact id; storage resolves the path).
 1. Plan the iteration based on the Requirements Ranking, selecting the most risky, valuable and least covered use cases, use case scenarios or features (10% chosen in previous iterations from inception or elaboration). Refine it in collaboration with the user.
   - early iterations focus on programing and testing architecturally significat concerns (such as security), and using, proving, devoloping ans stabilizing the key architectural elements (subsystems, interfaces, frameworks, wiring, and so on).
   - Artifacts in progress: `Requirements Ranking` and `Iteration Plan`
   - Before planning, load the active schema instruction Iteration Plan and the active schema template `Iteration Plan.md`.
   - Stop and request `OK PASO 1` before continuing.
-  - After approval, store the `Iteration Plan` artifact using the storage skill, following the active Artifact Store Policy. It should be stored under `openspec/artifacts/{domain}/08 Project Management/{{#}} {Iteration} Plan.md`.
-  - In that file name, `{{#}}` is the zero-padded numeric part of `{Iteration}` (`E1 -> 01`, `E11 -> 11`).
+  - After approval, store the `Iteration Plan` artifact using the storage skill (by artifact id, passing `{{#}}` and `{{Iteration}}`; storage resolves the path).
 2. Elaborate Domain Model for the current iteration.
   - Artifacts in progress: `Domain Model`
   - Before elaborating, load the active schema instruction for domain models and the active schema template `domain-model.md`.
   - Stop and request `OK PASO 2` before continuing.
-  - After approval, store the `Domain Model` artifact using the storage skill, following the active Artifact Store Policy. It should be stored under `openspec/artifacts/{domain}/01 Business Modeling/Domain Model.md`.
+  - After approval, store the `Domain Model` artifact using the storage skill (by artifact id; storage resolves the path).
 3. Elaborate System Sequence Diagrams for the use cases in scope for the iteration.
   - Artifacts in progress: `System Sequence Diagrams`
   - Before elaborating, load the active schema instruction for sequence diagrams and the active schema template `sequence-diagram.md`.
   - Stop and request `OK PASO 3` before continuing.
-  - After approval, store the `System Sequence Diagrams` artifacts using the storage skill, following the active Artifact Store Policy. They should be stored under `openspec/artifacts/{domain}/02 Requirements/SSDs/SSD UC{{#}} {{use-case.name}}.md`.
+  - After approval, store the `System Sequence Diagrams` artifacts using the storage skill (by artifact id, passing `{{use-case.name}}` and `{{scenario.#}}` per scenario; storage resolves the paths).
 4. Elaborate Operation Contracts for the use cases in scope for the iteration.
   - Artifacts in progress: `Operation Contracts`
   - Before elaborating, load the active schema instruction for operation contracts and the active schema template `operation-contract.md`.
   - If new discoveries during elaboration require changes to the vision, use-case model, supplementary specification, glossary, or risk list, update them in collaboration with the user and load the updated artifacts to storage before proceeding.
   - Stop and request `OK PASO 4` before continuing.
-  - After approval, store the `Operation Contracts` artifacts using the storage skill, following the active Artifact Store Policy. They should be stored under `openspec/artifacts/{domain}/02 Requirements/Operation Contracts/UC{{#}} {{use-case.name}} - Operation Contracts.md`.
+  - After approval, store the `Operation Contracts` artifacts using the storage skill (by artifact id, passing `{{use-case.name}}`; storage resolves the paths).
 
 5. UI Design if there is UI scope in the iteration.
    - Artifacts in progress: `Design System`, `State Visual Specs`, `Interaction Spec`, `Vaadin Mapping`.
@@ -249,11 +247,11 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
      c. Phase C: Create the Interaction Spec YAML — interactive elements, transitions with from/to states, validations, success/error/loading paths, and traceability to SSDs and Operation Contracts. Gate: `OK INTERACTION`.
      d. Phase D: Create the Vaadin Mapping document — structure mapping, state-to-UI mapping, transition mapping, validation/Binder strategy, theming, accessibility, and recommended class structure. Gate: `OK VAADIN`.
    - Stop and request `OK PASO 5` before continuing.
-   - After approval, store artifacts using the storage skill:
-     - Design System: `openspec/artifacts/{domain}/03 Design/UI/Design System.yaml`
-     - Visual Specs: `openspec/artifacts/{domain}/03 Design/UI/Visual Specs/UC{{#}} {{use-case.name}}/`
-     - Interaction Spec: `openspec/artifacts/{domain}/03 Design/UI/Interaction Specs/UC{{#}} {{use-case.name}} - Interaction Spec.yaml`
-     - Vaadin Mapping: `openspec/artifacts/{domain}/03 Design/UI/Technology Mapping/UC{{#}} {{use-case.name}} - Vaadin Mapping.md`
+    - After approval, store artifacts using the storage skill (by artifact id, passing `{{use-case.name}}` where applicable; storage resolves the paths):
+      - `Design System`
+      - `Visual Specs`
+      - `Interaction Spec`
+      - `UI Technology Mapping`
 
 6. (TBD) Reports design if there is report scope in the iteration.
 
@@ -266,10 +264,10 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
      a. `Architectural Analysis` — FURPS+ factor tables, prioritized factors, architectural decisions, variation/evolution points, and unresolved issues. Use the `architectural-analysis.md` template (this template does NOT include technical memos).
      b. `Technical Memos` — One file per significant architectural decision or issue. Use the `technical-memo.md` template.
    - Stop and request `OK PASO 7` before continuing.
-   - After approval, store artifacts using the storage skill:
-     - Architectural Analysis: `openspec/artifacts/{domain}/02 Requirements/architectural-analysis.md`
-     - Technical Memos: `openspec/artifacts/{domain}/02 Requirements/Technical memos/Issue - {{FURPS+ category}} - {{issue.name}}.md`
-   - If new discoveries during architectural analysis require changes to the Supplementary Specification, update it in collaboration with the user. Store under `openspec/artifacts/{domain}/02 Requirements/supplementary-specification.md`.
+    - After approval, store artifacts using the storage skill (by artifact id, passing `{{FURPS+ category}}` and `{{issue.name}}` for each memo; storage resolves the paths):
+      - `Architectural Analysis`
+      - `Technical Memo` (one per significant architectural decision or issue)
+    - If new discoveries during architectural analysis require changes to the `Supplementary Specification`, update it in collaboration with the user and store it by artifact id.
 
 8. Refine if needed or elaborate if not exist the logical view for packages, subsystems, and layers using `/packages-logical-view/SKILL.md` to add to the master files the incremental changes for the current iteration.
   - Artifacts in progress: `Logical View` (packages, subsystems, and layers).
@@ -289,8 +287,8 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - If a scenario cannot be placed cleanly into the current package boundaries, resolve that now in step 8 before moving to step 9A.
   - Stop and request `OK PASO 8` before continuing.
   - After approval,
-   - update the `Logical View` artifact in the master files with the incremental changes for the current iteration, using the storage skill and following the active Artifact Store Policy. It should be stored under `openspec/artifacts/{domain}/03 Design/Logical View/{{fully.qualified.package}}.packageDiagram.plantuml`.
-   - if new discoveries during logical view design require changes to supplementary specification or technical memos, update them in collaboration with the user. They should be stored under `openspec/artifacts/{domain}/02 Requirements/supplementary-specification.md` and `openspec/artifacts/{domain}/02 Requirements/Technical memos/Issue - {{FURPS+ category}} - {{issue.name}}.md` respectively, using the storage skill and following the active Artifact Store Policy.
+   - update the `Logical View Package Diagram` artifacts in the master files with the incremental changes for the current iteration, using the storage skill (by artifact id, passing `{{fully.qualified.package}}`; storage resolves the paths).
+   - if new discoveries during logical view design require changes to `Supplementary Specification` or `Technical Memo` artifacts, update them in collaboration with the user and store them by artifact id (passing `{{FURPS+ category}}` and `{{issue.name}}` for each memo).
 
 9A. Elaborate the Domain-to-Design Transition: bridge the conceptual Domain Model to the software Design Model with an explicit mapping that makes every design decision traceable to domain concepts and operation contracts.
   - Artifacts in progress: `Logical View` (domain-to-design transition map and responsibility assignments).
@@ -307,8 +305,8 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - MUST keep the transformation map at the class-and-responsibility level; do not descend into method signatures or algorithmic design.
   - If the transformation reveals a mismatch that requires changing package boundaries, stop and route the issue back to step 8.
   - Stop and request `OK PASO 9A` before continuing.
-  - After approval, persist the transition artifacts using the storage skill, following the active Artifact Store Policy:
-    - Domain-to-Design Transition Map under: `openspec/artifacts/{domain}/03 Design/Logical View/domain-to-design-transition.md`
+  - After approval, persist the transition artifacts using the storage skill (by artifact id; storage resolves the paths):
+    - `Domain-to-Design Transition Map`
 
 9B. Design sequence diagrams and class diagrams for the Logical View, mapping each approved scenario in scope to object design using the transition map from step 9A as a fixed contract.
   - Artifacts in progress: `Logical View` (design sequence diagrams and design class diagrams).
@@ -329,9 +327,9 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - MUST NOT override transformation decisions from step 9A; if a transformation issue is discovered, stop and route it back to step 9A.
   - If a package or layer problem is discovered, stop scenario design and route the issue back to step 8.
   - Stop and request `OK PASO 9B` before continuing.
-  - After approval, persist class and sequence diagrams using the storage skill, following the active Artifact Store Policy:
-    - Design Sequence Diagrams under: `openspec/artifacts/{domain}/03 Design/Logical View/DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml`
-    - Design Class Diagrams under: `openspec/artifacts/{domain}/03 Design/Logical View/{{fully.qualified.package}}.classDiagram.plantuml`
+  - After approval, persist class and sequence diagrams using the storage skill (by artifact id, passing `{{use-case.name}}`, `{{scenario.#}}`, and `{{fully.qualified.package}}`; storage resolves the paths):
+    - `Design Sequence Diagram` (one per scenario)
+    - `Logical View Class Diagram`
 
 10. Assemble Use Case Realization documents for each use case in scope, referencing and validating the designs already produced in steps 9A and 9B.
   - Artifacts in progress: `Use Case Realization`
@@ -352,7 +350,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - If documentation is incomplete but the design already exists, complete it here.
   - If a missing design element is discovered, route the issue back to step 9A or 9B instead of solving it inside step 10.
   - Stop and request `OK PASO 10` before continuing.
-  - After approval, store each `Use Case Realization` artifact using the storage skill, following the active Artifact Store Policy. It should be stored under `openspec/artifacts/{domain}/03 Design/Use Case Realization/UCR UC{{#}} {{use-case.name}}.md`.
+  - After approval, store each `Use Case Realization` artifact using the storage skill (by artifact id, passing `{{use-case.name}}`; storage resolves the paths).
 
 11. Reviewer pass for Logical View quality gate (steps 8, 9A, 9B, and 10).
   - Artifacts in progress: `Logical View` and `Use Case Realization`.
@@ -376,12 +374,12 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
     - readiness status for PASO 12: `YES`, `CONDITIONAL`, or `NO`.
   - MUST NOT allow PASO 12 to start while any use case is marked `NO`.
   - Stop and request `OK PASO 11` before continuing.
-  - After approval, persist each reviewed or refactored artifact using the storage skill, following the active Artifact Store Policy:
-    - Domain-to-Design Transition Map under: `openspec/artifacts/{domain}/03 Design/Logical View/domain-to-design-transition.md`
-    - Package diagrams under: `openspec/artifacts/{domain}/03 Design/Logical View/{{fully.qualified.package}}.packageDiagram.plantuml`
-    - Design Sequence Diagrams under: `openspec/artifacts/{domain}/03 Design/Logical View/DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml`
-    - Design Class Diagrams under: `openspec/artifacts/{domain}/03 Design/Logical View/{{fully.qualified.package}}.classDiagram.plantuml`
-    - Use Case Realization under: `openspec/artifacts/{domain}/03 Design/Use Case Realization/UCR UC{{#}} {{use-case.name}}.md`
+  - After approval, persist each reviewed or refactored artifact using the storage skill (by artifact id, passing the required placeholders; storage resolves the paths):
+    - `Domain-to-Design Transition Map`
+    - `Logical View Package Diagram`
+    - `Design Sequence Diagram`
+    - `Logical View Class Diagram`
+    - `Use Case Realization`
 
 12. Elaborate or refine the Data Model if there is data scope in the iteration.
   - Artifacts in progress: `Data Model` and `JPA Mapping`.
@@ -394,15 +392,13 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - If PASO 12 discovers a mismatch that requires changing the logical design, stop and route the issue back to steps 8, 9A, 9B, or 10 through the PASO 11 review gate before finalizing persistence design.
   - If the iteration has no data scope, document the skip rationale and still request approval for the step.
   - Stop and request `OK PASO 12` before continuing.
-  - After approval, store the `Data Model` and `JPA Mapping` artifacts using the storage skill, following the active Artifact Store Policy:
-    - `openspec/artifacts/{domain}/03 Design/Data Model/data-model.plantuml`
-    - `openspec/artifacts/{domain}/03 Design/Data Model/jpa-mapping.md`
+  - After approval, store the `Data Model` and `JPA Mapping` artifacts using the storage skill (by artifact id; storage resolves the paths).
   - If new discoveries during data-model design require changes to the Domain Model, Glossary, Supplementary Specification, or Technical Memos, update them in collaboration with the user before persisting.
 
 13. Elaborate the SW Architecture Document using the `/software-architecture-document/SKILL.md`, describing the key architectural decisions, patterns, and rationale for the current iteration.
   - Artifacts in progress: `SW Architecture Document`
   - Stop and request `OK PASO 13` before continuing.
-  - After approval, store the `SW Architecture Document` artifact using the storage skill, following the active Artifact Store Policy. It should be stored under `openspec/artifacts/{domain}/03 Design/SW Architecture Document.md`.
+  - After approval, store the `SW Architecture Document` artifact using the storage skill (by artifact id; storage resolves the path).
 
 14. Start Skill Test-Driven Development (TDD) cycles to implement the design for the selected scenarios in the iteration scope, producing working code and automated tests as part of elaboration.
   - Artifacts in progress: `Test Plan`, `Code`, `Unit and Integration Tests`
@@ -441,7 +437,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
     - UI state, interaction, or rendering issue -> `Design System`, `State Visual Specs`, `Interaction Spec`, and `Vaadin Mapping`
     - architecture decision or cross-cutting concern issue -> `SW Architecture Document` and `Technical Memos`
   - Request `OK PASO 14` to approve the test-case slice and TDD plan.
-  - Immediately after `OK PASO 14`, the TDD skill persists `Test Plan` through the storage skill under `openspec/artifacts/{domain}/05 Test/{{#}} {Iteration} Test plan.md`, with `{{#}}` resolved from the numeric part of `{Iteration}`.
+  - Immediately after `OK PASO 14`, the TDD skill persists `Test Plan` through the storage skill (by artifact id, passing `{{#}}` and `{{Iteration}}`; storage resolves the path).
   - After `Test Plan` is persisted, request `OK PASO 14 IMPLEMENTAR` before executing real file edits and test commands.
   - During execution, report RED/GREEN evidence per cycle (failing test, minimal change, green suite evidence, updated Test List).
   - When the selected scenario has UI scope, the final PASO 14 review MUST summarize:
@@ -455,7 +451,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - Artifacts in progress: `Requirements Ranking`
   - Before refining, load the active schema instruction for use cases and the active schema template `requirements-ranking.md`.
   - Stop and request `OK PASO 15` before continuing.
-  - After approval, persist the updated `Requirements Ranking` artifact using the storage skill, following the active Artifact Store Policy. It should be stored under `openspec/artifacts/{domain}/08 Project Management/Requirements Ranking.md`.
+  - After approval, persist the updated `Requirements Ranking` artifact using the storage skill (by artifact id; storage resolves the path).
 
 16. Based on the Requirements Ranking, choose 10% (at least one) of the use cases that are still in brief format (not yet converted to fully dressed). prioritize the pending candidates with the highest architectural significance, risk, and business value, explain the selection reasons, and then analyze each selected use case in fully dressed format. refine each in collaboration with the user before proceeding to the next one.
   - Artifacts in progress: `Requirements Ranking` and `Use Case fully dressed`.
@@ -464,7 +460,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - The 10% selection must come from that pending brief-format pool and be justified from the ranking; do not choose deep-dive use cases ad hoc.
   - Before drafting each detailed case, load the active schema instruction for use cases and the active schema template `use-case-fully-dressed.md`.
   - Stop and request `OK PASO 16` before continuing.
-    - After approval, persist each `Use Case fully dressed` artifact using the storage skill, following the active Artifact Store Policy. It should be stored under `openspec/artifacts/{domain}/02 Requirements/use-cases/UC{{#}} {{use-case.name}}.md`.
+    - After approval, persist each `Use Case fully dressed` artifact using the storage skill (by artifact id, passing `{{use-case.name}}`; storage resolves the paths).
 
 17. Close the current elaboration cycle in master-only persistence mode (NOT the Elaboration phase).
   - Stop and request `OK PASO 17` before closing the cycle.

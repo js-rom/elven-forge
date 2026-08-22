@@ -147,7 +147,7 @@ note left of EB #red : Constraint: audit-log every\nmodification
 
 - DSD files MUST follow this pattern:
   `DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml`
-- Storage path: `openspec/artifacts/{domain}/03 Design/Logical View/`
+- Persist through the storage skill by artifact id (`Design Sequence Diagram`, passing `{{use-case.name}}` and `{{scenario.#}}`; storage resolves the path from the domain config and the active schema).
 - Example: `DSD UC1 Register Sale - S1.sequenceDiagram.plantuml`
 - Scenario numbering: S1 = main success, S2 = first alternate, S3 = second alternate, etc.
 

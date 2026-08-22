@@ -225,8 +225,7 @@ Before requesting approval, verify:
 ## A.6 Gate
 
 - Stop and request `OK FASE A` before continuing.
-- After approval, persist the artifact using the storage skill:
-  - Path: `openspec/artifacts/{domain}/03 Design/UI/Abstract DSL/UC{{#}} {{use-case.name}} - UI DSL.yaml`
+- After approval, persist the artifact using the storage skill by artifact id (`Interaction Spec`, passing `{{use-case.name}}`; storage resolves the path from the domain config and the active schema).
 
 # FASE B: Design System
 
@@ -328,8 +327,7 @@ For each component type that will appear in the DSL, define which design tokens 
 ## B.6 Gate
 
 - Stop and request `OK FASE B` before continuing.
-- After approval, persist the artifact using the storage skill:
-  - Path: `openspec/artifacts/{domain}/03 Design/UI/Design System.md`
+- After approval, persist the artifact using the storage skill by artifact id (`Design System`; storage resolves the path from the domain config and the active schema).
 
 # FASE C: Technology Mapping (Vaadin 25)
 
@@ -429,8 +427,7 @@ Before requesting approval, verify:
 ## C.5 Gate
 
 - Stop and request `OK FASE C` before continuing.
-- After approval, persist the artifact using the storage skill:
-  - Path: `openspec/artifacts/{domain}/03 Design/UI/Technology Mapping/UC{{#}} {{use-case.name}} - Vaadin Mapping.md`
+- After approval, persist the artifact using the storage skill by artifact id (`UI Technology Mapping`, passing `{{use-case.name}}`; storage resolves the path from the domain config and the active schema).
 
 # Design Concern Routing
 
@@ -443,11 +440,13 @@ Before requesting approval, verify:
 
 After this skill completes, the following artifacts MUST be persisted:
 
-| Artifact | Path |
-|----------|------|
-| Abstract UI DSL | `openspec/artifacts/{domain}/03 Design/UI/Abstract DSL/UC{{#}} {{use-case.name}} - UI DSL.yaml` |
-| Design System | `openspec/artifacts/{domain}/03 Design/UI/Design System.md` |
-| Technology Mapping (Vaadin) | `openspec/artifacts/{domain}/03 Design/UI/Technology Mapping/UC{{#}} {{use-case.name}} - Vaadin Mapping.md` |
+| Artifact | Storage |
+|----------|---------|
+| Abstract UI DSL (FASE A) | `Interaction Spec` (schema artifact id) |
+| Design System (FASE B) | `Design System` (schema artifact id) |
+| Technology Mapping, Vaadin (FASE C) | `UI Technology Mapping` (schema artifact id) |
+
+Storage resolves every path through its Path Resolution Contract (domain config `artifacts_root` + active schema `path`); do not hardcode paths.
 
 Additionally, ensure:
 - The DSL YAML is valid YAML syntax and follows the controlled vocabulary.
@@ -475,7 +474,7 @@ Before considering this skill complete, verify:
 - [ ] FASE C: Every `pre_condition.field` has a Binder setup in the mapping.
 - [ ] FASE C: Every design token used in the DSL is mapped to a Vaadin CSS property.
 - [ ] FASE C: All layout directives (`alignment`, `spacing`, `justify`, `wrap`) have a mapping.
-- [ ] Artifacts are persisted to the correct `openspec/artifacts/{domain}/03 Design/UI/` paths via storage skill.
+- [ ] Artifacts are persisted through the storage skill by artifact id (storage resolves the paths from the domain config and the active schema).
 - [ ] All three approval gates (`OK FASE A`, `OK FASE B`, `OK FASE C`) were received.
 
 # Anti-Patterns

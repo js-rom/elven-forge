@@ -94,8 +94,7 @@ Project-level artifact containing:
 - responsive breakpoints
 - accessibility rules
 
-Recommended persistence path:
-- `openspec/artifacts/{domain}/03 Design/UI/Design System.yaml`
+Persistence: through the storage skill by artifact id (`Design System`); storage resolves the path from the domain config and the active schema.
 
 ### 2. State Visual Spec
 
@@ -252,8 +251,8 @@ Document at least:
 Stop and request:
 - `OK DESIGN SYSTEM`
 
-After approval, persist:
-- `openspec/artifacts/{domain}/03 Design/UI/Design System.yaml`
+After approval, persist through the storage skill by artifact id:
+- `Design System`
 
 ## Phase B: State Visual Specs
 
@@ -324,10 +323,9 @@ Before requesting approval, verify:
 Stop and request:
 - `OK VISUAL`
 
-After approval, persist each artifact under:
-- `openspec/artifacts/{domain}/03 Design/UI/Visual Specs/UC{{#}} {{use-case.name}}/`
+After approval, persist through the storage skill by artifact id (`Visual Specs`, passing `{{use-case.name}}`; storage resolves the path):
 
-Suggested naming:
+Suggested naming inside the bundle directory:
 - `UC{{#}} {{use-case.name}} - State {{state_id}}.yaml`
 
 ## Phase C: Interaction Spec
@@ -391,8 +389,8 @@ Before requesting approval, verify:
 Stop and request:
 - `OK INTERACTION`
 
-After approval, persist:
-- `openspec/artifacts/{domain}/03 Design/UI/Interaction Specs/UC{{#}} {{use-case.name}} - Interaction Spec.yaml`
+After approval, persist through the storage skill by artifact id:
+- `Interaction Spec` (passing `{{use-case.name}}`; storage resolves the path)
 
 ## Phase D: Vaadin Mapping
 
@@ -474,8 +472,8 @@ Before requesting approval, verify:
 Stop and request:
 - `OK VAADIN`
 
-After approval, persist:
-- `openspec/artifacts/{domain}/03 Design/UI/Technology Mapping/UC{{#}} {{use-case.name}} - Vaadin Mapping.md`
+After approval, persist through the storage skill by artifact id:
+- `UI Technology Mapping` (passing `{{use-case.name}}`; storage resolves the path)
 
 ## Reusable Schemas
 

@@ -46,14 +46,21 @@ notes: ""                             # additional context, decisions, open issu
 # Status lifecycle: not_started -> in_progress -> approved -> persisted -> refined
 artifacts:
   01 Business Modeling:
+    - id: Domain Model
+      path: 01 Business Modeling/Domain Model.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Glossary]
+
+  02 Requirements:
     - id: Glossary
-      path: 01 Business Modeling/Glossary.md
+      path: 02 Requirements/glosary.md
       status: not_started
       created_at_step: null
       refined_at_steps: []
       depends_on: [Vision and Business Case]
 
-  02 Requirements:
     - id: Vision and Business Case
       path: 02 Requirements/vision.md
       status: not_started

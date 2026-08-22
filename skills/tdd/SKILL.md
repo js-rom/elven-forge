@@ -106,8 +106,7 @@ Do not use this skill as a rule to write all tests upfront.
 	- Record the selected mode before starting RED/GREEN cycles.
 	- If the user does not choose explicitly, default to `Guided mode`.
 	- After the Test List, its rationale, and the execution mode are agreed, the TDD skill MUST invoke the storage skill itself using the active Artifact Store Policy before any `RED -> GREEN -> REFACTOR` cycle begins.
-	- Persist the `Test Plan` artifact under: `openspec/artifacts/{domain}/05 Test/{{#}} {Iteration} Test plan.md`.
-	- In this file name, `{{#}}` is the zero-padded numeric part of `{Iteration}` (`E1 -> 01`, `E11 -> 11`).
+	- Persist the `Test Plan` artifact by artifact id through the storage skill (passing `{{#}}` and `{{Iteration}}`; storage resolves the path from the domain config and the active schema).
 	- When TDD runs inside PASO 14 of `up-elaboration`, persist the artifact immediately after `OK PASO 14` and before `OK PASO 14 IMPLEMENTAR`.
 	- Build the artifact from the active schema template `test-plan.md`.
 2. Pick exactly one item from the list and **write one concrete automated test**.

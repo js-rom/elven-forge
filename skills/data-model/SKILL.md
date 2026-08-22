@@ -20,9 +20,7 @@ The result must stay technology-agnostic at framework level: capture tables, col
 - Logical View and Use Case Realization when they already exist.
 - Supplementary Specification.
 - Glossary.
-- Existing master artifacts, if they already exist:
-	- `openspec/artifacts/{domain}/03 Design/Data Model/data-model.plantuml`
-	- `openspec/artifacts/{domain}/03 Design/Data Model/jpa-mapping.md`
+- Existing master artifacts, if they already exist (`Data Model` and `JPA Mapping`). Resolve their paths through the storage skill's Path Resolution Contract (domain config `artifacts_root` + active schema `path`); do not hardcode paths.
 
 ## Source Baseline
 

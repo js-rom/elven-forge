@@ -7,195 +7,68 @@ openspec/
 ├── config.yaml              <- Global domain router (list of domains only: no defaults, no state)
 ├── schemas/
 │   └── default/
-│       ├── templates/       <- Default artifacts for Unified Process
+│       ├── templates/       <- Default templates for creating artifacts
 │       ├── instructions/    <- Default instructions for creating artifacts
-│       └── schema.yaml      <- Default rules for creating artifacts
+│       └── schema.yaml      <- Artifact layout (paths, templates, instructions, requires)
 ├── artifacts/               <- Source of truth (main specs)
 │   └── {domain}/
-│       ├── config.yaml      <- Domain-specific SDD config (schema, persistence, rules, tdd)
+│       ├── config.yaml      <- Domain config (schema, artifacts_root, rules, tdd)
 │       ├── state.yaml       <- Domain state tracking (phase, steps, artifact lifecycle)
 │       ├── 01 Business Modeling/
-│       │   └── Domain Model.md
 │       ├── 02 Requirements/
-│       │   ├── vision.md
-│       │   ├── supplementary-specification.md
-│       │   ├── architectural-analysis.md
-│       │   ├── glosary.md
-│       │   ├── domain-rules.md
-│       │   ├── Use Case Model.md
-│       │   ├── use-cases/
-│       │   │   └── UC{{#}} {{use-case.name}}.md
-│       │   ├── SSDs/
-│       │   │   └── SSD UC{{#}} {{use-case.name}}.md
-│       │   ├── Operation Contracts/
-│       │   │   └── UC{{#}} {{use-case.name}} - Operation Contracts.md
-│       │   └── Technical memos/
-│       │       └── Issue - {{FURPS+ category}} - {{issue.name}}.md
 │       ├── 03 Design/
-│       │   ├── Design Model.md
-│       │   ├── SW Architecture Document.md
-│       │   ├── Data Model/
-│       │   │   ├── data-model.plantuml
-│       │   │   └── jpa-mapping.md
-│       │   ├── UI/
-│       │   │   ├── Design System.md
-│       │   │   ├── Abstract DSL/
-│       │   │   │   └── UC{{#}} {{use-case.name}} - UI DSL.yaml
-│       │   │   └── Technology Mapping/
-│       │   │       └── UC{{#}} {{use-case.name}} - Vaadin Mapping.md
-│       │   ├── Logical View/
-│       │   │   ├── {{fully.qualified.package}}.packageDiagram.plantuml
-│       │   │   ├── {{fully.qualified.package}}.classDiagram.plantuml
-│       │   │   └── DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml
-│       │   └── Use Case Realization/
-│       │       └── UCR UC{{#}} {{use-case.name}}.md
 │       ├── 04 Implementation/
-│       │   └── .gitkeep
 │       ├── 05 Test/
-│       │   └── {{#}} {Iteration} Test plan.md
 │       ├── 06 Deployment/
-│       │   ├── deployment-view.plantuml
-│       │   ├── release-plan.md
-│       │   ├── data-migration-plan.md
-│       │   └── deployment-plan.md
 │       ├── 07 Configuration & CM/
-│       │   ├── cm-plan.md
-│       │   └── change-control.md
 │       ├── 08 Project Management/
-│       │   ├── {{#}} {Iteration} Plan.md
-│       │   └── Requirements Ranking.md
 │       └── 09 Enviroment/
-│           └── environment-setup.md
 ```
+
+The concrete layout inside each discipline directory is **derived from the active schema**, not from this file. Each artifact declares its `path` in `openspec/schemas/{schema}/schema.yaml`.
 
 ## Discipline Directories
 
-| Directory | Purpose | Current artifact allocation |
-|-----------|---------|----------------------------|
-| `01 Business Modeling` | Domain-level business concepts and relationships | `Domain Model.md` |
-| `02 Requirements` | Vision, use cases, supplementary requirements, glossary, domain rules, architectural analysis, and technical memos | `vision.md`, `supplementary-specification.md`, `architectural-analysis.md`, `glosary.md`, `domain-rules.md`, `Use Case Model.md`, `use-cases/`, `SSDs/SSD UC{{#}} {{use-case.name}}.md`, `Operation Contracts/UC{{#}} {{use-case.name}} - Operation Contracts.md`, `Technical memos/Issue - {{FURPS+ category}} - {{issue.name}}.md` |
-| `03 Design` | Logical design and architecture artifacts | `Design Model.md`, `SW Architecture Document.md`, `Data Model/data-model.plantuml`, `Data Model/jpa-mapping.md`, `UI/Design System.md`, `UI/Abstract DSL/UC{{#}} {{use-case.name}} - UI DSL.yaml`, `UI/Technology Mapping/UC{{#}} {{use-case.name}} - Vaadin Mapping.md`, `Logical View/{{fully.qualified.package}}.packageDiagram.plantuml` (template: `plantuml.plantuml`), `Logical View/{{fully.qualified.package}}.classDiagram.plantuml` (template: `plantuml.plantuml`), `Logical View/DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml` (template: `plantuml.plantuml`), `Use Case Realization/UCR UC{{#}} {{use-case.name}}.md` |
-| `04 Implementation` | Implementation-level artifacts | Reserved |
-| `05 Test` | Test artifacts | `{{#}} {Iteration} Test plan.md` |
-| `06 Deployment` | Deployment artifacts | `deployment-view.plantuml`, `release-plan.md`, `data-migration-plan.md`, `deployment-plan.md` |
-| `07 Configuration & CM` | Configuration and change-management artifacts | `cm-plan.md`, `change-control.md` |
-| `08 Project Management` | Project planning and tracking artifacts | `Requirements Ranking.md`, `Iteration Plan` |
-| `09 Enviroment` | Environment setup and support artifacts | `environment-setup.md` |
+| Directory | Purpose |
+|-----------|---------|
+| `01 Business Modeling` | Domain-level business concepts and relationships |
+| `02 Requirements` | Vision, use cases, supplementary requirements, glossary, domain rules, architectural analysis, and technical memos |
+| `03 Design` | Logical design and architecture artifacts (logical view, data model, UI, SW architecture document) |
+| `04 Implementation` | Implementation-level artifacts (reserved) |
+| `05 Test` | Test artifacts |
+| `06 Deployment` | Deployment artifacts |
+| `07 Configuration & CM` | Configuration and change-management artifacts |
+| `08 Project Management` | Project planning and tracking artifacts |
+| `09 Enviroment` | Environment setup and support artifacts |
 
-## Artifact File Paths
+## Path Resolution
 
-| Skill | Creates / Reads | Path |
-|-------|----------------|------|
-| storage | Creates (required) | `openspec/artifacts/{domain}/` (nine discipline directories) |
-| storage | Creates (required) | `openspec/artifacts/{domain}/config.yaml` (from template `.agents/skills/storage/openspec/domain-config.template.yaml`) |
-| storage | Creates (required) | `openspec/artifacts/{domain}/state.yaml` (from template `.agents/skills/storage/openspec/domain-state.template.yaml`) |
-| storage | Updates (orchestrator-only) | `openspec/config.yaml` (global domain router: register `{domain}` under `domains:`) |
-| up-inception / up-elaboration | Creates/Updates | `openspec/artifacts/{domain}/state.yaml` |
-| init | Creates (from seed) | `openspec/config.yaml` (router), `openspec/schemas/default/templates/`, `openspec/schemas/default/instructions/` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/01 Business Modeling/Domain Model.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/02 Requirements/vision.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/02 Requirements/supplementary-specification.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/02 Requirements/architectural-analysis.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/02 Requirements/glosary.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/02 Requirements/domain-rules.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/02 Requirements/Use Case Model.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/02 Requirements/use-cases/UC{{#}} {{use-case.name}}.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/02 Requirements/SSDs/SSD UC{{#}} {{use-case.name}}.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/02 Requirements/Operation Contracts/UC{{#}} {{use-case.name}} - Operation Contracts.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/02 Requirements/Technical memos/Issue - {{FURPS+ category}} - {{issue.name}}.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/03 Design/Design Model.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/03 Design/SW Architecture Document.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/03 Design/Data Model/data-model.plantuml` (from template `openspec/schemas/default/templates/plantuml.plantuml`) |
-| storage | Creates (required) | `openspec/artifacts/{domain}/03 Design/Data Model/jpa-mapping.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/03 Design/Logical View/{{fully.qualified.package}}.packageDiagram.plantuml` (from template `openspec/schemas/default/templates/plantuml.plantuml`) |
-| storage | Creates (required) | `openspec/artifacts/{domain}/03 Design/Logical View/{{fully.qualified.package}}.classDiagram.plantuml` (from template `openspec/schemas/default/templates/plantuml.plantuml`) |
-| storage | Creates (required) | `openspec/artifacts/{domain}/03 Design/Logical View/DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml` (from template `openspec/schemas/default/templates/plantuml.plantuml`) |
-| storage | Creates (required) | `openspec/artifacts/{domain}/03 Design/Use Case Realization/UCR UC{{#}} {{use-case.name}}.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/03 Design/UI/Design System.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/03 Design/UI/Abstract DSL/UC{{#}} {{use-case.name}} - UI DSL.yaml` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/03 Design/UI/Technology Mapping/UC{{#}} {{use-case.name}} - Vaadin Mapping.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/05 Test/{{#}} {Iteration} Test plan.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/08 Project Management/Requirements Ranking.md`, `openspec/artifacts/{domain}/08 Project Management/{{#}} {Iteration} Plan.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/06 Deployment/deployment-view.plantuml` (from template `openspec/schemas/default/templates/plantuml.plantuml`) |
-| storage | Creates (required) | `openspec/artifacts/{domain}/06 Deployment/release-plan.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/06 Deployment/data-migration-plan.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/06 Deployment/deployment-plan.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/07 Configuration & CM/cm-plan.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/07 Configuration & CM/change-control.md` |
-| storage | Creates (required) | `openspec/artifacts/{domain}/09 Enviroment/environment-setup.md` |
-| storage | Updates | `openspec/artifacts/{domain}/{discipline}/...` (direct master update; no archive merge) |
-
-## Path Placeholder Rules
-
-- In `08 Project Management/{{#}} {Iteration} Plan.md`, `{{#}}` resolves to the zero-padded numeric part of `{Iteration}` (for example `E1 -> 01`, `E11 -> 11`).
-- In `05 Test/{{#}} {Iteration} Test plan.md`, `{{#}}` resolves to the zero-padded numeric part of `{Iteration}` (for example `E1 -> 01`, `E11 -> 11`).
-
-## Default artifacts
-
-- Use `openspec/schemas/default` as templates and rules for all artifacts you create or update.
-- Use `openspec/schemas/default/templates/plantuml.plantuml` for `03 Design/Data Model/data-model.plantuml`.
-- Use `openspec/schemas/default/templates/plantuml.plantuml` for `03 Design/Logical View/{{fully.qualified.package}}.packageDiagram.plantuml`.
-- Use `openspec/schemas/default/templates/plantuml.plantuml` for `03 Design/Logical View/{{fully.qualified.package}}.classDiagram.plantuml`.
-- Use `openspec/schemas/default/templates/plantuml.plantuml` for `03 Design/Logical View/DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml`.
-- Use `openspec/schemas/default/templates/plantuml.plantuml` for `06 Deployment/deployment-view.plantuml`.
-
-## Reading Artifacts
-
-```
-vision: openspec/artifacts/{domain}/02 Requirements/vision.md
-supplementary specification: openspec/artifacts/{domain}/02 Requirements/supplementary-specification.md
-architectural analysis: openspec/artifacts/{domain}/02 Requirements/architectural-analysis.md
-glosary: openspec/artifacts/{domain}/02 Requirements/glosary.md
-domain rules: openspec/artifacts/{domain}/02 Requirements/domain-rules.md
-use case model: openspec/artifacts/{domain}/02 Requirements/Use Case Model.md
-use case: openspec/artifacts/{domain}/02 Requirements/use-cases/UC{{#}} {{use-case.name}}.md
-system sequence diagram: openspec/artifacts/{domain}/02 Requirements/SSDs/SSD UC{{#}} {{use-case.name}}.md
-operation contracts: openspec/artifacts/{domain}/02 Requirements/Operation Contracts/UC{{#}} {{use-case.name}} - Operation Contracts.md
-technical memo: openspec/artifacts/{domain}/02 Requirements/Technical memos/Issue - {{FURPS+ category}} - {{issue.name}}.md
-domain model: openspec/artifacts/{domain}/01 Business Modeling/Domain Model.md
-design model: openspec/artifacts/{domain}/03 Design/Design Model.md
-SW architecture document: openspec/artifacts/{domain}/03 Design/SW Architecture Document.md
-data model: openspec/artifacts/{domain}/03 Design/Data Model/data-model.plantuml
-jpa mapping: openspec/artifacts/{domain}/03 Design/Data Model/jpa-mapping.md
-logical view package diagram: openspec/artifacts/{domain}/03 Design/Logical View/{{fully.qualified.package}}.packageDiagram.plantuml
-logical view class diagram: openspec/artifacts/{domain}/03 Design/Logical View/{{fully.qualified.package}}.classDiagram.plantuml
-logical view design sequence diagram: openspec/artifacts/{domain}/03 Design/Logical View/DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}.sequenceDiagram.plantuml
-use case realization: openspec/artifacts/{domain}/03 Design/Use Case Realization/UCR UC{{#}} {{use-case.name}}.md
-design system: openspec/artifacts/{domain}/03 Design/UI/Design System.md
-ui abstract dsl: openspec/artifacts/{domain}/03 Design/UI/Abstract DSL/UC{{#}} {{use-case.name}} - UI DSL.yaml
-ui technology mapping: openspec/artifacts/{domain}/03 Design/UI/Technology Mapping/UC{{#}} {{use-case.name}} - Vaadin Mapping.md
-requirements-ranking: openspec/artifacts/{domain}/08 Project Management/Requirements Ranking.md
-Iteration Plan: openspec/artifacts/{domain}/08 Project Management/{{#}} {Iteration} Plan.md
-test plan: openspec/artifacts/{domain}/05 Test/{{#}} {Iteration} Test plan.md
-deployment view: openspec/artifacts/{domain}/06 Deployment/deployment-view.plantuml
-release plan: openspec/artifacts/{domain}/06 Deployment/release-plan.md
-data migration plan: openspec/artifacts/{domain}/06 Deployment/data-migration-plan.md
-deployment plan: openspec/artifacts/{domain}/06 Deployment/deployment-plan.md
-configuration management plan: openspec/artifacts/{domain}/07 Configuration & CM/cm-plan.md
-change control: openspec/artifacts/{domain}/07 Configuration & CM/change-control.md
-environment setup: openspec/artifacts/{domain}/09 Enviroment/environment-setup.md
-artifacts: openspec/artifacts/{domain}/  (all discipline subdirectories)
-domain config: openspec/artifacts/{domain}/config.yaml
-domain state: openspec/artifacts/{domain}/state.yaml
-domains router: openspec/config.yaml
-```
+- Artifact paths are NOT hardcoded in any skill. They live in the active schema's `path` field per artifact.
+- The storage skill resolves every read/write with its **Path Resolution Contract**:
+  1. Read the domain config (`schema`, `artifacts_root`).
+  2. Read `openspec/schemas/{schema}/schema.yaml` (fallback: seed copy under `.agents/skills/storage/openspec/schemas/{schema}/`).
+  3. Look up the artifact by `id` → `path`.
+  4. Resolve placeholders (`{{#}}`, `{{Iteration}}`, `{{use-case.name}}`, `{{scenario.#}}`, `{{FURPS+ category}}`, `{{issue.name}}`, `{{fully.qualified.package}}`) with caller-supplied values.
+  5. Final path = `{artifacts_root}/{path}`.
+- `{{#}}` resolves to the zero-padded numeric part of the iteration (`E1 -> 01`, `E11 -> 11`).
+- Scenario variants may append ` - S{{scenario.#}}` before the file extension when the caller supplies `{{scenario.#}}`.
+- Templates and instructions are declared per artifact in the same schema (`template` and `instruction` fields). Use them as the contract for headings, tables, diagrams, and minimum content.
 
 ## Writing Rules
 
-- Always write directly to `openspec/artifacts/{domain}/...`.
+- Always write directly to the resolved master path under `openspec/artifacts/{domain}/...`.
 - If a file already exists, READ it first and UPDATE it (do not overwrite blindly).
 - Do NOT create or use `openspec/iterations/` folders for artifact persistence.
-- Within each `{domain}`, always place artifacts in the correct Unified Process discipline directory.
-- Create all nine discipline directories for each `{domain}`. If a discipline has no artifact yet, keep the directory versioned with a placeholder such as `.gitkeep`.
+- Within each `{domain}`, always place artifacts in the correct Unified Process discipline directory (resolved from the schema).
+- Keep empty discipline directories versioned with a placeholder such as `.gitkeep`.
 - Use `openspec/artifacts/{domain}/config.yaml` `rules` section for domain-specific constraints per phase.
 
 ## Configuration and State (per domain)
 
 - The global `openspec/config.yaml` is ONLY a domain router: it lists `domains` (each with its `config_path`). It holds no defaults, no rules and no state.
-- Each domain owns its configuration at `openspec/artifacts/{domain}/config.yaml` (schema, persistence, context, rules, tdd).
+- Each domain owns its configuration at `openspec/artifacts/{domain}/config.yaml` (schema, `artifacts_root`, context, rules, tdd, persistence mode).
 - Each domain owns its state at `openspec/artifacts/{domain}/state.yaml` (phase, iteration, steps, artifact lifecycle).
-- Config resolution order: `openspec/artifacts/{domain}/config.yaml` first, then the seed template `.agents/skills/storage/openspec/domain-config.template.yaml` as fallback.
-- Recovery: read the router, then each domain state; resume the domain with `status: in_progress` (if several, ask the user).
+- There is no global state file. Recovery: read the router, then each domain state; resume the domain with `status: in_progress` (if several, ask the user).
 
 ## Archive Policy (Master-Only)
 

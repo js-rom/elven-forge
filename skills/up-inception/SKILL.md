@@ -41,7 +41,7 @@ The orchestrator will give you:
 - Resolve schema assets in this order:
   1. `openspec/schemas/{schema}/...`
   2. `.agents/skills/storage/openspec/schemas/{schema}/...`
-- Read `schema.yaml` from the active schema and build a working map of `artifact -> instruction -> template`.
+- Read `schema.yaml` from the active schema and build a working map of `artifact -> path -> instruction -> template`. The schema is the authority for WHERE each artifact lives (`path` field); never hardcode artifact paths.
 - If a schema entry is incomplete but the matching file exists in the active schema folders, use the file that exists and keep going. Do not ignore existing instructions or templates just because the schema metadata is incomplete.
 - Before each step, load every instruction and template required for that step and treat them as the contract for headings, tables, diagrams, and minimum content.
 - When an instruction and a template overlap, apply this precedence:
@@ -84,7 +84,7 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
    - Create `openspec/artifacts/{domain}/config.yaml` from the seed template `.agents/skills/storage/openspec/domain-config.template.yaml` and set `domain`.
    - Create `openspec/artifacts/{domain}/state.yaml` from the seed template `.agents/skills/storage/openspec/domain-state.template.yaml` and set `domain`.
    - Register the domain in the global router `openspec/config.yaml` under `domains:`.
-1. Read `openspec/schemas/{schema}/schema.yaml` and map every artifact `id` to the structure expected by the domain state file.
+1. Read `openspec/schemas/{schema}/schema.yaml` and map every artifact `id` to the structure expected by the domain state file, copying each `path` from the schema.
 2. Initialize `openspec/artifacts/{domain}/state.yaml` with:
    - `phase: inception`
    - `iteration: I1`
@@ -192,7 +192,7 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
   - Tie the deeper investigation back to the ranking criteria, the fully dressed special requirements, open issues, risks, and implementation uncertainty already surfaced.
   - Stop and request `OK PASO 7` before persisting artifacts.
 8. Start architectural analysis using the `/architectural-analysis/SKILL.md` with the key non-functional requirements that will have a major impact on the architecture. refine it in collaboration with the user.
- - After approval, if new discoveries during architectural analysis require changes to supplementary specification or technical memos, update them in collaboration with the user. They should be stored under `openspec/artifacts/{domain}/02 Requirements/supplementary-specification.md` and `openspec/artifacts/{domain}/02 Requirements/Technical memos/Issue - {{FURPS+ category}} - {{issue.name}}.md` respectively, using the storage skill and following the active Artifact Store Policy.
+ - After approval, if new discoveries during architectural analysis require changes to supplementary specification or technical memos, update them in collaboration with the user. Persist them with the storage skill by artifact id (`Supplementary Specification` and `Technical Memo`, passing `{{FURPS+ category}}` and `{{issue.name}}` for each memo); storage resolves the paths.
   - Stop and request `OK PASO 8` before persisting artifacts.
 9. Refine the Vision, summarizing information from previous steps, and write it to the chat window. refine it in collaboration with the user.
   - Return to the `Vision and Business Case` artifact and reload the active schema instruction/template for Vision before drafting the refined version.
@@ -201,7 +201,7 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
 10. **Immediately invoke the [storage](../storage/SKILL.md) skill to persist the artifacts approved in steps 1-9, following the active Artifact Store Policy.**
   - Treat this as an automatic step, not a user-driven action.
   - Pass only approved artifacts to storage.
-  - Persist approved inception artifacts directly under the discipline directories defined in `openspec-convention.md`; most inception artifacts land in `openspec/artifacts/{domain}/02 Requirements/`, while `Requirements Ranking` must be stored as `openspec/artifacts/{domain}/08 Project Management/Requirements Ranking.md`.
+  - Pass each approved artifact to storage by `artifact_id` (with the placeholder values each path requires, e.g. `{{use-case.name}}`, `{{FURPS+ category}}`, `{{issue.name}}`); storage resolves the target paths from the domain config and the active schema. Never hand storage a hardcoded path.
   - If the domain config (`openspec/artifacts/{domain}/config.yaml`) was refined in chat during steps 1-9, persist the approved values in the same storage batch.
   - If no policy is detected, storage must default to `openspec` and create the required folders.
 11. **Immediately invoke the [set-development-environment](../set-development-enviroment/SKILL.md) skill to set up the development environment for the project.**

@@ -19,7 +19,7 @@ The orchestrator persists DAG state after each phase transition to enable SDD re
 ## Common Rules
 
 - `none` → do NOT create or modify any project files; return results inline only
-- `openspec` → write files ONLY to paths defined in [openspec-convention](./openspec-convention.md)
+- `openspec` → write files ONLY to paths resolved by the storage skill's Path Resolution Contract (domain config `artifacts_root` + active schema `path` per artifact)
 - `openspec` → use master-only persistence under `openspec/artifacts/{domain}/...` (no iteration delta folders, no archive merge)
 - `openspec` → configuration is per-domain at `openspec/artifacts/{domain}/config.yaml`; `openspec/config.yaml` is only the domain router
 - If unsure which mode to use, default to `none`
