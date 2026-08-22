@@ -55,7 +55,7 @@ When creating or updating OpenSpec artifacts:
 2. Ensure the master path `openspec/artifacts/{domain}/` exists before writing artifacts, including its `config.yaml` and `state.yaml` (created from the seed templates when the domain is registered).
 3. Use schema templates and instructions from openspec/schemas/default/.
 4. Write artifacts directly under `openspec/artifacts/{domain}/{discipline}/...`.
-5. Organize each `{domain}` by the Unified Process discipline directories `01 Business Modeling` through `09 Enviroment`.
+5. Organize each `{domain}` according to the active schema's artifact layout (`path` fields in `schema.yaml`); never hardcode discipline directories.
 6. State is per-domain: `openspec/artifacts/{domain}/state.yaml` tracks phase progress, steps, and artifact lifecycle. There is no global state file.
 7. Do not create or use `openspec/iterations/` for persistence; do not run archive/merge flows.
 

@@ -55,7 +55,7 @@ If the domain directory does not exist, register the domain before persisting an
 
 1. Read the domain config template `.agents/skills/storage/openspec/domain-config.template.yaml`, create `openspec/artifacts/{domain}/config.yaml` from it, set `domain` and `artifacts_root`. If no template exists, create the file following the same structure.
 2. Read the active schema (from the `schema` key) and derive the directory set from its artifact `path` values (unique parent directories). Create those directories under `artifacts_root` and keep empty ones versioned with `.gitkeep`.
-3. Create `openspec/artifacts/{domain}/state.yaml` from the template `.agents/skills/storage/openspec/domain-state.template.yaml` (set `domain`). If no template exists, create the file following the same structure.
+3. Create `openspec/artifacts/{domain}/state.yaml` from the active schema's state template `openspec/schemas/{schema}/state.template.yaml` (fallback: seed copy under `.agents/skills/storage/openspec/schemas/{schema}/state.template.yaml`; if no template exists, create the file following the structure of the domain state). Set `domain`.
 4. Register the domain in the global router `openspec/config.yaml` by adding an entry under `domains:`. Do NOT duplicate per-domain settings in the router.
 
 ## Step 2: Persist Artifacts

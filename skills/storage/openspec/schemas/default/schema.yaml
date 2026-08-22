@@ -30,8 +30,27 @@
 # =============================================================================
 
 name: my-workflow
-version: 2
+version: 3
 description: Default OpenSpec workflow - Unified Process artifacts with schema-driven paths
+disciplines:
+  - id: "01 Business Modeling"
+    purpose: Domain-level business concepts and relationships
+  - id: "02 Requirements"
+    purpose: Vision, use cases, supplementary requirements, glossary, domain rules, architectural analysis, and technical memos
+  - id: "03 Design"
+    purpose: Logical design and architecture artifacts (logical view, data model, UI, SW architecture document)
+  - id: "04 Implementation"
+    purpose: Implementation-level artifacts (reserved)
+  - id: "05 Test"
+    purpose: Test artifacts
+  - id: "06 Deployment"
+    purpose: Deployment artifacts
+  - id: "07 Configuration & CM"
+    purpose: Configuration and change-management artifacts
+  - id: "08 Project Management"
+    purpose: Project planning and tracking artifacts
+  - id: "09 Enviroment"
+    purpose: Environment setup and support artifacts
 artifacts:
   - id: Vision and Business Case
     path: 02 Requirements/vision.md

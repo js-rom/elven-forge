@@ -1,45 +1,28 @@
 # OpenSpec File Convention (shared across all SDD skills)
 
+This convention is schema-agnostic. Workflow-specific organization (such as the
+Unified Process discipline directories) belongs to the active schema under
+`openspec/schemas/{schema}/`, never to this file.
+
 ## Directory Structure
 
 ```
 openspec/
 ├── config.yaml              <- Global domain router (list of domains only: no defaults, no state)
 ├── schemas/
-│   └── default/
-│       ├── templates/       <- Default templates for creating artifacts
-│       ├── instructions/    <- Default instructions for creating artifacts
-│       └── schema.yaml      <- Artifact layout (paths, templates, instructions, requires)
+│   └── {schema}/
+│       ├── templates/       <- Templates for creating artifacts
+│       ├── instructions/    <- Instructions for creating artifacts
+│       ├── schema.yaml      <- Artifact layout (paths, templates, instructions, requires, disciplines)
+│       └── state.template.yaml <- Domain state template for this schema
 ├── artifacts/               <- Source of truth (main specs)
 │   └── {domain}/
 │       ├── config.yaml      <- Domain config (schema, artifacts_root, rules, tdd)
 │       ├── state.yaml       <- Domain state tracking (phase, steps, artifact lifecycle)
-│       ├── 01 Business Modeling/
-│       ├── 02 Requirements/
-│       ├── 03 Design/
-│       ├── 04 Implementation/
-│       ├── 05 Test/
-│       ├── 06 Deployment/
-│       ├── 07 Configuration & CM/
-│       ├── 08 Project Management/
-│       └── 09 Enviroment/
+│       └── ...              <- Layout derived from the active schema `path` fields
 ```
 
-The concrete layout inside each discipline directory is **derived from the active schema**, not from this file. Each artifact declares its `path` in `openspec/schemas/{schema}/schema.yaml`.
-
-## Discipline Directories
-
-| Directory | Purpose |
-|-----------|---------|
-| `01 Business Modeling` | Domain-level business concepts and relationships |
-| `02 Requirements` | Vision, use cases, supplementary requirements, glossary, domain rules, architectural analysis, and technical memos |
-| `03 Design` | Logical design and architecture artifacts (logical view, data model, UI, SW architecture document) |
-| `04 Implementation` | Implementation-level artifacts (reserved) |
-| `05 Test` | Test artifacts |
-| `06 Deployment` | Deployment artifacts |
-| `07 Configuration & CM` | Configuration and change-management artifacts |
-| `08 Project Management` | Project planning and tracking artifacts |
-| `09 Enviroment` | Environment setup and support artifacts |
+The concrete layout inside each `{domain}` is **derived from the active schema**, not from this file. Each artifact declares its `path` in `openspec/schemas/{schema}/schema.yaml`. A schema may also declare its own domain state template at `openspec/schemas/{schema}/state.template.yaml` (grouping state entries however that workflow requires).
 
 ## Path Resolution
 
@@ -59,15 +42,15 @@ The concrete layout inside each discipline directory is **derived from the activ
 - Always write directly to the resolved master path under `openspec/artifacts/{domain}/...`.
 - If a file already exists, READ it first and UPDATE it (do not overwrite blindly).
 - Do NOT create or use `openspec/iterations/` folders for artifact persistence.
-- Within each `{domain}`, always place artifacts in the correct Unified Process discipline directory (resolved from the schema).
-- Keep empty discipline directories versioned with a placeholder such as `.gitkeep`.
+- Place each artifact in the path resolved from the active schema; never hardcode artifact paths in instructions.
+- Keep empty directories versioned with a placeholder such as `.gitkeep`.
 - Use `openspec/artifacts/{domain}/config.yaml` `rules` section for domain-specific constraints per phase.
 
 ## Configuration and State (per domain)
 
 - The global `openspec/config.yaml` is ONLY a domain router: it lists `domains` (each with its `config_path`). It holds no defaults, no rules and no state.
 - Each domain owns its configuration at `openspec/artifacts/{domain}/config.yaml` (schema, `artifacts_root`, context, rules, tdd, persistence mode).
-- Each domain owns its state at `openspec/artifacts/{domain}/state.yaml` (phase, iteration, steps, artifact lifecycle).
+- Each domain owns its state at `openspec/artifacts/{domain}/state.yaml`; the storage skill creates it from the active schema's `state.template.yaml` when the domain is registered.
 - There is no global state file. Recovery: read the router, then each domain state; resume the domain with `status: in_progress` (if several, ask the user).
 
 ## Archive Policy (Master-Only)

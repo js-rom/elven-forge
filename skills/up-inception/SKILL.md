@@ -82,7 +82,7 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
 
 0. Register the domain (only if `openspec/artifacts/{domain}/` does not exist yet):
    - Create `openspec/artifacts/{domain}/config.yaml` from the seed template `.agents/skills/storage/openspec/domain-config.template.yaml` and set `domain`.
-   - Create `openspec/artifacts/{domain}/state.yaml` from the seed template `.agents/skills/storage/openspec/domain-state.template.yaml` and set `domain`.
+   - Create `openspec/artifacts/{domain}/state.yaml` from the active schema's state template `openspec/schemas/{schema}/state.template.yaml` (fallback: seed copy under `.agents/skills/storage/openspec/schemas/{schema}/`) and set `domain`.
    - Register the domain in the global router `openspec/config.yaml` under `domains:`.
 1. Read `openspec/schemas/{schema}/schema.yaml` and map every artifact `id` to the structure expected by the domain state file, copying each `path` from the schema.
 2. Initialize `openspec/artifacts/{domain}/state.yaml` with:
@@ -155,7 +155,7 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
 
 0. Register the domain (automatic bootstrap step, treated like init infrastructure — file writes are allowed).
   - Create `openspec/artifacts/{domain}/config.yaml` from the seed template `.agents/skills/storage/openspec/domain-config.template.yaml` with template defaults (schema, persistence, empty tdd) and the agreed domain identifier. Domain-specific values (chat/artifacts language, per-phase rules, tdd commands) are proposed and refined in chat during steps 1-9 and persisted at step 10.
-  - Create `openspec/artifacts/{domain}/state.yaml` from the seed template `.agents/skills/storage/openspec/domain-state.template.yaml` and initialize it per the State Tracking Contract.
+  - Create `openspec/artifacts/{domain}/state.yaml` from the active schema's state template `openspec/schemas/{schema}/state.template.yaml` (fallback: seed copy) and initialize it per the State Tracking Contract.
   - Add the domain entry to the global router `openspec/config.yaml` under `domains:`. Do NOT duplicate per-domain settings in the router.
   - This step requires no approval token; report what was created and continue to PASO 1.
 1. Brief fisrt draft of the Vision.

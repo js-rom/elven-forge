@@ -5,7 +5,7 @@ The Environment Setup artifact allows a new developer to provision the local dev
 ## Instructions for the Agent
 
 - Produce one Environment Setup artifact per project, and update it when the toolchain or infrastructure changes.
-- Persist the approved artifact under `09 Enviroment/environment-setup.md`.
+- Persist the approved artifact by artifact id (`Environment Setup`) through the storage skill; storage resolves the path from the domain config and the active schema.
 - Derive the concrete values from the project's build files (`pom.xml` or `build.gradle`), wrapper scripts, and local infrastructure files (e.g., `docker-compose.yaml`). Never invent versions.
 
 ### 1. Prerequisites
