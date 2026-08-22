@@ -43,11 +43,11 @@ key ideas:
 The orchestrator will give you:
 - Context of the inception phase, including the artifacts created and the decisions taken, and any relevant domain context.
 - The project files, which you can analyze to detect the tech stack and code patterns.
-- The project configuration from `openspec/config.yaml`, which may include specific rules for elaboration
+- The domain configuration from `openspec/artifacts/{domain}/config.yaml`, which may include specific rules for elaboration (fallback: the seed template `.agents/skills/storage/openspec/domain-config.template.yaml`)
 
 ## Schema Bootstrap Contract (MANDATORY)
 
-- Before drafting anything for `PASO 1`, detect the active OpenSpec schema from `openspec/config.yaml`.
+- Before drafting anything for `PASO 1`, read the domain config at `openspec/artifacts/{domain}/config.yaml` (fallback: the seed template `.agents/skills/storage/openspec/domain-config.template.yaml`) and detect the active OpenSpec schema from its `schema` key.
 - Resolve schema assets in this order:
   1. `openspec/schemas/{schema}/...`
   2. `.agents/skills/storage/openspec/schemas/{schema}/...`
@@ -87,13 +87,13 @@ The orchestrator will give you:
 
 ## State Tracking Contract (MANDATORY)
 
-You MUST maintain `openspec/state.yaml` as a live tracker of phase progress, step position, and artifact lifecycle. This file is the single source of truth for recovery after compaction.
+You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of phase progress, step position, and artifact lifecycle for THIS domain. This file is the single source of truth for recovery after compaction. There is no global state file; the global `openspec/config.yaml` is only a domain router.
 
 ### Initialization / Resume (before PASO 1)
 
 **First elaboration iteration (no prior state or phase=inception):**
-1. Read `openspec/schemas/{schema}/schema.yaml` and map every artifact `id` to the structure expected by `state.yaml`.
-2. Initialize `openspec/state.yaml` with:
+1. Read `openspec/schemas/{schema}/schema.yaml` and map every artifact `id` to the structure expected by the domain state file.
+2. Initialize `openspec/artifacts/{domain}/state.yaml` with:
    - `phase: elaboration`
    - `iteration: E1`
    - `domain` from the active domain context
@@ -108,7 +108,7 @@ You MUST maintain `openspec/state.yaml` as a live tracker of phase progress, ste
     - Keep `Test Plan.path` in placeholder form as `05 Test/{{#}} {Iteration} Test plan.md`; the storage skill resolves `{{#}}` from `iteration` (`E1 -> 01`, `E11 -> 11`) when persisting.
 
 **Resume after cycle closure (phase=elaboration, status=in_progress):**
-1. Read existing `openspec/state.yaml`.
+1. Read existing `openspec/artifacts/{domain}/state.yaml`.
 2. Keep all artifact statuses (some may be `persisted` from prior cycles).
 3. Increment `iteration` (E1 → E2 → ... En).
 4. Reset `current_step: 0`, `last_approved_step: 0`, `approved_steps: []`.
@@ -138,7 +138,7 @@ You MUST maintain `openspec/state.yaml` as a live tracker of phase progress, ste
 - After the storage invocation succeeds, update `Test Plan` to `status: persisted`
 - If TDD persists additional documentation artifacts because it discovers scope, design, persistence, UI, or architecture issues, update only those artifacts that were part of that additional storage batch
 - `OK PASO 14 IMPLEMENTAR` authorizes code edits and test execution; keep `current_step: 14`
-- Report RED/GREEN evidence per cycle; no state.yaml change per cycle
+- Report RED/GREEN evidence per cycle; no domain state file change per cycle
 - On completion of step 14 (all TDD cycles done), request a final `OK PASO 14` and move it from `pending_steps` to `approved_steps`; update `last_approved_step: 14`
 
 ### After Storage Invocation
@@ -151,7 +151,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
 ### Cycle Close (step 17)
 
 - Do NOT set `status: completed` — the Elaboration phase is not yet closed
-- Confirm to user that `state.yaml` reflects completed cycle and list updated artifacts
+- Confirm to user that `openspec/artifacts/{domain}/state.yaml` reflects completed cycle and list updated artifacts
 - If requirements coverage < 100%, a new cycle starts from step 1; invoke the resume logic above
 
 ### Phase Close (step 18)
@@ -480,9 +480,9 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
 
 ## Step Progress Display
 
-Map `state.yaml` fields to visual indicators:
+Map `openspec/artifacts/{domain}/state.yaml` fields to visual indicators:
 
-| Símbolo | Estado | Fuente en `state.yaml` |
+| Símbolo | Estado | Fuente en el state del dominio |
 |---------|--------|------------------------|
 | `✅` | Completado | Paso presente en `approved_steps` |
 | `🔄` | En progreso | Paso igual a `current_step` |
@@ -510,13 +510,13 @@ Map `state.yaml` fields to visual indicators:
 ### ⬜ Paso 17 — Cycle close
 ### ⬜ Paso 18 — Phase close
 
-La lista anterior es la plantilla — el driver la renderiza dinámicamente, sustituyendo los marcadores `✅`/`🔄`/`⬜`/`⏭️` según los datos reales de `state.yaml` en tiempo de ejecución.
+La lista anterior es la plantilla — el driver la renderiza dinámicamente, sustituyendo los marcadores `✅`/`🔄`/`⬜`/`⏭️` según los datos reales de `openspec/artifacts/{domain}/state.yaml` en tiempo de ejecución.
 
 ## Required Turn Template
 
 For each step, always respond in this order:
 
-0. **Progress overview** — Render the step checklist above with current `state.yaml` data (completed, in-progress, pending), mark the current step and iteration label (e.g. `E1`, `E2`).
+0. **Progress overview** — Render the step checklist above with current `openspec/artifacts/{domain}/state.yaml` data (completed, in-progress, pending), mark the current step and iteration label (e.g. `E1`, `E2`).
 1. Proposed draft for the current step (short and reviewable).
 2. Open questions or assumptions.
 3. Explicit approval request: `Escribe OK PASO N para continuar`.

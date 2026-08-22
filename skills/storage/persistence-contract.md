@@ -9,11 +9,11 @@
 
 ## State Persistence (Orchestrator)
 
-The orchestrator persists DAG state after each phase transition to enable SDD recovery after compaction.
+The orchestrator persists DAG state after each phase transition to enable SDD recovery after compaction. State is per-domain: there is no global state file.
 
 | Mode | Persist State | Recover State |
 |------|--------------|---------------|
-| `openspec` | Write `openspec/state.yaml` | Read `openspec/state.yaml` |
+| `openspec` | Write `openspec/artifacts/{domain}/state.yaml` | Read the global router `openspec/config.yaml` (list of `domains`), then each `openspec/artifacts/{domain}/state.yaml`; resume the domain with `status: in_progress` (if several, ask the user) |
 | `none` | Not possible — warn user | Not possible |
 
 ## Common Rules
@@ -21,6 +21,7 @@ The orchestrator persists DAG state after each phase transition to enable SDD re
 - `none` → do NOT create or modify any project files; return results inline only
 - `openspec` → write files ONLY to paths defined in [openspec-convention](./openspec-convention.md)
 - `openspec` → use master-only persistence under `openspec/artifacts/{domain}/...` (no iteration delta folders, no archive merge)
+- `openspec` → configuration is per-domain at `openspec/artifacts/{domain}/config.yaml`; `openspec/config.yaml` is only the domain router
 - If unsure which mode to use, default to `none`
 
 ## Sub-Agent Context Rules

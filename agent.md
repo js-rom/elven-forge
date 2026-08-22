@@ -51,12 +51,13 @@ For each sub-agent launch:
 ### OpenSpec Storage Contract
 
 When creating or updating OpenSpec artifacts:
-1. Ensure openspec/config.yaml exists and use its rules section for project constraints.
-2. Ensure the master path `openspec/artifacts/{domain}/` exists before writing artifacts.
+1. Configuration is per-domain: `openspec/artifacts/{domain}/config.yaml` is authoritative (schema, persistence, rules, tdd). The global `openspec/config.yaml` is ONLY a domain router (`domains` list); never put project defaults or rules there.
+2. Ensure the master path `openspec/artifacts/{domain}/` exists before writing artifacts, including its `config.yaml` and `state.yaml` (created from the seed templates when the domain is registered).
 3. Use schema templates and instructions from openspec/schemas/default/.
 4. Write artifacts directly under `openspec/artifacts/{domain}/{discipline}/...`.
 5. Organize each `{domain}` by the Unified Process discipline directories `01 Business Modeling` through `09 Enviroment`.
-6. Do not create or use `openspec/iterations/` for persistence; do not run archive/merge flows.
+6. State is per-domain: `openspec/artifacts/{domain}/state.yaml` tracks phase progress, steps, and artifact lifecycle. There is no global state file.
+7. Do not create or use `openspec/iterations/` for persistence; do not run archive/merge flows.
 
 ### Sub-Agent Context Protocol
 

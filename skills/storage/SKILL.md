@@ -19,7 +19,16 @@ Unified Process Artifacts to persist
 
 # What you need to do
 
-## Step 1: Persist Unified Process Artifacts
+## Step 1: Register Domain (when `openspec/artifacts/{domain}/` does not exist yet)
+
+If the domain directory does not exist, register the domain before persisting anything:
+
+1. Create `openspec/artifacts/{domain}/` with the nine discipline folders from `openspec-convention.md`.
+2. Create `openspec/artifacts/{domain}/config.yaml` from the template `.agents/skills/storage/openspec/domain-config.template.yaml` (fill `domain` with the domain identifier and set the domain-specific rules). If no template exists, create the file following the same structure.
+3. Create `openspec/artifacts/{domain}/state.yaml` from the template `.agents/skills/storage/openspec/domain-state.template.yaml` (set `domain`). If no template exists, create the file following the same structure.
+4. Register the domain in the global router `openspec/config.yaml` by adding an entry under `domains:`. Do NOT duplicate per-domain settings in the router.
+
+## Step 2: Persist Unified Process Artifacts
 
 Persist Unified Process Artifacts following the active Artifact Store Policy and Conventions. If no policy is detected, default to `openspec` mode. If the policy is `none`, return results inline only and recommend enabling a persistence mode for better artifact management. **Only if** necessary file system paths do not exist, create them following applicable conventions.
 
@@ -27,7 +36,7 @@ For `openspec` mode, use **master-only persistence**: store artifacts directly u
 
 - Persist `Requirements Ranking` specifically under `openspec/artifacts/{domain}/08 Project Management/Requirements Ranking.md`.
 
-## Step 2: Archive Requests (disabled in master-only policy)
+## Step 3: Archive Requests (disabled in master-only policy)
 
 When the orchestrator asks to archive an iteration or merge deltas, do NOT move folders and do NOT run merge logic.
 
@@ -55,5 +64,5 @@ Do only for enabled modes.
 
 | Mode | Recovery |
 |------|----------|
-| `openspec` | read `openspec/state.yaml` |
+| `openspec` | read the global router `openspec/config.yaml` (list of `domains`), then read each `openspec/artifacts/{domain}/state.yaml`; resume the domain with `status: in_progress` (if several, ask the user which one to resume) |
 | `none` | State not persisted — explain to user |

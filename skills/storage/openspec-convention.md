@@ -4,8 +4,7 @@
 
 ```
 openspec/
-├── config.yaml              <- Project-specific SDD config
-├── state.yaml               <- DAG state (survives compaction)
+├── config.yaml              <- Global domain router (list of domains only: no defaults, no state)
 ├── schemas/
 │   └── default/
 │       ├── templates/       <- Default artifacts for Unified Process
@@ -13,6 +12,8 @@ openspec/
 │       └── schema.yaml      <- Default rules for creating artifacts
 ├── artifacts/               <- Source of truth (main specs)
 │   └── {domain}/
+│       ├── config.yaml      <- Domain-specific SDD config (schema, persistence, rules, tdd)
+│       ├── state.yaml       <- Domain state tracking (phase, steps, artifact lifecycle)
 │       ├── 01 Business Modeling/
 │       │   └── Domain Model.md
 │       ├── 02 Requirements/
@@ -85,8 +86,12 @@ openspec/
 
 | Skill | Creates / Reads | Path |
 |-------|----------------|------|
-| orchestrator | Creates/Updates | `openspec/state.yaml` |
-| storage | Creates (required) | `openspec/config.yaml`, `openspec/state.yaml`, `openspec/artifacts/`, `openspec/schemas/default/templates/`, `openspec/schemas/default/instructions/` |
+| storage | Creates (required) | `openspec/artifacts/{domain}/` (nine discipline directories) |
+| storage | Creates (required) | `openspec/artifacts/{domain}/config.yaml` (from template `.agents/skills/storage/openspec/domain-config.template.yaml`) |
+| storage | Creates (required) | `openspec/artifacts/{domain}/state.yaml` (from template `.agents/skills/storage/openspec/domain-state.template.yaml`) |
+| storage | Updates (orchestrator-only) | `openspec/config.yaml` (global domain router: register `{domain}` under `domains:`) |
+| up-inception / up-elaboration | Creates/Updates | `openspec/artifacts/{domain}/state.yaml` |
+| init | Creates (from seed) | `openspec/config.yaml` (router), `openspec/schemas/default/templates/`, `openspec/schemas/default/instructions/` |
 | storage | Creates (required) | `openspec/artifacts/{domain}/01 Business Modeling/Domain Model.md` |
 | storage | Creates (required) | `openspec/artifacts/{domain}/02 Requirements/vision.md` |
 | storage | Creates (required) | `openspec/artifacts/{domain}/02 Requirements/supplementary-specification.md` |
@@ -170,7 +175,9 @@ configuration management plan: openspec/artifacts/{domain}/07 Configuration & CM
 change control: openspec/artifacts/{domain}/07 Configuration & CM/change-control.md
 environment setup: openspec/artifacts/{domain}/09 Enviroment/environment-setup.md
 artifacts: openspec/artifacts/{domain}/  (all discipline subdirectories)
-config: openspec/config.yaml
+domain config: openspec/artifacts/{domain}/config.yaml
+domain state: openspec/artifacts/{domain}/state.yaml
+domains router: openspec/config.yaml
 ```
 
 ## Writing Rules
@@ -180,7 +187,15 @@ config: openspec/config.yaml
 - Do NOT create or use `openspec/iterations/` folders for artifact persistence.
 - Within each `{domain}`, always place artifacts in the correct Unified Process discipline directory.
 - Create all nine discipline directories for each `{domain}`. If a discipline has no artifact yet, keep the directory versioned with a placeholder such as `.gitkeep`.
-- Use `openspec/config.yaml` `rules` section for project-specific constraints per phase.
+- Use `openspec/artifacts/{domain}/config.yaml` `rules` section for domain-specific constraints per phase.
+
+## Configuration and State (per domain)
+
+- The global `openspec/config.yaml` is ONLY a domain router: it lists `domains` (each with its `config_path`). It holds no defaults, no rules and no state.
+- Each domain owns its configuration at `openspec/artifacts/{domain}/config.yaml` (schema, persistence, context, rules, tdd).
+- Each domain owns its state at `openspec/artifacts/{domain}/state.yaml` (phase, iteration, steps, artifact lifecycle).
+- Config resolution order: `openspec/artifacts/{domain}/config.yaml` first, then the seed template `.agents/skills/storage/openspec/domain-config.template.yaml` as fallback.
+- Recovery: read the router, then each domain state; resume the domain with `status: in_progress` (if several, ask the user).
 
 ## Archive Policy (Master-Only)
 

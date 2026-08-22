@@ -1,9 +1,18 @@
 # =============================================================================
-# LIVE State Tracking - survives compaction
+# Domain State Tracking - survives compaction
 # =============================================================================
-# This file tracks the current position in the Unified Process workflow.
-# It is updated by the active phase skill (up-inception / up-elaboration).
-# After compaction, the orchestrator reads this file to recover position.
+# Per-domain tracker: openspec/artifacts/{domain}/state.yaml
+#
+# There is NO global state file. State is particular to each domain, so the
+# storage skill creates this file from this template when the domain is
+# registered (during inception PASO 0).
+#
+# This file tracks the current position in the Unified Process workflow for
+# THIS domain. It is updated by the active phase skill (up-inception /
+# up-elaboration). After compaction, the orchestrator recovers position by:
+#   1. reading the global router `openspec/config.yaml` (list of domains)
+#   2. reading each `openspec/artifacts/{domain}/state.yaml`
+#   3. resuming the domain with `status: in_progress` (if several, ask user)
 #
 # HOW TO MAINTAIN:
 #   1. Phase skill initializes this file at phase start (before step 1).

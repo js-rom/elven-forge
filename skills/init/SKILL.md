@@ -42,6 +42,7 @@ Copy-Item -Path "./.agents/skills/storage/openspec/*" -Destination "./openspec" 
 Notes:
 - This command MUST run before generating/updating config files.
 - If `openspec/` already exists, this command **DO NOT** update/overwrite files with the seed content.
+- The seed contains: the global domain router `openspec/config.yaml`, the schema assets under `openspec/schemas/`, and the per-domain templates `openspec/domain-config.template.yaml` + `openspec/domain-state.template.yaml`. There is NO global state file — domain config and state are created per domain when the storage skill registers the first domain (inception PASO 0).
 
 ### Step 3: Build Skill Registry
 
@@ -72,5 +73,5 @@ Ready for /up-inception <topic>.
 - ALWAYS detect the real tech stack, don't guess
 - NEVER behave like the orchestrator from this phase - execute directly and return results
 - If the project already has an `openspec/` directory, report what exists and ask the orchestrator if it should be updated
-- Keep config.yaml context CONCISE - no more than 10 lines
+- Keep config.yaml context CONCISE - no more than 10 lines. This applies to both the global router `openspec/config.yaml` (domains list only) and any domain config `openspec/artifacts/{domain}/config.yaml`
 - Return a structured envelope with: `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks`

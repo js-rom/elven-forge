@@ -112,7 +112,16 @@ Artifacts are organized by UP disciplines under `openspec/artifacts/{domain}/`:
 09 Environment/           ← Tools, standards
 ```
 
-Each artifact's state is tracked in `openspec/state.yaml` (in progress, approved, persisted).
+Each artifact's state is tracked in the domain state file `openspec/artifacts/{domain}/state.yaml` (in progress, approved, persisted).
+
+### Configuration and State per Domain
+
+The system supports multiple domains in the same repository. There is no global configuration or state:
+
+- `openspec/config.yaml` is only a **domain router**: it lists the registered domains. It holds no defaults, no rules and no state.
+- Each domain owns its configuration at `openspec/artifacts/{domain}/config.yaml` (schema, persistence mode, context, language and phase rules, TDD commands).
+- Each domain owns its state at `openspec/artifacts/{domain}/state.yaml` (phase, iteration, step position, artifact lifecycle).
+- Recovery: read the router, then each domain state; resume the domain with `status: in_progress`.
 
 ### Persistence Mode: master-only
 
@@ -129,7 +138,7 @@ No iteration folders or deltas are created. All artifacts are persisted directly
 
 **Continuing an elaboration in progress:**
 
-The system automatically detects state from `openspec/state.yaml`. Just resume the conversation with the agent. The step progress display shows you exactly where you left off.
+The system automatically detects state by scanning the domain states listed in the global router `openspec/config.yaml` (active domain = `status: in_progress`). Just resume the conversation with the agent. The step progress display shows you exactly where you left off.
 
 **During a step:**
 
@@ -185,4 +194,5 @@ Each design discipline has its own skill loaded on demand by the orchestrator:
 | **Iteration** | Timeboxed cycle within a phase. In elaboration there are N iterations (E1..En). |
 | **Cycle** | Synonym for iteration. Closing a cycle does NOT close the phase. |
 | **Master-only** | Persistence mode without iteration folders. One file per artifact. |
-| **state.yaml** | File tracking current phase progress (current step, approved steps, artifacts). |
+| **Domain router** | `openspec/config.yaml` — global file that only lists the registered domains. |
+| **state.yaml** | Per-domain file at `openspec/artifacts/{domain}/state.yaml` tracking current phase progress (current step, approved steps, artifacts). |

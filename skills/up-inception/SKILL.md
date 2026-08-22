@@ -37,7 +37,7 @@ The orchestrator will give you:
 
 ## Schema Bootstrap Contract (MANDATORY)
 
-- Before drafting anything for `PASO 1`, detect the active OpenSpec schema from `openspec/config.yaml`.
+- Before drafting anything for `PASO 1`, read the domain config at `openspec/artifacts/{domain}/config.yaml` (fallback: the seed template `.agents/skills/storage/openspec/domain-config.template.yaml`) and detect the active OpenSpec schema from its `schema` key.
 - Resolve schema assets in this order:
   1. `openspec/schemas/{schema}/...`
   2. `.agents/skills/storage/openspec/schemas/{schema}/...`
@@ -76,12 +76,16 @@ The orchestrator will give you:
 
 ## State Tracking Contract (MANDATORY)
 
-You MUST maintain `openspec/state.yaml` as a live tracker of phase progress, step position, and artifact lifecycle. This file is the single source of truth for recovery after compaction.
+You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of phase progress, step position, and artifact lifecycle for THIS domain. This file is the single source of truth for recovery after compaction. There is no global state file; the global `openspec/config.yaml` is only a domain router.
 
 ### Initialization (before PASO 1)
 
-1. Read `openspec/schemas/{schema}/schema.yaml` and map every artifact `id` to the structure expected by `state.yaml`.
-2. Initialize `openspec/state.yaml` with:
+0. Register the domain (only if `openspec/artifacts/{domain}/` does not exist yet):
+   - Create `openspec/artifacts/{domain}/config.yaml` from the seed template `.agents/skills/storage/openspec/domain-config.template.yaml` and set `domain`.
+   - Create `openspec/artifacts/{domain}/state.yaml` from the seed template `.agents/skills/storage/openspec/domain-state.template.yaml` and set `domain`.
+   - Register the domain in the global router `openspec/config.yaml` under `domains:`.
+1. Read `openspec/schemas/{schema}/schema.yaml` and map every artifact `id` to the structure expected by the domain state file.
+2. Initialize `openspec/artifacts/{domain}/state.yaml` with:
    - `phase: inception`
    - `iteration: I1`
    - `domain` from the active domain context
@@ -116,7 +120,7 @@ You MUST maintain `openspec/state.yaml` as a live tracker of phase progress, ste
 
 - Set `status: completed`
 - Update `date` to today
-- Confirm to user that `state.yaml` reflects completed inception phase
+- Confirm to user that `openspec/artifacts/{domain}/state.yaml` reflects completed inception phase
 
 ### Artifact-Step Mapping for Inception
 
@@ -149,6 +153,11 @@ You MUST maintain `openspec/state.yaml` as a live tracker of phase progress, ste
 
 # What you need to do (Pair Programming workflow)
 
+0. Register the domain (automatic bootstrap step, treated like init infrastructure — file writes are allowed).
+  - Create `openspec/artifacts/{domain}/config.yaml` from the seed template `.agents/skills/storage/openspec/domain-config.template.yaml` with template defaults (schema, persistence, empty tdd) and the agreed domain identifier. Domain-specific values (chat/artifacts language, per-phase rules, tdd commands) are proposed and refined in chat during steps 1-9 and persisted at step 10.
+  - Create `openspec/artifacts/{domain}/state.yaml` from the seed template `.agents/skills/storage/openspec/domain-state.template.yaml` and initialize it per the State Tracking Contract.
+  - Add the domain entry to the global router `openspec/config.yaml` under `domains:`. Do NOT duplicate per-domain settings in the router.
+  - This step requires no approval token; report what was created and continue to PASO 1.
 1. Brief fisrt draft of the Vision.
   - Artifact in progress: `Vision and Business Case`.
   - Before drafting, load the active schema instruction for Vision and the active schema template `vision.md`.
@@ -193,6 +202,7 @@ You MUST maintain `openspec/state.yaml` as a live tracker of phase progress, ste
   - Treat this as an automatic step, not a user-driven action.
   - Pass only approved artifacts to storage.
   - Persist approved inception artifacts directly under the discipline directories defined in `openspec-convention.md`; most inception artifacts land in `openspec/artifacts/{domain}/02 Requirements/`, while `Requirements Ranking` must be stored as `openspec/artifacts/{domain}/08 Project Management/Requirements Ranking.md`.
+  - If the domain config (`openspec/artifacts/{domain}/config.yaml`) was refined in chat during steps 1-9, persist the approved values in the same storage batch.
   - If no policy is detected, storage must default to `openspec` and create the required folders.
 11. **Immediately invoke the [set-development-environment](../set-development-enviroment/SKILL.md) skill to set up the development environment for the project.**
   - Treat this as an automatic step, not a user-driven action.
