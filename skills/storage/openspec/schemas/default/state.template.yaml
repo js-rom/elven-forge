@@ -139,6 +139,13 @@ artifacts:
       refined_at_steps: []
       depends_on: [Supplementary Specification, Use Case Model, Design Sequence Diagram]
 
+    - id: Domain-to-Design Transition Map
+      path: 03 Design/Logical View/{{#}} {Iteration} domain-to-design-transition.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Domain Model, System Sequence Diagram, Operation Contracts]
+
     - id: Use Case Realization
       path: 03 Design/Use Case Realization/UCR UC{{#}} {{use-case.name}}.md
       status: not_started

@@ -106,6 +106,7 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
    - `artifacts` populated from schema with `status: not_started`, `created_at_step: null`, `refined_at_steps: []`
     - Keep `Iteration Plan.path` in placeholder form as `08 Project Management/{{#}} {Iteration} Plan.md`; the storage skill resolves `{{#}}` from `iteration` (`E1 -> 01`, `E11 -> 11`) when persisting.
     - Keep `Test Plan.path` in placeholder form as `05 Test/{{#}} {Iteration} Test plan.md`; the storage skill resolves `{{#}}` from `iteration` (`E1 -> 01`, `E11 -> 11`) when persisting.
+    - Keep `Domain-to-Design Transition Map.path` in placeholder form as `03 Design/Logical View/{{#}} {Iteration} domain-to-design-transition.md`; the storage skill resolves `{{#}}` and `{{Iteration}}` when persisting, producing one transition map per iteration.
 
 **Resume after cycle closure (phase=elaboration, status=in_progress):**
 1. Read existing `openspec/artifacts/{domain}/state.yaml`.
@@ -115,7 +116,8 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
 5. Populate `pending_steps` with the steps applicable to the new cycle scope.
 6. Update `scope`, `notes`, and `date`.
   7. Keep `Iteration Plan.path` in placeholder form as `08 Project Management/{{#}} {Iteration} Plan.md`; the storage skill resolves the concrete file name from the new `iteration`.
-  7. Keep `Test Plan.path` in placeholder form as `05 Test/{{#}} {Iteration} Test plan.md`; the storage skill resolves the concrete file name from the new `iteration`.
+  8. Keep `Test Plan.path` in placeholder form as `05 Test/{{#}} {Iteration} Test plan.md`; the storage skill resolves the concrete file name from the new `iteration`.
+  9. Keep `Domain-to-Design Transition Map.path` in placeholder form as `03 Design/Logical View/{{#}} {Iteration} domain-to-design-transition.md`; the storage skill resolves the concrete file name from the new `iteration`, producing a new transition map per iteration.
 
 ### Per-Step Updates
 
@@ -172,7 +174,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
 | 6 | (TBD) Reports Design | N/A |
 | 7 | `Architectural Analysis`, `Technical Memos`, `Supplementary Specification` (refine) | Yes |
 | 8 | Logical View packages (`packageDiagram.plantuml`) | Yes |
-| 9A | `Domain-to-Design Transition Map` (transformation map, responsibility matrix, postcondition traceability, pattern candidates) | Yes |
+| 9A | `Domain-to-Design Transition Map` (transformation map, responsibility matrix, postcondition traceability, pattern candidates — one per iteration) | Yes |
 | 9B | `Design Sequence Diagram`, Design Class Diagrams (`classDiagram.plantuml`) | Yes |
 | 10 | `Use Case Realization` (per UC in scope) | Yes |
 | 11 | Reviewer pass — refines artifacts from steps 8, 9A, 9B, 10 (no new artifact) | Yes (refactored artifacts) |
@@ -305,12 +307,12 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - MUST keep the transformation map at the class-and-responsibility level; do not descend into method signatures or algorithmic design.
   - If the transformation reveals a mismatch that requires changing package boundaries, stop and route the issue back to step 8.
   - Stop and request `OK PASO 9A` before continuing.
-  - After approval, persist the transition artifacts using the storage skill (by artifact id; storage resolves the paths):
+  - After approval, persist the transition artifact using the storage skill (by artifact id, passing `{{#}}` and `{{Iteration}}`; storage resolves the path to one file per iteration, e.g. `01 E1 domain-to-design-transition.md`):
     - `Domain-to-Design Transition Map`
 
 9B. Design sequence diagrams and class diagrams for the Logical View, mapping each approved scenario in scope to object design using the transition map from step 9A as a fixed contract.
   - Artifacts in progress: `Logical View` (design sequence diagrams and design class diagrams).
-  - Before designing, load the skills `/sequence-diagram/SKILL.md` and `/class-diagram/SKILL.md`, and re-load the approved `domain-to-design-transition.md` from step 9A.
+  - Before designing, load the skills `/sequence-diagram/SKILL.md` and `/class-diagram/SKILL.md`, and re-load the approved iteration-scoped transition map from step 9A (e.g. `01 E1 domain-to-design-transition.md`, resolved from the schema path with `{{#}}` and `{{Iteration}}`).
   - Required inputs: approved iteration plan, SSDs from step 3, Operation Contracts from step 4, approved Domain-to-Design Transition Map from step 9A, Logical View packages from step 8, Supplementary Specification, and Glossary.
   - Use the scenario queue already built in step 9A; do NOT rebuild it.
   - This step is the scenario-level design step. Use the package boundaries from step 8 and the transition map from step 9A as fixed constraints.
@@ -375,7 +377,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - MUST NOT allow PASO 12 to start while any use case is marked `NO`.
   - Stop and request `OK PASO 11` before continuing.
   - After approval, persist each reviewed or refactored artifact using the storage skill (by artifact id, passing the required placeholders; storage resolves the paths):
-    - `Domain-to-Design Transition Map`
+    - `Domain-to-Design Transition Map` (pass `{{#}}` and `{{Iteration}}`; one file per iteration)
     - `Logical View Package Diagram`
     - `Design Sequence Diagram`
     - `Logical View Class Diagram`

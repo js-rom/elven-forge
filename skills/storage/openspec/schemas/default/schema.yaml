@@ -185,8 +185,8 @@ artifacts:
     instruction: ""
     requires: [supplementary-specification, use-case-model, design-sequence-diagram]
   - id: Domain-to-Design Transition Map
-    path: 03 Design/Logical View/domain-to-design-transition.md
-    description: Bridges the conceptual Domain Model to the software Design Model (transformation map, responsibility matrix, postcondition traceability, pattern candidates, rationale).
+    path: 03 Design/Logical View/{{#}} {{Iteration}} domain-to-design-transition.md
+    description: Bridges the conceptual Domain Model to the software Design Model for one elaboration iteration (transformation map, responsibility matrix, postcondition traceability, pattern candidates, rationale). One file per iteration.
     template: domain-to-design-transition.md
     instruction: INVOKE this link -> "./instructions/domain-to-design-transition.md"
     requires: [domain-model, system-sequence-diagram, operation-contracts]

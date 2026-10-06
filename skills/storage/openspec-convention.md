@@ -41,6 +41,7 @@ The concrete layout inside each `{domain}` is **derived from the active schema**
 
 - Always write directly to the resolved master path under `openspec/artifacts/{domain}/...`.
 - If a file already exists, READ it first and UPDATE it (do not overwrite blindly).
+- Artifacts whose schema `path` contains `{{#}}` or `{{Iteration}}` are iteration-scoped: each iteration resolves to a NEW file (e.g. `01 E1 domain-to-design-transition.md`). The read-then-update rule does not apply across iterations, only when re-persisting within the same iteration.
 - Do NOT create or use `openspec/iterations/` folders for artifact persistence.
 - Place each artifact in the path resolved from the active schema; never hardcode artifact paths in instructions.
 - Keep empty directories versioned with a placeholder such as `.gitkeep`.

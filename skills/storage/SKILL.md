@@ -67,6 +67,7 @@ For `openspec` mode, use **master-only persistence**:
 1. Apply the Path Resolution Contract for each artifact (by `artifact_id`).
 2. Write the content directly to the resolved master path. Create missing directories as needed; keep empty directories versioned with `.gitkeep` when they contain no artifacts.
 3. If the target file already exists, READ it first and UPDATE it (do not overwrite blindly).
+   Exception — iteration-scoped artifacts: when the schema `path` contains `{{#}}` or `{{Iteration}}`, the resolution produces a NEW file per iteration (e.g. `01 E1 domain-to-design-transition.md`, `02 E2 domain-to-design-transition.md`). Write it fresh; the read-then-update rule only applies when re-persisting within the SAME iteration.
 
 ## Step 3: Read Artifacts
 
