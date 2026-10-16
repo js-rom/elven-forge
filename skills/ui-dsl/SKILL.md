@@ -40,7 +40,7 @@ The DSL is structured around **state transitions**, not just static layout. Each
 - Validate traceability: each transition ↔ system operation ↔ operation contract.
 
 **Out of scope:**
-- Generating executable code. The actual implementation happens in step 14 (TDD).
+- Generating executable code. The actual implementation happens in step 14B (TDD).
 - Reports design (step 6, separate skill).
 - Interactive UI prototyping. This phase produces specifications and mappings.
 
@@ -333,7 +333,7 @@ For each component type that will appear in the DSL, define which design tokens 
 
 ## Purpose
 
-Map the abstract UI DSL and Design System to a concrete UI technology. By default this maps to Vaadin 25 (Java/Flow). The output is a documented mapping — not executable code. Implementation happens in step 14 (TDD).
+Map the abstract UI DSL and Design System to a concrete UI technology. By default this maps to Vaadin 25 (Java/Flow). The output is a documented mapping — not executable code. Implementation happens in step 14B (TDD).
 
 ## C.1 Load Inputs
 

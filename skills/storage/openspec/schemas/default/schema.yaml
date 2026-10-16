@@ -166,6 +166,12 @@ artifacts:
     template: test-plan.md
     instruction: INVOKE this link -> "./instructions/test-plan.md"
     requires: [use-case-realization, iteration-plan]
+  - id: Acceptance Test Plan
+    path: 05 Test/{{#}} {{Iteration}} Acceptance plan.md
+    description: ATDD acceptance planning output for a single elaboration iteration: Gherkin scenarios traced to use case steps/extensions, domain invariants, legal rules and interaction specs, with invariant coverage and rules compliance matrices plus RED/GREEN execution evidence.
+    template: acceptance-test-plan.md
+    instruction: INVOKE this link -> "./instructions/acceptance-test-plan.md"
+    requires: [test-plan, use-case-model, domain-model, interaction-spec]
   - id: SW Architecture Document
     path: 03 Design/SW Architecture Document.md
     description: Architecture drivers, significant decisions, 4+1 views, quality scenarios, and evolution strategy.

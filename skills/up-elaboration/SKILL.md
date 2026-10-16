@@ -79,10 +79,10 @@ The orchestrator will give you:
 ## Write Gating Rules (MANDATORY)
 
 - During steps 1-13 and 15-17: no create/update file operations; chat content only (tables, diagrams, brief and fully dressed use cases). After gate approval, persist artifacts.
-- **Exception for step 14 (TDD):** create/update code and test files is REQUIRED to execute the TDD cycles.
-- For step 14, use a two-gate flow:
-  - `OK PASO 14` approves the test-case slice and TDD plan.
-  - `OK PASO 14 IMPLEMENTAR` authorizes real code/test edits and test execution in terminal.
+- **Exception for steps 14A, 14B and 14C (acceptance + TDD):** create/update code and test files is REQUIRED to execute the ATDD/TDD cycles. Feature files (`src/test/resources/features`) and step definitions are file-based code artifacts, like unit tests.
+- For step 14B, use a two-gate flow:
+  - `OK PASO 14B` approves the test-case slice and TDD plan.
+  - `OK PASO 14B IMPLEMENTAR` authorizes real code/test edits and test execution in terminal.
 - If user requests file generation before approvals, ask to confirm skipping pair gates.
 
 ## State Tracking Contract (MANDATORY)
@@ -101,7 +101,7 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
    - `date` set to today
    - `current_step: 0`, `last_approved_step: 0`
    - `approved_steps: []`
-  - `pending_steps: [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]` (skip TBD step 6; step 18 is phase-close marker)
+   - `pending_steps: [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14A, 14B, 14C, 15, 16, 17]` (skip TBD step 6; step 18 is phase-close marker)
    - `scope` and `notes` set to appropriate placeholders
    - `artifacts` populated from schema with `status: not_started`, `created_at_step: null`, `refined_at_steps: []`
     - Keep `Iteration Plan.path` in placeholder form as `08 Project Management/{{#}} {Iteration} Plan.md`; the storage skill resolves `{{#}}` from `iteration` (`E1 -> 01`, `E11 -> 11`) when persisting.
@@ -133,20 +133,26 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
 - For artifacts refined in this step, append N to `refined_at_steps`
 - Update `date` to today
 
-**Exception — Step 14 (TDD):**
-- `OK PASO 14` marks the test-case slice and `Test Plan` content as approved; update `Test Plan` to `status: approved` but do NOT move step to `approved_steps` yet (the implementation phase follows)
-- Immediately after `OK PASO 14`, the TDD skill MUST persist `Test Plan` using the storage skill by artifact id (passing `{{#}}` and `{{Iteration}}`; storage resolves the path)
+**Exception — Step 14B (TDD):**
+- `OK PASO 14B` marks the test-case slice and `Test Plan` content as approved; update `Test Plan` to `status: approved` but do NOT move step to `approved_steps` yet (the implementation phase follows)
+- Immediately after `OK PASO 14B`, the TDD skill MUST persist `Test Plan` using the storage skill by artifact id (passing `{{#}}` and `{{Iteration}}`; storage resolves the path)
 - After the storage invocation succeeds, update `Test Plan` to `status: persisted`
 - If TDD persists additional documentation artifacts because it discovers scope, design, persistence, UI, or architecture issues, update only those artifacts that were part of that additional storage batch
-- `OK PASO 14 IMPLEMENTAR` authorizes code edits and test execution; keep `current_step: 14`
+- `OK PASO 14B IMPLEMENTAR` authorizes code edits and test execution; keep `current_step: 14B`
 - Report RED/GREEN evidence per cycle; no domain state file change per cycle
-- On completion of step 14 (all TDD cycles done), request a final `OK PASO 14` and move it from `pending_steps` to `approved_steps`; update `last_approved_step: 14`
+- On completion of step 14B (all TDD cycles done), request a final `OK PASO 14B` and move it from `pending_steps` to `approved_steps`; update `last_approved_step: 14B`
+
+**Steps 14A and 14C (ATDD acceptance):**
+- `OK PASO 14A` approves the acceptance scenarios and the `Acceptance Test Plan` content (chat-first); feature files and glue may be drafted but MUST NOT be executed yet
+- After `OK PASO 14A`, persist `Acceptance Test Plan` via the storage skill (by artifact id, passing `{{#}}` and `{{Iteration}}`); update it to `status: persisted`
+- `OK PASO 14C` authorizes acceptance execution (`mvn test -Pacceptance`) and records GREEN evidence in the `Acceptance Test Plan`; defects found (RED) are implemented through the PASO 14B TDD loop or, if already approved, as acceptance-driven fixes
+- On completion of 14C, request a final `OK PASO 14C` and move it from `pending_steps` to `approved_steps`; update `last_approved_step: 14C`
 
 ### After Storage Invocation
 
 After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16):
 - For every artifact passed to storage, set `status: persisted`
-- In step 14, `Test Plan` is the mandatory storage artifact; code and test files remain file-based TDD outputs, and any additional documentation artifacts persisted due to TDD findings must also be updated only when they were part of the storage batch
+- In step 14B, `Test Plan` is the mandatory storage artifact; code and test files remain file-based TDD outputs, and any additional documentation artifacts persisted due to TDD findings must also be updated only when they were part of the storage batch
 - Do NOT change artifacts that were not part of the storage batch
 
 ### Cycle Close (step 17)
@@ -180,7 +186,9 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
 | 11 | Reviewer pass — refines artifacts from steps 8, 9A, 9B, 10 (no new artifact) | Yes (refactored artifacts) |
 | 12 | `Data Model`, `JPA Mapping` | Yes |
 | 13 | `SW Architecture Document` | Yes |
-| 14 | `Test Plan`, Code + Unit/Integration Tests (TDD) | Yes (`Test Plan` only; code/tests remain file-based) |
+| 14A | `Acceptance Test Plan`, Gherkin features + acceptance glue (code, file-based) | Yes (`Acceptance Test Plan` only; features/glue remain file-based) |
+| 14B | `Test Plan`, Code + Unit/Integration Tests (TDD) | Yes (`Test Plan` only; code/tests remain file-based) |
+| 14C | `Acceptance Test Plan` (GREEN evidence), defect fixes | Yes (`Acceptance Test Plan` only when evidence was added) |
 | 15 | `Requirements Ranking` (refine) | Yes |
 | 16 | `Use Case fully dressed` (10% brief→detailed) | Yes |
 | 17 | Cycle close — lists updated artifacts; NO new artifacts | No |
@@ -402,7 +410,25 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - Stop and request `OK PASO 13` before continuing.
   - After approval, store the `SW Architecture Document` artifact using the storage skill (by artifact id; storage resolves the path).
 
-14. Start Skill Test-Driven Development (TDD) cycles to implement the design for the selected scenarios in the iteration scope, producing working code and automated tests as part of elaboration.
+14A. Start the ATDD acceptance step: define executable Gherkin acceptance scenarios for the iteration slice BEFORE the TDD implementation cycles, so the acceptance criteria are specified first.
+  - Artifacts in progress: `Acceptance Test Plan`, Gherkin feature files, acceptance step definitions (code).
+  - Before starting, load the active schema instruction `acceptance-test-plan.md` and the approved artifacts that define the acceptance slice:
+    - `Iteration Plan` from step 1, as the scope contract.
+    - Use Case scenarios (steps 3/4: SSDs and Operation Contracts) plus the use case extensions, as the behavior contract.
+    - `Domain Model` invariants from step 2, applying the promotion gate (legal rule / cross-layer integration / actor-visible effect / core domain contract).
+    - `domain-rules.md`, to build the rules compliance matrix (automatable rules become scenarios; organizational ones are recorded as traceability, never faked as tests).
+    - `Interaction Spec` and `Vaadin Mapping` from step 5, as the UI acceptance criteria source (states and transitions).
+    - `Use Case Realization` from step 10, as the design contract.
+  - For each use case in scope:
+    a. Write one Gherkin feature (`src/test/resources/features/...`) with one scenario per main-success step group and per extension, using the domain vocabulary of the use case.
+    b. Select domain invariants for acceptance coverage with the promotion gate; record every in-scope invariant in the coverage matrix with an explicit decision (acceptance scenario or unit-only + rationale).
+    c. Build the rules compliance matrix (Cubierto / Pendiente / N-A + evidence).
+  - When the slice modifies existing code, produce RED evidence here (run the new scenarios against the current implementation); for brand-new functionality, the RED is documented and materializes in the first TDD cycle of step 14B.
+  - Chat-first: present the scenario list, invariant matrix and rules matrix. Feature files and glue may be drafted but not executed until approval.
+  - Stop and request `OK PASO 14A` before continuing.
+  - After approval, persist the `Acceptance Test Plan` artifact using the storage skill (by artifact id, passing `{{#}}` and `{{Iteration}}`; storage resolves the path). Feature files and glue remain file-based code artifacts.
+
+14B. Start Skill Test-Driven Development (TDD) cycles to implement the design for the selected scenarios in the iteration scope, producing working code and automated tests as part of elaboration.
   - Artifacts in progress: `Test Plan`, `Code`, `Unit and Integration Tests`
   - Before starting TDD, load the skill `/tdd/SKILL.md` and the approved artifacts that define the selected implementation slice:
     - `Iteration Plan` from step 1, as the scope and sequencing contract for the iteration.
@@ -416,16 +442,17 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - If the selected scenario implements an architecturally significant or risky concern, also load the relevant `Architectural Analysis` and `Technical Memos` from step 7.
   - Use the `Iteration Plan` as a hard scope gate: implement only the use cases, scenarios, or slices explicitly selected for the current iteration. If implementation reveals out-of-scope work, stop and route the change back to PASO 1 before coding it.
   - Use the `Use Case Realization` as the primary scenario contract: derive the active test slice from the scenario mapping, referenced DSD/DCD, and postcondition satisfaction checklist. Do not invent behavior outside the approved scenario slice.
-  - If the selected scenario has UI scope, before requesting `OK PASO 14`, present a UI implementation baseline that includes:
+  - If the selected scenario has UI scope, before requesting `OK PASO 14B`, present a UI implementation baseline that includes:
     - target view(s),
     - approved visual state ids in scope,
     - linked HTML mock and screenshot/image assets loaded,
     - `Interaction Spec` transitions in scope,
     - `Vaadin Mapping` sections used,
     - visual non-negotiables and any deferred UI states.
-  - Before requesting `OK PASO 14`, confirm that the selected scenario passed the Logical View review gate and has no unresolved blocking design issues.
+  - Before requesting `OK PASO 14B`, confirm that the selected scenario passed the Logical View review gate and has no unresolved blocking design issues.
   - For each selected scenario, follow the TDD loop to incrementally implement the approved design, starting from the scenario's SSD system operations, operation contract events/postconditions, and the responsibilities defined in the referenced design artifacts.
   - Ensure that every implemented scenario has corresponding automated tests that validate expected behavior, edge cases, and the scenario result promised in the `Iteration Plan`.
+  - Each TDD test item must record which acceptance scenario(s) from step 14A it satisfies: the TDD loop is the implementation engine that turns the 14A acceptance scenarios green.
   - Ensure that every `Test Plan` item is traceable at least to: `Iteration Plan` item, use case/scenario, `Use Case Realization` section, SSD reference, and Operation Contract postcondition. Add architecture, persistence, or UI references when applicable.
   - If the selected scenario has UI scope, the initial `Test Plan` MUST include at least one UI fidelity item per target view and trace it to:
     - `State Visual Spec.state_id`,
@@ -438,16 +465,25 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
     - persistence-model or JPA-mapping issue -> `Data Model` and `JPA Mapping`
     - UI state, interaction, or rendering issue -> `Design System`, `State Visual Specs`, `Interaction Spec`, and `Vaadin Mapping`
     - architecture decision or cross-cutting concern issue -> `SW Architecture Document` and `Technical Memos`
-  - Request `OK PASO 14` to approve the test-case slice and TDD plan.
-  - Immediately after `OK PASO 14`, the TDD skill persists `Test Plan` through the storage skill (by artifact id, passing `{{#}}` and `{{Iteration}}`; storage resolves the path).
-  - After `Test Plan` is persisted, request `OK PASO 14 IMPLEMENTAR` before executing real file edits and test commands.
+  - Request `OK PASO 14B` to approve the test-case slice and TDD plan.
+  - Immediately after `OK PASO 14B`, the TDD skill persists `Test Plan` through the storage skill (by artifact id, passing `{{#}}` and `{{Iteration}}`; storage resolves the path).
+  - After `Test Plan` is persisted, request `OK PASO 14B IMPLEMENTAR` before executing real file edits and test commands.
   - During execution, report RED/GREEN evidence per cycle (failing test, minimal change, green suite evidence, updated Test List).
-  - When the selected scenario has UI scope, the final PASO 14 review MUST summarize:
+  - When the selected scenario has UI scope, the final PASO 14B review MUST summarize:
     - implemented UI states,
     - deferred UI states,
     - remaining mismatches versus approved UI artifacts,
     - executable validation evidence for view structure and state rendering.
-  - When implementation for this step is complete and reviewed, request `OK PASO 14` to continue to PASO 15.
+  - When implementation for this step is complete and reviewed, request `OK PASO 14B` to continue to PASO 15.
+
+14C. Execute the acceptance suite for the iteration slice and close the ATDD loop with GREEN evidence.
+  - Artifacts in progress: `Acceptance Test Plan` (execution evidence section), defect fixes.
+  - Run `mvn test -Pacceptance` and report per-scenario GREEN evidence.
+  - Acceptance scenarios in RED are defects: route each defect through the PASO 14B TDD loop (RED unit test -> fix -> GREEN), then re-run the acceptance suite until green.
+  - If a scenario reveals a mismatch with the approved `Interaction Spec` or design artifacts, stop and route the issue back to the owning steps (5 / 9A / 9B / 10 / 11) instead of silently changing the scenario.
+  - Update the `Acceptance Test Plan` with: defects found (RED evidence + resolution) and final execution evidence (`mvn test -Pacceptance` and `mvn test`).
+  - Stop and request `OK PASO 14C` before continuing.
+  - After approval, persist the updated `Acceptance Test Plan` using the storage skill (by artifact id, passing `{{#}}` and `{{Iteration}}`).
 
 15. Refine Requirements Ranking based on iteration feedback if any (new features or use cases, defects, changes in priorities). Refine it in collaboration with the user.
   - Artifacts in progress: `Requirements Ranking`
@@ -502,7 +538,9 @@ Map `openspec/artifacts/{domain}/state.yaml` fields to visual indicators:
 ### ⬜ Paso 11 — Reviewer pass
 ### ⬜ Paso 12 — Data Model + JPA Mapping
 ### ⬜ Paso 13 — SW Architecture Document
-### ⬜ Paso 14 — TDD (Code + Tests)
+### ⬜ Paso 14A — Acceptance Tests (ATDD)
+### ⬜ Paso 14B — TDD (Code + Tests)
+### ⬜ Paso 14C — Acceptance execution (GREEN)
 ### ⬜ Paso 15 — Refine Requirements Ranking
 ### ⬜ Paso 16 — Use Case fully dressed (10%)
 ### ⬜ Paso 17 — Cycle close
@@ -536,6 +574,10 @@ Do not include content for later steps until approval is received.
 - attempting archive or delta-merge operations in master-only persistence mode.
 - treating elaboration cycle closure as if it were phase completion.
 - starting a new UP phase immediately after cycle closure while Elaboration coverage is still below target.
+- writing acceptance scenarios after the implementation is already green (ATDD requires scenarios first, then TDD toward green).
+- faking legal/organizational rules (RGPD duties, RAT, sanctions) as executable tests instead of recording them in the rules compliance matrix.
+- promoting every domain invariant to acceptance coverage without applying the promotion gate (duplicating unit tests at a slower layer).
+- executing the acceptance suite (`mvn test -Pacceptance`) without Docker/Testcontainers available.
 define the architecture
 
 # Results

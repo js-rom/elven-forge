@@ -77,7 +77,7 @@ This skill separates concerns explicitly:
 
 - For every approved State Visual Spec, `assets.html_mock` is required unless the user explicitly approves image-only design.
 - For every approved State Visual Spec, `assets.screenshot` is required unless the HTML mock fully expresses the state and the user agrees to omit the screenshot.
-- The approved HTML mock becomes a mandatory implementation anchor for PASO 14 and any implementation skill consuming the UI artifacts.
+- The approved HTML mock becomes a mandatory implementation anchor for PASO 14B and any implementation skill consuming the UI artifacts.
 - The approved screenshot/image becomes supporting implementation evidence for spacing, emphasis, hierarchy, and responsive intent when the HTML mock does not fully express them.
 - If the HTML mock, screenshot/image, State Visual Spec, and Vaadin Mapping disagree, the driver must resolve the conflict in the UI artifacts before implementation proceeds.
 

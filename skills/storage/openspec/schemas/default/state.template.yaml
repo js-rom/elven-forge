@@ -170,6 +170,13 @@ artifacts:
       refined_at_steps: []
       depends_on: [Use Case Realization, Iteration Plan]
 
+    - id: Acceptance Test Plan
+      path: 05 Test/{{#}} {Iteration} Acceptance plan.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Test Plan, Use Case Model, Domain Model, Interaction Spec]
+
   06 Deployment:
     - id: Deployment View
       path: 06 Deployment/deployment-view.plantuml

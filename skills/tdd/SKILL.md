@@ -39,7 +39,7 @@ Do not use this skill as a rule to write all tests upfront.
 	- If persistence is affected, `Data Model` and `JPA Mapping` when available.
 	- If UI scope exists, `Design System`, `State Visual Specs`, `Interaction Spec`, and `Vaadin Mapping` when available.
 	- If the slice implements an architecturally significant or risky concern, `Architectural Analysis` and `Technical Memos` when available.
-- When TDD runs inside PASO 14 of `up-elaboration`, the artifact set above is mandatory according to the approved step contract.
+- When TDD runs inside PASO 14B of `up-elaboration`, the artifact set above is mandatory according to the approved step contract.
 - Use the `Iteration Plan` as a hard scope gate when available; do not implement behavior outside the approved iteration slice.
 - Use the `Use Case Realization` as the primary scenario contract when available; derive the implementation slice from the scenario mapping, referenced design artifacts, and postcondition checklist.
 - Keep `Test Plan` traceability explicit: each test item should trace to the scenario or use case and, when available, to the `Iteration Plan` item, `Use Case Realization` section, SSD reference, Operation Contract postcondition, and any relevant architecture, persistence, or UI artifacts.
@@ -107,7 +107,7 @@ Do not use this skill as a rule to write all tests upfront.
 	- If the user does not choose explicitly, default to `Guided mode`.
 	- After the Test List, its rationale, and the execution mode are agreed, the TDD skill MUST invoke the storage skill itself using the active Artifact Store Policy before any `RED -> GREEN -> REFACTOR` cycle begins.
 	- Persist the `Test Plan` artifact by artifact id through the storage skill (passing `{{#}}` and `{{Iteration}}`; storage resolves the path from the domain config and the active schema).
-	- When TDD runs inside PASO 14 of `up-elaboration`, persist the artifact immediately after `OK PASO 14` and before `OK PASO 14 IMPLEMENTAR`.
+	- When TDD runs inside PASO 14B of `up-elaboration`, persist the artifact immediately after `OK PASO 14B` and before `OK PASO 14B IMPLEMENTAR`.
 	- Build the artifact from the active schema template `test-plan.md`.
 2. Pick exactly one item from the list and **write one concrete automated test**.
 	- In `Guided mode`, the selected item MUST be explicitly approved by the user.
