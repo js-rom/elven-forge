@@ -74,8 +74,7 @@ The artifact MUST include:
 
 ## Storage Convention
 
-- Persist one file per use case under:
-	`03 Design/Use Case Realization/UCR UC{{#}} {{use-case.name}}.md`
+- Persist one file per use case using the storage skill by artifact id (passing `{{use-case.name}}`; storage resolves the concrete path from the active schema). Do NOT hardcode artifact paths.
 - The file must contain all mapped scenarios for that use case.
 
 ## Validation Checklist

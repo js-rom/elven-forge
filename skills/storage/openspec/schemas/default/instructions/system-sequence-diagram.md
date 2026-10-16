@@ -48,8 +48,7 @@ The artifact MUST include:
 
 ## Storage Convention
 
-- Persist each SSD under:
-	`02 Requirements/SSDs/SSD UC{{#}} {{use-case.name}}.md`
+- Persist each SSD using the storage skill by artifact id (passing `{{use-case.name}}` and `{{scenario.#}}` per scenario; storage resolves the concrete path from the active schema). Do NOT hardcode artifact paths.
 - Keep one SSD file per use case scenario when scenarios are materially different.
 
 ## Validation Checklist

@@ -54,9 +54,7 @@ The Test Plan captures the explicit output of Step 1 of the TDD loop before any 
 
 ## Storage Convention
 
-- Persist the test plan artifact once per elaboration iteration under:
-  - `05 Test/{{#}} {Iteration} Test plan.md`
-- In this file name, `{{#}}` is the zero-padded numeric part of `{Iteration}` (for example `E1 -> 01`, `E11 -> 11`).
+- Persist the test plan artifact once per elaboration iteration using the storage skill by artifact id (passing `{{#}}` and `{{Iteration}}`; storage resolves the concrete path from the active schema, resolving `{{#}}` from the iteration, e.g. `E1 -> 01`). Do NOT hardcode artifact paths.
 
 ## Validation Checklist
 

@@ -58,8 +58,7 @@ The artifact MUST include:
 
 ## Storage Convention
 
-- Persist each operation-contract artifact under:
-	`02 Requirements/Operation Contracts/UC{{#}} {{use-case.name}} - Operation Contracts.md`
+- Persist each operation-contract artifact using the storage skill by artifact id (passing `{{use-case.name}}`; storage resolves the concrete path from the active schema). Do NOT hardcode artifact paths.
 
 ## Validation Checklist
 

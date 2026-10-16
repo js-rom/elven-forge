@@ -48,8 +48,7 @@ The artifact MUST include:
 
 ## Storage Convention
 
-- Persist each technical memo under:
-	`02 Requirements/Technical memos/Issue - {{FURPS+ category}} - {{issue.name}}.md`
+- Persist each technical memo using the storage skill by artifact id (passing `{{FURPS+ category}}` and `{{issue.name}}`; storage resolves the concrete path from the active schema). Do NOT hardcode artifact paths.
 
 ## Validation Checklist
 
