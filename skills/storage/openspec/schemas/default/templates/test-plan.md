@@ -136,6 +136,21 @@
 
 ---
 
+## Implementation Conformance Review (14D)
+
+| Diagram Element | Diagram Source (`.plantuml`) | Implemented Counterpart (namespaced identifier / operation) | Verdict | Action |
+| :--- | :--- | :--- | :--- | :--- |
+| <package / classifier / message> | <file + line> | <namespaced identifier#operation> | MATCH / MISSING / EXTRA / DIVERGENT | <none / TDD item / route to 9B / route to 8> |
+| ... | ... | ... | ... | ... |
+
+- **Review scope (packages / scenarios):** {{review-scope}}
+- **Out of scope (untouched packages validated in prior iterations):** {{out-of-scope}}
+- **Build / compile evidence:** {{build-command + result}}
+- **Verdict:** {{PASS | FAIL}}
+- **Deviations routed to:** {{14B TDD items / 9B / 11 / 8 / none}}
+
+---
+
 ## Risks and Follow-ups
 
 | Risk / Pending Question | Impact | Mitigation / Next Action |

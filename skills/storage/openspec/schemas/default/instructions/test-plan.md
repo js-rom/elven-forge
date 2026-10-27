@@ -52,6 +52,14 @@ The Test Plan captures the explicit output of Step 1 of the TDD loop before any 
 - Exclude infrastructure and algorithm details that do not affect test intent.
 - If information is missing, keep sections and mark them as `TBD`.
 
+### 7. Implementation Conformance Review (14D)
+
+- After 14C, record the reviewer pass that matches the implemented source tree against the approved Logical View diagrams for the iteration slice (the packages touched by 14B/14C plus the scenarios in scope).
+- Check package/subsystem declarations, classifier kind and visible members, declared relationships, and DSD lifelines/messages against the actual implementation, using the project's own build layout and toolchain.
+- Record one row per checked element with verdict `MATCH`, `MISSING`, `EXTRA`, or `DIVERGENT`, plus the action taken.
+- Record the build/compile evidence produced by this review and the final verdict (`PASS`/`FAIL`).
+- On `FAIL`, list every deviation routed back to 14B as a test item (group "14D conformance fixes"), or to 9B/11/8 when the diagram is the stale side.
+
 ## Storage Convention
 
 - Persist the test plan artifact once per elaboration iteration using the storage skill by artifact id (passing `{{#}}` and `{{Iteration}}`; storage resolves the concrete path from the active schema, resolving `{{#}}` from the iteration, e.g. `E1 -> 01`). Do NOT hardcode artifact paths.
@@ -66,3 +74,4 @@ The Test Plan captures the explicit output of Step 1 of the TDD loop before any 
 6. Does each test item trace to the `Iteration Plan` item, use case/scenario, `Use Case Realization` section, SSD reference, and `Operation Contract` postcondition?
 7. Are architecture, persistence, and UI references captured when applicable?
 8. Is the storage path and file name compliant?
+9. Does the 14D conformance review cover the iteration slice and record its verdict and routing?

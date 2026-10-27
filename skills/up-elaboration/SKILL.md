@@ -78,8 +78,9 @@ The orchestrator will give you:
 
 ## Write Gating Rules (MANDATORY)
 
-- During steps 1-13 and 15-17: no create/update file operations; chat content only (tables, diagrams, brief and fully dressed use cases). After gate approval, persist artifacts.
+- During steps 1-13, 14D and 15-17: no create/update file operations while refining; chat content only (tables, diagrams, brief and fully dressed use cases). After gate approval, persist artifacts.
 - **Exception for steps 14A, 14B and 14C (acceptance + TDD):** create/update code and test files is REQUIRED to execute the ATDD/TDD cycles. Feature files (`src/test/resources/features`) and step definitions are file-based code artifacts, like unit tests.
+- Step 14D performs inspection only; fixes authorized by a 14D conformance mismatch are executed in step 14B.
 - For step 14B, use a two-gate flow:
   - `OK PASO 14B` approves the test-case slice and TDD plan.
   - `OK PASO 14B IMPLEMENTAR` authorizes real code/test edits and test execution in terminal.
@@ -101,7 +102,7 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
    - `date` set to today
    - `current_step: 0`, `last_approved_step: 0`
    - `approved_steps: []`
-   - `pending_steps: [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14A, 14B, 14C, 15, 16, 17]` (skip TBD step 6; step 18 is phase-close marker)
+   - `pending_steps: [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14A, 14B, 14C, 14D, 15, 16, 17]` (skip TBD step 6; step 18 is phase-close marker)
    - `scope` and `notes` set to appropriate placeholders
    - `artifacts` populated from schema with `status: not_started`, `created_at_step: null`, `refined_at_steps: []`
     - Keep `Iteration Plan.path` in placeholder form as `08 Project Management/{{#}} {Iteration} Plan.md`; the storage skill resolves `{{#}}` from `iteration` (`E1 -> 01`, `E11 -> 11`) when persisting.
@@ -148,9 +149,16 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
 - `OK PASO 14C` authorizes acceptance execution (`mvn test -Pacceptance`) and records GREEN evidence in the `Acceptance Test Plan`; defects found (RED) are implemented through the PASO 14B TDD loop or, if already approved, as acceptance-driven fixes
 - On completion of 14C, request a final `OK PASO 14C` and move it from `pending_steps` to `approved_steps`; update `last_approved_step: 14C`
 
+**Exception — Step 14D (implementation conformance):**
+- `OK PASO 14D` is only accepted with a fully `MATCH` conformance matrix over the iteration slice
+- On mismatch, keep `current_step: 14D` and keep 14D in `pending_steps`; record each deviation as a new `Test Plan` item (group "14D conformance fixes") and route execution back to 14B, which requires a new `OK PASO 14B IMPLEMENTAR` before code edits, followed by a re-run of 14C and a fresh 14D review
+- When a diagram is proven stale because it contradicts the approved 9A transition map or an Operation Contract postcondition, route the issue to 9B (and 11 if the transition map changes) instead of changing code, and re-run 14D after the design is re-approved; package or layer deviations route to 8
+- On PASS, move 14D from `pending_steps` to `approved_steps`; update `last_approved_step: 14D`
+- After approval, persist `Test Plan` via the storage skill (by artifact id, passing `{{#}}` and `{{Iteration}}`) and set it to `status: persisted`
+
 ### After Storage Invocation
 
-After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16):
+After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 14D, 15, 16):
 - For every artifact passed to storage, set `status: persisted`
 - In step 14B, `Test Plan` is the mandatory storage artifact; code and test files remain file-based TDD outputs, and any additional documentation artifacts persisted due to TDD findings must also be updated only when they were part of the storage batch
 - Do NOT change artifacts that were not part of the storage batch
@@ -189,6 +197,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
 | 14A | `Acceptance Test Plan`, Gherkin features + acceptance glue (code, file-based) | Yes (`Acceptance Test Plan` only; features/glue remain file-based) |
 | 14B | `Test Plan`, Code + Unit/Integration Tests (TDD) | Yes (`Test Plan` only; code/tests remain file-based) |
 | 14C | `Acceptance Test Plan` (GREEN evidence), defect fixes | Yes (`Acceptance Test Plan` only when evidence was added) |
+| 14D | Reviewer pass — implementation vs approved Logical View diagrams (`Test Plan` conformance section; no code edits here) | Yes (`Test Plan` only) |
 | 15 | `Requirements Ranking` (refine) | Yes |
 | 16 | `Use Case fully dressed` (10% brief→detailed) | Yes |
 | 17 | Cycle close — lists updated artifacts; NO new artifacts | No |
@@ -484,7 +493,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
     - deferred UI states,
     - remaining mismatches versus approved UI artifacts,
     - executable validation evidence for view structure and state rendering.
-  - When implementation for this step is complete and reviewed, request `OK PASO 14B` to continue to PASO 15.
+  - When implementation for this step is complete and reviewed, request `OK PASO 14B` to continue to PASO 14C.
 
 14C. Execute the acceptance suite for the iteration slice and close the ATDD loop with GREEN evidence.
   - Artifacts in progress: `Acceptance Test Plan` (execution evidence section), defect fixes.
@@ -494,6 +503,24 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - Update the `Acceptance Test Plan` with: defects found (RED evidence + resolution) and final execution evidence (`mvn test -Pacceptance` and `mvn test`).
   - Stop and request `OK PASO 14C` before continuing.
   - After approval, persist the updated `Acceptance Test Plan` using the storage skill (by artifact id, passing `{{#}}` and `{{Iteration}}`).
+
+14D. Reviewer pass: verify that the implementation delivered by 14B and 14C conforms to the approved Logical View diagrams for the iteration slice.
+  - Artifacts in progress: `Test Plan` (conformance section). No new artifact.
+  - Before reviewing, load the approved Logical View artifacts for the packages and scenarios in scope: `*.packageDiagram.plantuml`, `*.classDiagram.plantuml`, and `*.sequenceDiagram.plantuml`, together with the `Use Case Realization` from step 10, the `Domain-to-Design Transition Map` from step 9A, the `Iteration Plan` from step 1, the `SW Architecture Document` from step 13, and the build layout that declares where production sources live.
+  - This step is the implementation-to-design gate. Do not continue to PASO 15 until conformance is explicitly accepted.
+  - Scope: packages/subsystems and scenarios selected by the `Iteration Plan`, plus any package touched by 14B or 14C. Untouched packages are out of scope because they were validated in prior iterations.
+  - Locate the production source tree and the build command from the project's own build layout. Do not assume a language, directory convention, or toolchain.
+  - Run these passes in order:
+    a. Package conformance: verify that every package, subsystem, or module declared in the scope's package diagrams exists in the production source tree with the same namespaced identifier, that no implemented classifier lives in a package absent from the approved diagrams, and that the declared layer and dependency-direction rules hold.
+    b. Classifier conformance: verify that every classifier in the scope's class diagrams exists with the same namespaced identifier and the same kind (class, interface, enum, record, module, protocol, trait, or the project language's equivalent), that its visible operations and attributes cover those invoked by the DSDs, and that associations, aggregations, inheritance, and realization match the declared relationships using the target language's idiom for each relation.
+    c. Interaction conformance: for each in-scope DSD, verify that every lifeline resolves to an existing classifier in the package declared by the class diagrams, that every message resolves to an existing operation visible to the sender (name and parameter signature, with documented framework or language exceptions), and that collaboration order and the controller/application/domain/infrastructure separation match the diagram.
+    d. Build evidence: run the project's own build or compile command so that every finding is based on a tree that compiles (for example `mvn -q -DskipTests compile`, `./gradlew compileJava`, `npm run build`, or the equivalent for the detected toolchain). Do not re-run the test suites here.
+  - Emit a conformance matrix in chat with one row per checked element: diagram element | `.plantuml` source | implemented counterpart (namespaced identifier or operation) | verdict (`MATCH` | `MISSING` | `EXTRA` | `DIVERGENT`) | action.
+  - Do NOT edit code in this step.
+  - Any non-`MATCH` row FAILS the step and routes back to 14B: each deviation becomes a new TDD item in the `Test Plan` (group "14D conformance fixes") with RED evidence; `OK PASO 14B IMPLEMENTAR` is required again, then 14C re-runs, then 14D re-runs. `OK PASO 14D` is only valid with a fully `MATCH` matrix.
+  - Exception: if a diagram is provably stale because it contradicts the approved 9A transition map or an Operation Contract postcondition, do not bend the implementation to it; route the issue to PASO 9B (and PASO 11 if the transition map changes) and re-run 14D after the design is re-approved. Package or layer deviations route to PASO 8.
+  - Stop and request `OK PASO 14D` before continuing.
+  - After approval, persist the conformance review in the `Test Plan` using the storage skill (by artifact id, passing `{{#}}` and `{{Iteration}}`; storage resolves the path).
 
 15. Refine Requirements Ranking based on iteration feedback if any (new features or use cases, defects, changes in priorities). Refine it in collaboration with the user.
   - Artifacts in progress: `Requirements Ranking`
@@ -551,6 +578,7 @@ Map `openspec/artifacts/{domain}/state.yaml` fields to visual indicators:
 ### ⬜ Paso 14A — Acceptance Tests (ATDD)
 ### ⬜ Paso 14B — TDD (Code + Tests)
 ### ⬜ Paso 14C — Acceptance execution (GREEN)
+### ⬜ Paso 14D — Conformance (implementation vs Logical View)
 ### ⬜ Paso 15 — Refine Requirements Ranking
 ### ⬜ Paso 16 — Use Case fully dressed (10%)
 ### ⬜ Paso 17 — Cycle close
@@ -588,6 +616,9 @@ Do not include content for later steps until approval is received.
 - faking legal/organizational rules (RGPD duties, RAT, sanctions) as executable tests instead of recording them in the rules compliance matrix.
 - promoting every domain invariant to acceptance coverage without applying the promotion gate (duplicating unit tests at a slower layer).
 - executing the acceptance suite (`mvn test -Pacceptance`) without Docker/Testcontainers available.
+- declaring 14B/14C complete without matching the implemented source tree against the approved Logical View diagrams.
+- bending code to a stale diagram that contradicts an approved Operation Contract postcondition instead of routing the issue to 9B.
+- reviewing the whole Logical View folder on every iteration instead of the iteration slice plus the packages touched by implementation.
 define the architecture
 
 # Results
