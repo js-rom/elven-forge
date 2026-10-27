@@ -85,6 +85,7 @@ This skill must always run in driver/navigator mode.
 - MUST make every persisted table key explicit.
 - MUST keep composite keys unambiguous; use tagged-value style notes such as `{key = PK, order = 1}` only when the order of columns matters.
 - MUST prefer concise diagrams: keep clutter out of the drawing and move bulky rationale into notes handed to the JPA mapping artifact.
+- MUST keep the master overview diagram (`data-model.plantuml`) noise-free: each package shows only the tables that participate in cross-domain relationships (FK owner side); tables whose associations stay within their own domain live only in their per-domain detail file. A table enters or leaves the overview in the same delta that gives it or removes a cross-domain association.
 - MUST align table and column names with domain language unless there is a concrete technical reason not to.
 - MUST mark deprecated or replacement structures only when they are part of an active refactor delta.
 - MUST NOT include JPA annotations, Java collection types, repository names, service names, or package names.
@@ -120,7 +121,7 @@ This skill must always run in driver/navigator mode.
 
 Produce:
 
-1. One updated PlantUML master diagram for `data-model.plantuml`.
+1. One updated PlantUML master overview diagram (`data-model.plantuml`), plus the per-domain detail files touched by the delta.
 2. A concise delta summary for the current iteration:
 	 - added structures,
 	 - changed structures,
@@ -140,3 +141,4 @@ If information is missing, mark it as `TBD` and continue.
 6. Does every relationship use the correct PlantUML symbol (`*--` for composition, `o--` for aggregation, `--` for association) with explicit cardinality on both ends and a label?
 7. Is the diagram readable without JPA or Java implementation noise?
 8. Does the delta preserve a master-model evolution instead of creating per-iteration fragments?
+9. Does the master overview include only tables with cross-domain relationships, with the rest living in their per-domain detail files?
