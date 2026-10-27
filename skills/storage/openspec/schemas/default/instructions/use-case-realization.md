@@ -77,6 +77,36 @@ The artifact MUST include:
 - Persist one file per use case using the storage skill by artifact id (passing `{{use-case.name}}`; storage resolves the concrete path from the active schema). Do NOT hardcode artifact paths.
 - The file must contain all mapped scenarios for that use case.
 
+## Diagram Export & SVG Linking (MANDATORY)
+
+Before assembling (and before the reviewer pass of step 11), every diagram referenced by the UCR must exist as an exported SVG:
+
+1. Export command
+   - Run the PlantUML VS Code extension command `PlantUML: Export Workspace Diagrams` (command id `plantuml.exportWorkspace`).
+   - Terminal trigger (Windows): `Start-Process "vscode://command/plantuml.exportWorkspace"`.
+   - If the command cannot be triggered or no SVG appears, stop and ask the user to run it manually from the VS Code Command Palette and confirm.
+   - The export is asynchronous: poll `<workspace>/out/` for the required SVGs (timeout ~120 s) before writing the UCR.
+
+2. Export layout
+   - One folder per diagram: `<workspace>/out/{source dir relative to workspace}/{baseName}/{diagramName}.svg`
+   - `{baseName}` is the original `.plantuml` file name WITHOUT the extension (e.g. `DSD UC18 Asignar Políticas al Empleado - S4.sequenceDiagram`).
+   - `{diagramName}` is the identifier declared after `@startuml` in the source file (fallback: `{baseName}`). DSDs declare ids like `DSD_UC18_S4`; class/package diagrams declare the fully qualified name, which matches `{baseName}`.
+   - Example: source `openspec/artifacts/registro-horario/03 Design/Logical View/DSD UC18 Asignar Políticas al Empleado - S4.sequenceDiagram.plantuml` with `@startuml DSD_UC18_S4` exports to `out/openspec/artifacts/registro-horario/03 Design/Logical View/DSD UC18 Asignar Políticas al Empleado - S4.sequenceDiagram/DSD_UC18_S4.svg`.
+
+3. Linking rule
+   - Every reference to a `.plantuml` diagram (DSD, DCD, package diagram) MUST be an embedded image with the relative path from the UCR document directory to its exported SVG: `![alt text](relative/path/to/svg.svg)`.
+   - URL-encode the path: spaces as `%20` and non-ASCII characters percent-encoded (e.g. `í` → `%C3%AD`).
+   - Links to `.md` documents (Use Case, SSD, Operation Contracts, transition map, Supplementary Specification, Glossary) stay as plain text links and are never converted.
+
+4. Where the SVG rule applies inside the UCR
+   - Inputs and References: the "Design Sequence Diagrams (9B)" and "Design Class Diagrams (9B)" lists keep plain text links to the original `.plantuml` files (`[label](relative/path/diagram.plantuml)`); they are NOT SVG images.
+   - Scenario Mapping table: the Design Sequence and Design Class columns use embedded SVG images.
+   - Per-scenario realization: the design sequence diagram reference uses an embedded SVG image.
+   - Consolidated Design Class View: every diagram cross-reference uses an embedded SVG image.
+
+5. Verification
+   - Before requesting approval, verify that every `![](…svg)` path resolves to an existing file under `<workspace>/out/`. If any is missing, re-run the export (or ask the user to) and re-verify.
+
 ## Validation Checklist
 
 1. Is there exactly one file per use case?

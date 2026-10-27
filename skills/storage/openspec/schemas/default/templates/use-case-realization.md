@@ -24,6 +24,10 @@
 - [Supplementary Specification constraints](../../02%20Requirements/supplementary-specification.md)
 - [Glossary](../../02%20Requirements/glosary.md)
 - [Domain Model](../../01%20Business%20Modeling/Domain%20Model.md)
+- Design Sequence Diagrams (9B) — plain text links to the original `.plantuml` files (never SVG images):
+  - [DSD UC{{#}} {{use-case.name}} - S{{scenario.#}}](../Logical%20View/DSD%20UC{{#}}%20{{use-case.name}}%20-%20S{{scenario.#}}.sequenceDiagram.plantuml)
+- Design Class Diagrams (9B) — plain text links to the original `.plantuml` files (never SVG images):
+  - [{{fully.qualified.package}} class diagram](../Logical%20View/{{fully.qualified.package}}.classDiagram.plantuml)
 
 ## Scenario Mapping
 

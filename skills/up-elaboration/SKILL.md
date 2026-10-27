@@ -350,9 +350,19 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
     - Design Sequence Diagrams and Design Class Diagrams from Logical View (step 9B)
     - SSDs from step 3
     - Operation Contracts from step 4
+  - Diagram export (MANDATORY before assembling any UCR):
+    - Run the PlantUML VS Code extension command `PlantUML: Export Workspace Diagrams` (command id `plantuml.exportWorkspace`).
+    - Trigger from the terminal: `Start-Process "vscode://command/plantuml.exportWorkspace"` (Windows URI protocol handler); on failure, ask the user to run it manually from the Command Palette and confirm.
+    - The export writes one folder per diagram under `<workspace>/out/{source dir relative to workspace}/{baseName}/{diagramName}.svg`, where `{baseName}` is the original file name without the `.plantuml` extension and `{diagramName}` is the diagram identifier declared after `@startuml` in the source (fallback: `{baseName}`). Example: source `DSD UC18 ... - S4.sequenceDiagram.plantuml` with `@startuml DSD_UC18_S4` exports to `out/.../Logical View/DSD UC18 ... - S4.sequenceDiagram/DSD_UC18_S4.svg`.
+    - Poll `out/` for the SVGs referenced by the UCR (timeout ~120 s). If any required SVG is missing, stop and ask the user to re-run the export and confirm.
+  - Diagram link rule (MANDATORY in every UCR):
+    - Every reference to a `.plantuml` diagram (DSD, DCD, package diagram) MUST be an embedded image pointing to its exported SVG: `![](relative-path-to-out-svg)`.
+    - Exception (Inputs and References only): the "Design Sequence Diagrams (9B)" and "Design Class Diagrams (9B)" lists keep plain text links to the original `.plantuml` files (`[label](relative-path-to-plantuml)`), NOT SVG images.
+    - Resolve the SVG path from the original file name: for `{dir}/{base}.plantuml` the SVG is `<workspace>/out/{dir}/{base}/{diagramName}.svg`, where `{diagramName}` is the `@startuml` identifier read from the source (fallback: `{base}`); compute the relative path from the UCR document directory and URL-encode spaces and non-ASCII characters (`%20`, `%C3%AD`, ...).
+    - Links to `.md` documents (Use Case, SSD, Operation Contracts, transition map, Supplementary Specification, Glossary) remain plain text links and are never converted.
   - For each use case:
     a. Build the scenario mapping table (UC steps → SSD → OC → Design reference from steps 9A/9B).
-    b. Reference, and do not recreate, the design diagrams and transition map from Logical View.
+    b. Reference, and do not recreate, the design diagrams and transition map from Logical View, using the SVG link rule above for every diagram reference.
     c. Fill the operation contract postcondition satisfaction checklist, cross-referencing the Postcondition Traceability Matrix from step 9A.
     d. Verify and document alignment with Supplementary Specification and Glossary.
     e. Add design rationale notes drawing from `/design-principles/SKILL.md` validation already produced in step 9B.
@@ -371,7 +381,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
     a. Structural review of step 8: verify package catalog, package-to-scenario traceability, layer rules, dependency direction rules, and absence of boundary violations.
     b. Transition review of step 9A: verify Domain-to-Software Transformation Map completeness, Responsibility Assignment Matrix coverage and Information Expert justification, Postcondition Traceability Matrix coverage (no missing postconditions), pattern candidate evidence and rationale, and transformation divergence justifications.
     c. Scenario design review of step 9B: verify one DSD per scenario, DCD deltas only in touched packages, object collaborations consistent with 9A responsibility assignments, controller/view separation, cohesion/coupling rationale, pattern realization aligned with 9A candidates, persistence touchpoints, and explicit fulfillment of every Operation Contract postcondition against the 9A traceability matrix.
-    d. Documentation review of step 10: verify complete scenario mapping (UC steps → SSD → OC → design references from 9A/9B), correct references to design diagrams and transition map from Logical View, alignment with Supplementary Specification and Glossary, and confirmation that PASO 10 did not introduce new design elements.
+    d. Documentation review of step 10: verify complete scenario mapping (UC steps → SSD → OC → design references from 9A/9B), correct references to design diagrams and transition map from Logical View, alignment with Supplementary Specification and Glossary, and confirmation that PASO 10 did not introduce new design elements. Verify that every diagram reference is an embedded SVG image (`![](...)`) and that each SVG path resolves to an existing file under `out/` (re-run the diagram export if any is missing).
   - If any package, layer, or dependency issue is found, route the issue back to step 8.
   - If any transformation, responsibility mapping, or traceability issue is found, route the issue back to step 9A.
   - If any scenario design, collaboration, or diagram issue is found, route the issue back to step 9B.
