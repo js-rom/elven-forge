@@ -16,7 +16,7 @@ metadata:
 
 Create one commit from already staged changes using the project convention.
 Keep token use low: run one script, read its compact output, write the summary,
-and execute the returned command.
+show it to the user, wait for confirmation, and execute the returned command.
 
 # Minimal Flow
 
@@ -29,9 +29,24 @@ powershell -NoProfile -File ".agents\skills\up-commit\scripts\prepare-commit.ps1
 2. If `STAGED_COUNT=0` and `AGENTS_STAGED_COUNT=0`, stop and ask which files to stage. Do not stage automatically.
 3. If `SAFETY=WARN`, show the warning and ask before committing.
 4. Read only the script output. Do not inspect full diffs, artifacts, or other skills.
-5. If `AGENTS_STAGED_COUNT>0`, commit `.agents` first with `AGENTS_COMMAND_TEMPLATE`, then run `AFTER_AGENTS`.
-6. If `STAGED_COUNT>0`, run `COMMAND_TEMPLATE` after filling `<summary>` and the changes.
-7. Run `git status --short` and `git log -1 --oneline`; report hashes. Do not push or amend.
+5. Fill `SUBJECT` and `BODY` from `SUBJECT_PREFIX`, `BODY_TEMPLATE`, and the actual staged changes.
+6. Show the proposal and wait for explicit user confirmation:
+
+```text
+SUBJECT: [Phase][Iteration][Step N] Short imperative summary
+BODY:
+UP phase: ...
+Iteration: ...
+Flow step: ...
+Changes:
+- ...
+STAGED: <file list>
+```
+
+7. Do not run the commit in the same turn in which the proposal is shown. Do not stage files on your own initiative; only commit what the user staged or approved.
+8. If `AGENTS_STAGED_COUNT>0`, commit `.agents` first with `AGENTS_COMMAND_TEMPLATE`, then run `AFTER_AGENTS`.
+9. If `STAGED_COUNT>0`, run `COMMAND_TEMPLATE` after confirmation, with the same subject and body shown in step 6.
+10. Run `git status --short` and `git log -1 --oneline`; report hashes. Do not push or amend.
 
 # Commit Convention
 
@@ -58,6 +73,8 @@ Rules:
 - Write the summary and changes in English.
 - Keep the subject at 72 characters or fewer, imperative, no trailing period.
 - Describe the actual staged changes, not the branch or the whole iteration.
+- Always show `SUBJECT` and `BODY` and wait for explicit confirmation before committing, even when `SAFETY=OK`.
+- Never stage files on your own initiative; only commit staged changes or files the user approved.
 - If `.agents` is committed first, its subject/body describe the skill/tooling changes; the main commit describes project changes.
 - Never `git add -A`, force-push, amend, or skip hooks.
 - Do not commit unstaged or unrelated files.
