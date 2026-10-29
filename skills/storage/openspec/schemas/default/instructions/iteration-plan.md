@@ -30,19 +30,27 @@ The Unified Process is use case driven. Work is organized around completing use 
 - Record resolved questions and outstanding questions.
 - State the expected result for the selected scope.
 
-### 5. Task Breakdown
+### 5. History Tracking
+
+- Add a `History Tracking` table for every selected scope item.
+- Record the UC identifier when the item maps to a use case; use an empty value for pure support work.
+- Classify each item as `full`, `slice`, `refactor`, `support`, or `retired`.
+- Set `Counts for average` to `Yes` only for delivered `full` or `slice` use cases.
+- This table is the authoritative scope input for the elaboration history ledger.
+
+### 6. Task Breakdown
 
 - Brainstorm a set of more detailed tasks with rough estimates.
 - Include tasks across the relevant areas, such as UI, database, domain logic, testing, deployment, and external system integration.
 - Keep the breakdown concrete enough to support a capacity decision, but do not over-engineer the estimates.
 
-### 6. Running Total and Cut Line
+### 7. Running Total and Cut Line
 
 - Sum all task estimates into a running total.
 - Continue selecting and estimating work until the iteration is full enough to meet the goal without exceeding realistic team capacity.
 - Make the cut line explicit so it is clear what work should be deferred first if estimates increase.
 
-### 7. Risks and Dependencies
+### 8. Risks and Dependencies
 
 - Capture the main risks and dependencies that could threaten the iteration outcome.
 - Note the mitigation or follow-up action for each one.

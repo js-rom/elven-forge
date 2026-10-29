@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "project_timezone": "Europe/Madrid",
+  "method": "commit_range_author_date_v1",
+  "last_updated": "YYYY-MM-DD",
+  "document_notes": [],
+  "iterations": [
+    {
+      "iteration": "E1",
+      "phase": "elaboration",
+      "status": "in_progress",
+      "planned_start": "YYYY-MM-DD",
+      "planned_end": "YYYY-MM-DD",
+      "actual_start": "YYYY-MM-DD",
+      "actual_end": null,
+      "start_ref": "<git-ref>",
+      "end_ref": null,
+      "branch": "<branch>",
+      "method": "commit_range_author_date_v1",
+      "commit_count": 0,
+      "effective_days": 0,
+      "commit_days": [],
+      "commits": [],
+      "working_tree_clean_at_close": null,
+      "scope": [
+        {
+          "uc": "UC01",
+          "name": "Registrar Fichaje",
+          "delivery_type": "full",
+          "counts_for_average": true
+        }
+      ],
+      "shared_boundary_days": [],
+      "reliability": "open",
+      "include_in_average": false,
+      "excluded_reason": "Iteration not closed",
+      "notes": ""
+    }
+  ]
+}

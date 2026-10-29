@@ -78,7 +78,7 @@ The orchestrator will give you:
 
 ## Write Gating Rules (MANDATORY)
 
-- During steps 1-13, 14D and 15-17: no create/update file operations while refining; chat content only (tables, diagrams, brief and fully dressed use cases). After gate approval, persist artifacts.
+- During steps 1-13, 14D and 15-18: no create/update file operations while refining; chat content only (tables, diagrams, brief and fully dressed use cases). After gate approval, persist artifacts.
 - **Exception for steps 14A, 14B and 14C (acceptance + TDD):** create/update code and test files is REQUIRED to execute the ATDD/TDD cycles. Feature files (`src/test/resources/features`) and step definitions are file-based code artifacts, like unit tests.
 - Step 14D performs inspection only; fixes authorized by a 14D conformance mismatch are executed in step 14B.
 - For step 14B, use a two-gate flow:
@@ -102,7 +102,7 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
    - `date` set to today
    - `current_step: 0`, `last_approved_step: 0`
    - `approved_steps: []`
-   - `pending_steps: [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14A, 14B, 14C, 14D, 15, 16, 17]` (skip TBD step 6; step 18 is phase-close marker)
+   - `pending_steps: [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14A, 14B, 14C, 14D, 15, 16, 17, 18]` (skip TBD step 6; step 19 is phase-close marker)
    - `scope` and `notes` set to appropriate placeholders
    - `artifacts` populated from schema with `status: not_started`, `created_at_step: null`, `refined_at_steps: []`
     - Keep `Iteration Plan.path` in placeholder form as `08 Project Management/{{#}} {Iteration} Plan.md`; the storage skill resolves `{{#}}` from `iteration` (`E1 -> 01`, `E11 -> 11`) when persisting.
@@ -158,7 +158,7 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
 
 ### After Storage Invocation
 
-After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 14D, 15, 16):
+After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 14D, 15, 16, 18):
 - For every artifact passed to storage, set `status: persisted`
 - In step 14B, `Test Plan` is the mandatory storage artifact; code and test files remain file-based TDD outputs, and any additional documentation artifacts persisted due to TDD findings must also be updated only when they were part of the storage batch
 - Do NOT change artifacts that were not part of the storage batch
@@ -167,9 +167,9 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
 
 - Do NOT set `status: completed` — the Elaboration phase is not yet closed
 - Confirm to user that `openspec/artifacts/{domain}/state.yaml` reflects completed cycle and list updated artifacts
-- If requirements coverage < 100%, a new cycle starts from step 1; invoke the resume logic above
+- After PASO 17, run PASO 18 (Elaboration Iterations History); only after `OK PASO 18`, if requirements coverage < 100%, a new cycle starts from step 1; invoke the resume logic above
 
-### Phase Close (step 18)
+### Phase Close (step 19)
 
 - Only when `status` is `in_progress` AND requirements coverage target is achieved AND user explicitly approves ending Elaboration
 - Set `status: completed`
@@ -180,7 +180,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
 | Step | Artifacts worked on | Persist after approval? |
 |------|---------------------|-------------------------|
 | 0 | `Glossary` (anytime suggestion) | Yes, when updated |
-| 1 | `Requirements Ranking` (refine), `Iteration Plan` | Yes |
+| 1 | `Requirements Ranking` (refine), `Iteration Plan`, `Elaboration Iterations Ledger` (open iteration record) | Yes |
 | 2 | `Domain Model` | Yes |
 | 3 | `System Sequence Diagram` (per UC in scope) | Yes |
 | 4 | `Operation Contracts` (per UC in scope) | Yes |
@@ -201,7 +201,8 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
 | 15 | `Requirements Ranking` (refine) | Yes |
 | 16 | `Use Case fully dressed` (10% brief→detailed) | Yes |
 | 17 | Cycle close — lists updated artifacts; NO new artifacts | No |
-| 18 | Phase close marker — loop to step 1 or exit | N/A |
+| 18 | `Elaboration Iterations Ledger` (close record), `Elaboration Iterations History` (generated report) | Yes |
+| 19 | Phase close marker — loop to step 1 or exit | N/A |
 
 | Artifact | Comment |
 |----------|------|
@@ -543,9 +544,23 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - Do NOT create, move, or archive folders under `openspec/iterations/`.
   - Do NOT run delta-merge operations.
   - Confirm to the user that approved artifacts are already persisted directly under `openspec/artifacts/{domain}/...` and list the files updated in this cycle.
-  - After cycle closure, if requirements coverage is < 100%, start a new elaboration cycle and continue from step 1.
+  - After `OK PASO 17`, proceed to PASO 18; do NOT start a new cycle yet.
 
-18. Repeat steps 1 to 17 for each elaboration iteration until 100% of requirements are addressed.
+18. Record and generate the Elaboration Iterations History for the closed iteration.
+  - Artifacts in progress: `Elaboration Iterations Ledger` and `Elaboration Iterations History`.
+  - Before starting, load the skill `/elaboration-history/SKILL.md`, the active schema instruction `elaboration-iterations-history.md`, and its templates.
+  - Required inputs: closed `Iteration Plan` from step 1, `Requirements Ranking`, `Use Case Model`, `state.yaml`, existing ledger, existing history document, and git repository metadata.
+  - Verify that `OK PASO 17` was approved. If not, stop and return to PASO 17.
+  - Capture `end_ref` from the current `HEAD`; never use `git log --all` for the calculation.
+  - Confirm the iteration scope and classify every item as `full`, `slice`, `refactor`, `support`, or `retired`; mark `counts_for_average` explicitly.
+  - Compute effective days from unique author dates inside `start_ref..end_ref`.
+  - Record commit hashes, commit days, ancestry, working-tree cleanliness, reliability, and exclusion reasons in the ledger.
+  - Render the Markdown report from the ledger; do not edit generated tables manually.
+  - Present the report in chat and stop to request `OK PASO 18`.
+  - After approval, persist `Elaboration Iterations Ledger` and `Elaboration Iterations History` using the storage skill, then update artifact statuses in `state.yaml`.
+  - If requirements coverage is < 100%, start the next elaboration cycle from step 1. If coverage is 100% and the user approves phase closure, continue to PASO 19.
+
+19. Repeat steps 1 to 18 for each elaboration iteration until 100% of requirements are addressed.
   - Do not exit Elaboration only because one cycle was closed.
   - Transition out of Elaboration only when requirements coverage target is achieved and explicitly approved.
 
@@ -582,7 +597,8 @@ Map `openspec/artifacts/{domain}/state.yaml` fields to visual indicators:
 ### ⬜ Paso 15 — Refine Requirements Ranking
 ### ⬜ Paso 16 — Use Case fully dressed (10%)
 ### ⬜ Paso 17 — Cycle close
-### ⬜ Paso 18 — Phase close
+### ⬜ Paso 18 — Elaboration Iterations History
+### ⬜ Paso 19 — Phase close
 
 La lista anterior es la plantilla — el driver la renderiza dinámicamente, sustituyendo los marcadores `✅`/`🔄`/`⬜`/`⏭️` según los datos reales de `openspec/artifacts/{domain}/state.yaml` en tiempo de ejecución.
 
@@ -619,6 +635,10 @@ Do not include content for later steps until approval is received.
 - declaring 14B/14C complete without matching the implemented source tree against the approved Logical View diagrams.
 - bending code to a stale diagram that contradicts an approved Operation Contract postcondition instead of routing the issue to 9B.
 - reviewing the whole Logical View folder on every iteration instead of the iteration slice plus the packages touched by implementation.
+- reconstructing iteration dates only from prose when git evidence exists.
+- using `git log --all` and counting orphan or agent-session commits in the history.
+- counting uncommitted work as an effective day or editing the generated history table by hand.
+- averaging over low-confidence, open, refactor-only, or mixed-scope iterations.
 define the architecture
 
 # Results

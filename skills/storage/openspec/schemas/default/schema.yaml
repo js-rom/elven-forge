@@ -112,6 +112,18 @@ artifacts:
     template: iteration-plan.md
     instruction: INVOKE this link -> "./instructions/iteration-plan.md"
     requires: [requirements-ranking, use-case-model]
+  - id: Elaboration Iterations Ledger
+    path: 08 Project Management/Elaboration Iterations Ledger.json
+    description: Machine-readable source of truth for iteration dates, git evidence, effective days, UC classification, reliability, and average eligibility.
+    template: elaboration-iterations-ledger.json
+    instruction: INVOKE this link -> "./instructions/elaboration-iterations-history.md"
+    requires: [iteration-plan, requirements-ranking, use-case-model]
+  - id: Elaboration Iterations History
+    path: 08 Project Management/Elaboration Iterations History.md
+    description: Generated Markdown report of all elaboration iterations with dates, effective days, use cases, confidence, exclusions, and effective-days-per-use-case average.
+    template: elaboration-iterations-history.md
+    instruction: INVOKE this link -> "./instructions/elaboration-iterations-history.md"
+    requires: [elaboration-iterations-ledger]
   - id: Use Case fully dressed
     path: 02 Requirements/use-cases/UC{{#}} {{use-case.name}}.md
     description: Functional requirements in fully dressed format.

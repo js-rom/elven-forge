@@ -44,6 +44,15 @@
 
 ---
 
+## History Tracking
+
+| Scope Item | UC ID | Delivery Type | Counts for average |
+| :--- | :--- | :--- | :--- |
+| <Use case, scenario, slice, or feature> | <UCxx or empty> | <full \| slice \| refactor \| support \| retired> | <Yes \| No> |
+| ... | ... | ... | ... |
+
+---
+
 ## Selected Work Detail
 
 ### <Use Case, Scenario, or Feature 1>

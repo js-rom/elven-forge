@@ -236,6 +236,20 @@ artifacts:
       refined_at_steps: []
       depends_on: [Requirements Ranking, Use Case Model]
 
+    - id: Elaboration Iterations Ledger
+      path: 08 Project Management/Elaboration Iterations Ledger.json
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Iteration Plan, Requirements Ranking, Use Case Model]
+
+    - id: Elaboration Iterations History
+      path: 08 Project Management/Elaboration Iterations History.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Elaboration Iterations Ledger]
+
   09 Enviroment:
     - id: Environment Setup
       path: 09 Enviroment/environment-setup.md
