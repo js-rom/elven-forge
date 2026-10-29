@@ -238,8 +238,13 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - early iterations focus on programing and testing architecturally significat concerns (such as security), and using, proving, devoloping ans stabilizing the key architectural elements (subsystems, interfaces, frameworks, wiring, and so on).
   - Artifacts in progress: `Requirements Ranking` and `Iteration Plan`
   - Before planning, load the active schema instruction Iteration Plan and the active schema template `Iteration Plan.md`.
+  - Before estimating, load the skill `/elaboration-history/SKILL.md`, read `Elaboration Iterations History` and the `Elaboration Iterations Ledger`, and run `get-calibration-baseline.ps1` against the ledger.
+  - Use only `high` iterations and UCs classified as `full` or `slice`. Exclude low, medium, open, refactor-only, support, and retired records.
+  - Use the median effective days per UC as the primary reference, the weighted average as a secondary reference, and the min-max range as the uncertainty band. Report sample size and confidence.
+  - Include a `Historical Calibration` section in the Iteration Plan. If no valid baseline exists, state `no historical baseline` and continue with normal task-based estimation.
+  - If the task-based estimate falls outside 30% of the historical range, document the reason or adjust the estimate before requesting `OK PASO 1`.
   - Stop and request `OK PASO 1` before continuing.
-  - After approval, store the `Iteration Plan` artifact using the storage skill (by artifact id, passing `{{#}}` and `{{Iteration}}`; storage resolves the path).
+  - After approval, record the calibration snapshot in the `Elaboration Iterations Ledger` record using the elaboration-history skill, then store the `Iteration Plan` artifact using the storage skill (by artifact id, passing `{{#}}` and `{{Iteration}}`; storage resolves the path).
 2. Elaborate Domain Model for the current iteration.
   - Artifacts in progress: `Domain Model`
   - Before elaborating, load the active schema instruction for domain models and the active schema template `domain-model.md`.
@@ -639,6 +644,7 @@ Do not include content for later steps until approval is received.
 - using `git log --all` and counting orphan or agent-session commits in the history.
 - counting uncommitted work as an effective day or editing the generated history table by hand.
 - averaging over low-confidence, open, refactor-only, or mixed-scope iterations.
+- estimating from history without loading the ledger, reporting sample size, or reconciling deviations over 30%.
 define the architecture
 
 # Results

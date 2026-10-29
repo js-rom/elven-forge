@@ -38,19 +38,29 @@ The Unified Process is use case driven. Work is organized around completing use 
 - Set `Counts for average` to `Yes` only for delivered `full` or `slice` use cases.
 - This table is the authoritative scope input for the elaboration history ledger.
 
-### 6. Task Breakdown
+### 6. Historical Calibration
+
+- Load `Elaboration Iterations History` and the `Elaboration Iterations Ledger`.
+- Use only high-confidence iterations and `full` or `slice` UCs.
+- Record the sample size and confidence.
+- Use the median effective days per UC as the primary reference, the weighted average as a secondary reference, and the min-max range as the uncertainty band.
+- Apply the baseline only to comparable UCs; estimate refactors and support work separately.
+- Reconcile the task-based estimate with the historical estimate. If the deviation exceeds 30% of the historical range, document the reason or adjust the estimate.
+- If no valid sample exists, state `no historical baseline` and continue with normal estimation.
+
+### 7. Task Breakdown
 
 - Brainstorm a set of more detailed tasks with rough estimates.
 - Include tasks across the relevant areas, such as UI, database, domain logic, testing, deployment, and external system integration.
 - Keep the breakdown concrete enough to support a capacity decision, but do not over-engineer the estimates.
 
-### 7. Running Total and Cut Line
+### 8. Running Total and Cut Line
 
 - Sum all task estimates into a running total.
 - Continue selecting and estimating work until the iteration is full enough to meet the goal without exceeding realistic team capacity.
 - Make the cut line explicit so it is clear what work should be deferred first if estimates increase.
 
-### 8. Risks and Dependencies
+### 9. Risks and Dependencies
 
 - Capture the main risks and dependencies that could threaten the iteration outcome.
 - Note the mitigation or follow-up action for each one.

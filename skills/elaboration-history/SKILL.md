@@ -36,6 +36,7 @@ tables manually; fix the ledger and regenerate.
 - Git repository metadata.
 - Project timezone from the ledger; default `Europe/Madrid`.
 - Explicit user confirmation for any UC classification that is not obvious.
+- `get-calibration-baseline.ps1` for PASO 1 planning calibration.
 
 # Artifact Paths
 
@@ -81,6 +82,24 @@ support work, and retired use cases never count.
 
 # Workflow
 
+## Phase 0 - Planning calibration
+
+Run during PASO 1, before drafting the Iteration Plan. This phase is read-only.
+
+1. Read the ledger and the existing history document.
+2. Run `get-calibration-baseline.ps1` against the ledger.
+3. Use only `high` iterations and UCs with `delivery_type` `full` or `slice`.
+4. Treat the median days per UC as the primary reference, the weighted average as
+   a secondary reference, and the min-max range as the uncertainty band.
+5. Report the sample size and confidence. With three iterations and five UCs,
+   confidence is `medium`; do not present the result as a precise prediction.
+6. Do not apply the baseline to refactors, support work, retired UCs, or open
+   iterations.
+7. If there is no valid sample, report `no historical baseline` and continue with
+   normal task-based estimation.
+8. Require an explicit justification when the task-based estimate falls outside
+   30% of the historical range.
+
 ## Phase A - Open the iteration record
 
 Run after `OK PASO 1` and after the Iteration Plan is approved.
@@ -94,8 +113,11 @@ Run after `OK PASO 1` and after the Iteration Plan is approved.
    - `branch` = current branch
    - `scope[]` with the selected UCs and their provisional `delivery_type`
    - `counts_for_average` defaults: `true` for `full` and `slice`, `false` otherwise
-4. Capture the current git state. Do not require a clean tree at iteration start.
-5. Persist the ledger with the storage skill.
+   - `calibration` snapshot used for the Iteration Plan: source cutoff, sample
+     iterations and UCs, median, weighted average, range, applied UCs,
+     adjustment, and confidence
+5. Capture the current git state. Do not require a clean tree at iteration start.
+6. Persist the ledger with the storage skill.
 
 Do not add a new approval gate for this phase; it is part of PASO 1 persistence.
 
@@ -181,6 +203,17 @@ The ledger is a JSON object with this shape:
       "reliability": "low",
       "include_in_average": false,
       "excluded_reason": "No dates or scope evidence",
+      "calibration": {
+        "source_cutoff": null,
+        "sample_iterations": [],
+        "sample_ucs": 0,
+        "median_days_per_uc": null,
+        "weighted_average_days_per_uc": null,
+        "range": [],
+        "applied_to": [],
+        "adjustment": "",
+        "confidence": "none"
+      },
       "notes": ""
     }
   ]
@@ -235,6 +268,10 @@ Run `validate-iteration-history.ps1` before requesting approval. It MUST verify:
 - Editing the generated Markdown instead of the ledger.
 - Hiding an unreliable record instead of recording its exclusion reason.
 - Auto-committing or rewriting history without user approval.
+- Using the historical average as a precise prediction instead of a calibrated reference.
+- Estimating with low, medium, open, refactor-only, or mixed-scope iterations.
+- Ignoring sample size or hiding a deviation greater than 30% from the historical range.
+- Applying a multi-UC baseline to one UC without adjusting for scope.
 
 # Results
 

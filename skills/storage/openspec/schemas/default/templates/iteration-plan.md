@@ -53,6 +53,25 @@
 
 ---
 
+## Historical Calibration
+
+| Item | Value |
+| :--- | :--- |
+| Source | `Elaboration Iterations History` + ledger, cutoff `<date>` |
+| Sample iterations | `<E12, E13, E15>` |
+| Sample UCs | `<n>` |
+| Effective days per UC | `<values>` |
+| Median days per UC | `<value>` |
+| Weighted average days per UC | `<value>` |
+| Range | `<min>-<max>` |
+| Applied to | `<UCxx>` |
+| Adjustment | `<complexity, risk, UI, persistence, uncertainty>` |
+| Calibrated estimate | `<effective days>` |
+| Reconciliation with task breakdown | `<estimate vs task-derived estimate>` |
+| Confidence | `<High \| Medium \| Low>` and rationale |
+
+---
+
 ## Selected Work Detail
 
 ### <Use Case, Scenario, or Feature 1>

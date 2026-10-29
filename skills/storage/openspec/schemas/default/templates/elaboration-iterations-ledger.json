@@ -34,6 +34,17 @@
       "reliability": "open",
       "include_in_average": false,
       "excluded_reason": "Iteration not closed",
+      "calibration": {
+        "source_cutoff": null,
+        "sample_iterations": [],
+        "sample_ucs": 0,
+        "median_days_per_uc": null,
+        "weighted_average_days_per_uc": null,
+        "range": [],
+        "applied_to": [],
+        "adjustment": "",
+        "confidence": "none"
+      },
       "notes": ""
     }
   ]
