@@ -75,12 +75,16 @@ try {
 
     $mainStatus = @(& git status --porcelain)
     $mainStaged = @(& git diff --cached --name-status)
+    $mainUnstaged = @(& git diff --name-only)
+    $mainUntracked = @(& git ls-files --others --exclude-standard)
     $agentsStatus = @(& git -C .agents status --porcelain)
     $agentsStaged = @(& git -C .agents diff --cached --name-status)
     $mainCheck = @(& git diff --cached --check)
     $agentsCheck = @(& git -C .agents diff --cached --check)
     $conflicts = @(& git diff --cached --name-only --diff-filter=U)
     $conflicts += @(& git -C .agents diff --cached --name-only --diff-filter=U)
+    $extraChanges = ($mainUnstaged.Count -gt 0 -or $mainUntracked.Count -gt 0)
+    $commitScope = if ($mainStaged.Count -gt 0 -or $agentsStaged.Count -gt 0) { "STAGED_ONLY" } else { "NONE" }
 
     $safety = "OK"
     if ($mainCheck.Count -gt 0 -or $agentsCheck.Count -gt 0 -or $conflicts.Count -gt 0) { $safety = "WARN" }
@@ -100,11 +104,20 @@ try {
     Write-Output "AGENTS_DIRTY=$($agentsStatus.Count -gt 0)"
     Write-Output "STAGED_COUNT=$($mainStaged.Count)"
     Write-Output "AGENTS_STAGED_COUNT=$($agentsStaged.Count)"
+    Write-Output "UNSTAGED_COUNT=$($mainUnstaged.Count)"
+    Write-Output "UNTRACKED_COUNT=$($mainUntracked.Count)"
+    Write-Output ("EXTRA_CHANGES=" + $(if ($extraChanges) { "YES" } else { "NO" }))
+    Write-Output "COMMIT_SCOPE=$commitScope"
+    Write-Output "STAGE_POLICY=NEVER_ADD"
 
     Write-Output "STAGED:"
     if ($mainStaged.Count -eq 0) { Write-Output "NONE" } else { $mainStaged | ForEach-Object { Write-Output $_ } }
     Write-Output "AGENTS_STAGED:"
     if ($agentsStaged.Count -eq 0) { Write-Output "NONE" } else { $agentsStaged | ForEach-Object { Write-Output $_ } }
+    Write-Output "UNSTAGED:"
+    if ($mainUnstaged.Count -eq 0) { Write-Output "NONE" } else { $mainUnstaged | ForEach-Object { Write-Output $_ } }
+    Write-Output "UNTRACKED:"
+    if ($mainUntracked.Count -eq 0) { Write-Output "NONE" } else { $mainUntracked | ForEach-Object { Write-Output $_ } }
 
     $nl = '`n'
     $commandBody = "UP phase: $phaseTag${nl}Iteration: $iteration${nl}Flow step: $stepTag - $stepDescription${nl}Changes:${nl}- <change 1>"
