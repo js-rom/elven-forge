@@ -16,7 +16,7 @@ function Resolve-TimeZone {
 
 function Get-StepFromMessage {
     param([string]$Message)
-    if ($Message -match '(?i)PASO\s*(9[AB]|1[0-9][A-D]?|[1-9])') { return $Matches[1].ToUpperInvariant() }
+    if ($Message -match '(?i)(?:PASO|STEP)\s*(9[AB]|1[0-9][A-D]?|[1-9])') { return $Matches[1].ToUpperInvariant() }
     if ($Message -match '(?i)\b(14[ABCD])\b') { return $Matches[1].ToUpperInvariant() }
     if ($Message -match '(?i)\b(9[AB])\b') { return $Matches[1].ToUpperInvariant() }
     if ($Message -match '(?i)conformance|\b14D\b') { return "14D" }
