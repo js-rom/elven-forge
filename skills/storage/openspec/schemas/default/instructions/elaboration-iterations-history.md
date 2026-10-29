@@ -21,8 +21,8 @@ is generated from it.
 - Do not infer use cases from commit messages. Use the approved Iteration Plan and confirm ambiguous classifications with the user.
 - Classify every scope item as `full`, `slice`, `refactor`, `support`, or `retired`.
 - Set `counts_for_average` explicitly; only `full` and `slice` may count.
-- Record `working_tree_clean_at_close`; never count uncommitted work as an effective day.
-- If the working tree is dirty, do not commit automatically. Mark the record `medium`, exclude it from the average, and ask the user whether the pending files belong to the iteration.
+- Record `working_tree_clean_at_close`; never count uncommitted work as an effective day. Exclude `openspec/artifacts/{domain}/state.yaml` from the dirty-tree check because it records the in-progress PASO 18 bookkeeping.
+- If the working tree is dirty, do not commit automatically. Mark the record `medium`, exclude it from the average, and ask the user whether the pending files belong to the iteration. `state.yaml` alone does not make the tree dirty for this gate.
 
 ## Reliability Levels
 

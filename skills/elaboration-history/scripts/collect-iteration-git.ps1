@@ -2,7 +2,8 @@ param(
     [Parameter(Mandatory = $true)][string]$StartRef,
     [Parameter(Mandatory = $true)][string]$EndRef,
     [string]$Repository = ".",
-    [string]$Timezone = "Europe/Madrid"
+    [string]$Timezone = "Europe/Madrid",
+    [string[]]$IgnoreDirtyPath = @("openspec/artifacts/*/state.yaml")
 )
 
 $ErrorActionPreference = "Stop"
@@ -57,7 +58,16 @@ try {
 
     $uniqueAuthorDates = @($authorDates | Sort-Object -Unique)
     $uniqueCommitterDates = @($committerDates | Sort-Object -Unique)
-    $dirty = @(& git status --porcelain)
+    $allDirty = @(& git status --porcelain)
+    $dirty = @($allDirty | Where-Object {
+        $path = $_.Substring(3).Trim()
+        $ignored = $false
+        foreach ($pattern in $IgnoreDirtyPath) {
+            if ($path -like $pattern) { $ignored = $true; break }
+        }
+        -not $ignored
+    })
+    $ignoredDirty = @($allDirty | Where-Object { $dirty -notcontains $_ })
 
     $result = [ordered]@{
         start_ref = $startResolved
@@ -74,6 +84,8 @@ try {
         last_author_date = if ($uniqueAuthorDates.Count -gt 0) { $uniqueAuthorDates[$uniqueAuthorDates.Count - 1] } else { $null }
         working_tree_clean = ($dirty.Count -eq 0)
         dirty_paths = $dirty
+        ignored_dirty_paths = $ignoredDirty
+        ignored_dirty_patterns = $IgnoreDirtyPath
         commits = $commits
         generated_at = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssK")
     }

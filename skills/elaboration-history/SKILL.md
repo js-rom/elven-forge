@@ -59,7 +59,7 @@ The history is only as reliable as its source data. Apply these rules:
 - Do not infer use cases from commit messages.
 - Classify each in-scope item as `full`, `slice`, `refactor`, `support`, or `retired`.
 - Mark `counts_for_average` explicitly for each UC.
-- Record `working_tree_clean_at_close`; do not silently count uncommitted work.
+- Record `working_tree_clean_at_close`; do not silently count uncommitted work. Exclude `openspec/artifacts/{domain}/state.yaml` from the dirty-tree check: it records the in-progress PASO 18 bookkeeping, not uncommitted product or artifact work.
 - If `start_ref` is not an ancestor of `end_ref`, mark the record `medium` and exclude it from the average.
 - If the repository is unavailable, keep the record with `reliability: low` and no git metrics.
 - Never rewrite historical records without an explicit migration note.
@@ -145,7 +145,8 @@ Run after `OK PASO 17`.
 
 If the working tree is dirty, do not commit automatically. Record the condition,
 mark the record `medium`, and ask the user whether the pending files belong to
-the iteration.
+the iteration. Ignore `openspec/artifacts/{domain}/state.yaml` in this check:
+its changes are the live PASO 18 bookkeeping and do not make the tree dirty.
 
 # Required Git Commands
 
