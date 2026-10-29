@@ -250,6 +250,20 @@ artifacts:
       refined_at_steps: []
       depends_on: [Elaboration Iterations Ledger]
 
+    - id: Flow Audit Ledger
+      path: 08 Project Management/Flow Audit Ledger.json
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Elaboration Iterations Ledger, Iteration Plan]
+
+    - id: Flow Audit Report
+      path: 08 Project Management/Flow Audit Report.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Flow Audit Ledger]
+
   09 Enviroment:
     - id: Environment Setup
       path: 09 Enviroment/environment-setup.md

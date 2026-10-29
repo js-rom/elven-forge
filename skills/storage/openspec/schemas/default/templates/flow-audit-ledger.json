@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "project_timezone": "Europe/Madrid",
+  "method": "retrospective_commit_path_v1",
+  "generated_at": null,
+  "sources": [
+    {
+      "iteration": "E1",
+      "start_ref": "<git-ref>",
+      "end_ref": "<git-ref>",
+      "status": "closed",
+      "partial": false
+    }
+  ],
+  "manual_findings": [],
+  "iterations": [],
+  "steps": [],
+  "unclassified": [],
+  "tooling": []
+}

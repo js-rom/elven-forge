@@ -201,7 +201,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
 | 15 | `Requirements Ranking` (refine) | Yes |
 | 16 | `Use Case fully dressed` (10% brief→detailed) | Yes |
 | 17 | Cycle close — lists updated artifacts; NO new artifacts | No |
-| 18 | `Elaboration Iterations Ledger` (close record), `Elaboration Iterations History` (generated report) | Yes |
+| 18 | `Elaboration Iterations Ledger` (close record), `Elaboration Iterations History` (generated report), `Flow Audit Ledger`, `Flow Audit Report` | Yes |
 | 19 | Phase close marker — loop to step 1 or exit | N/A |
 
 | Artifact | Comment |
@@ -551,10 +551,10 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - Confirm to the user that approved artifacts are already persisted directly under `openspec/artifacts/{domain}/...` and list the files updated in this cycle.
   - After `OK PASO 17`, proceed to PASO 18; do NOT start a new cycle yet.
 
-18. Record and generate the Elaboration Iterations History for the closed iteration.
-  - Artifacts in progress: `Elaboration Iterations Ledger` and `Elaboration Iterations History`.
-  - Before starting, load the skill `/elaboration-history/SKILL.md`, the active schema instruction `elaboration-iterations-history.md`, and its templates.
-  - Required inputs: closed `Iteration Plan` from step 1, `Requirements Ranking`, `Use Case Model`, `state.yaml`, existing ledger, existing history document, and git repository metadata.
+18. Record and generate the Elaboration Iterations History for the closed iteration, then run the automatic flow audit.
+  - Artifacts in progress: `Elaboration Iterations Ledger`, `Elaboration Iterations History`, `Flow Audit Ledger`, and `Flow Audit Report`.
+  - Before starting, load the skills `/elaboration-history/SKILL.md` and `/flow-audit/SKILL.md`, the active schema instructions `elaboration-iterations-history.md` and `flow-audit.md`, and their templates.
+  - Required inputs: closed `Iteration Plan` from step 1, `Requirements Ranking`, `Use Case Model`, `state.yaml`, existing ledger, existing history document, existing flow audit ledger, and git repository metadata.
   - Verify that `OK PASO 17` was approved. If not, stop and return to PASO 17.
   - Capture `end_ref` from the current `HEAD`; never use `git log --all` for the calculation.
   - Confirm the iteration scope and classify every item as `full`, `slice`, `refactor`, `support`, or `retired`; mark `counts_for_average` explicitly.
@@ -563,6 +563,8 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
   - Render the Markdown report from the ledger; do not edit generated tables manually.
   - Present the report in chat and stop to request `OK PASO 18`.
   - After approval, persist `Elaboration Iterations Ledger` and `Elaboration Iterations History` using the storage skill, then update artifact statuses in `state.yaml`.
+  - Immediately after persisting the history, run the flow audit automatically: update the closed iteration in the flow audit `sources`, run `build-flow-audit.ps1`, `render-flow-audit.ps1`, and `validate-flow-audit.ps1`, then persist `Flow Audit Ledger` and `Flow Audit Report`.
+  - The flow audit is automatic and non-blocking; do NOT request a separate approval for it. Report the top steps, rework signals, and recommended experiments in the same turn.
   - If requirements coverage is < 100%, start the next elaboration cycle from step 1. If coverage is 100% and the user approves phase closure, continue to PASO 19.
 
 19. Repeat steps 1 to 18 for each elaboration iteration until 100% of requirements are addressed.
@@ -602,7 +604,7 @@ Map `openspec/artifacts/{domain}/state.yaml` fields to visual indicators:
 ### ⬜ Paso 15 — Refine Requirements Ranking
 ### ⬜ Paso 16 — Use Case fully dressed (10%)
 ### ⬜ Paso 17 — Cycle close
-### ⬜ Paso 18 — Elaboration Iterations History
+### ⬜ Paso 18 — Elaboration History + Flow Audit
 ### ⬜ Paso 19 — Phase close
 
 La lista anterior es la plantilla — el driver la renderiza dinámicamente, sustituyendo los marcadores `✅`/`🔄`/`⬜`/`⏭️` según los datos reales de `openspec/artifacts/{domain}/state.yaml` en tiempo de ejecución.
@@ -645,6 +647,7 @@ Do not include content for later steps until approval is received.
 - counting uncommitted work as an effective day or editing the generated history table by hand.
 - averaging over low-confidence, open, refactor-only, or mixed-scope iterations.
 - estimating from history without loading the ledger, reporting sample size, or reconciling deviations over 30%.
+- treating the automatic flow audit as a new approval gate or skipping it after PASO 18.
 define the architecture
 
 # Results

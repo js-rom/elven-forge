@@ -124,6 +124,18 @@ artifacts:
     template: elaboration-iterations-history.md
     instruction: INVOKE this link -> "./instructions/elaboration-iterations-history.md"
     requires: [elaboration-iterations-ledger]
+  - id: Flow Audit Ledger
+    path: 08 Project Management/Flow Audit Ledger.json
+    description: Machine-readable flow audit evidence with commit days per step, sources, manual findings, tooling, and unclassified commits.
+    template: flow-audit-ledger.json
+    instruction: INVOKE this link -> "./instructions/flow-audit.md"
+    requires: [elaboration-iterations-ledger, iteration-plan]
+  - id: Flow Audit Report
+    path: 08 Project Management/Flow Audit Report.md
+    description: Generated flow audit report with coverage, bottlenecks, overlap, rework evidence, hypotheses, and improvement experiments.
+    template: flow-audit-report.md
+    instruction: INVOKE this link -> "./instructions/flow-audit.md"
+    requires: [flow-audit-ledger]
   - id: Use Case fully dressed
     path: 02 Requirements/use-cases/UC{{#}} {{use-case.name}}.md
     description: Functional requirements in fully dressed format.
