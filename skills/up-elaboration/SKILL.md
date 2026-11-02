@@ -365,9 +365,9 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
     - Design Sequence Diagrams and Design Class Diagrams from Logical View (step 9B)
     - SSDs from step 3
     - Operation Contracts from step 4
-  - Diagram export (MANDATORY before assembling any UCR):
-    - Run the PlantUML VS Code extension command `PlantUML: Export Workspace Diagrams` (command id `plantuml.exportWorkspace`).
-    - Trigger from the terminal: `Start-Process "vscode://command/plantuml.exportWorkspace"` (Windows URI protocol handler); on failure, ask the user to run it manually from the Command Palette and confirm.
+- Diagram export (MANDATORY before assembling any UCR):
+  - **Preferred (deterministic):** run `powershell -NoProfile -ExecutionPolicy Bypass -File ".agents\skills\up-elaboration\scripts\export-plantuml-svg.ps1"` from the workspace root. It exports every `.plantuml` under `openspec/artifacts` to the exact `out/{dir}/{baseName}/{diagramName}.svg` layout using the `plantuml.jar` bundled by the jebbs.plantuml extension, with no dependence on VS Code windows.
+  - Fallback: VS Code extension command `PlantUML: Export Workspace Diagrams` (command id `plantuml.exportWorkspace`) run manually from the Command Palette of the window that has the workspace open (the URI trigger `Start-Process "vscode://command/plantuml.exportWorkspace"` is unreliable with several VS Code windows: it targets the most recently focused window, which may not be the right workspace).
     - The export writes one folder per diagram under `<workspace>/out/{source dir relative to workspace}/{baseName}/{diagramName}.svg`, where `{baseName}` is the original file name without the `.plantuml` extension and `{diagramName}` is the diagram identifier declared after `@startuml` in the source (fallback: `{baseName}`). Example: source `DSD UC18 ... - S4.sequenceDiagram.plantuml` with `@startuml DSD_UC18_S4` exports to `out/.../Logical View/DSD UC18 ... - S4.sequenceDiagram/DSD_UC18_S4.svg`.
     - Poll `out/` for the SVGs referenced by the UCR (timeout ~120 s). If any required SVG is missing, stop and ask the user to re-run the export and confirm.
   - Diagram link rule (MANDATORY in every UCR):
