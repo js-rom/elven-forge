@@ -137,7 +137,8 @@ foreach ($file in $files) {
     if ($Include.Count -gt 0) {
         $inScope = $false
         foreach ($pattern in $Include) {
-            if ($file.Name -like $pattern -or $file.FullName -like "*$pattern*") { $inScope = $true; break }
+            $normalizedPattern = if ($pattern -match '[\*\?\[]') { $pattern } else { "*$pattern*" }
+            if ($file.Name -like $normalizedPattern -or $file.FullName -like "*$pattern*") { $inScope = $true; break }
         }
     }
     if (-not $inScope) { continue }
@@ -214,7 +215,8 @@ foreach ($file in $files) {
     if ($Include.Count -gt 0) {
         $inScope = $false
         foreach ($pattern in $Include) {
-            if ($file.Name -like $pattern -or $file.FullName -like "*$pattern*") { $inScope = $true; break }
+            $normalizedPattern = if ($pattern -match '[\*\?\[]') { $pattern } else { "*$pattern*" }
+            if ($file.Name -like $normalizedPattern -or $file.FullName -like "*$pattern*") { $inScope = $true; break }
         }
     }
     if (-not $inScope) { continue }
@@ -304,7 +306,8 @@ foreach ($file in $files) {
     if ($Include.Count -gt 0) {
         $inScope = $false
         foreach ($pattern in $Include) {
-            if ($file.Name -like $pattern -or $file.FullName -like "*$pattern*") { $inScope = $true; break }
+            $normalizedPattern = if ($pattern -match '[\*\?\[]') { $pattern } else { "*$pattern*" }
+            if ($file.Name -like $normalizedPattern -or $file.FullName -like "*$pattern*") { $inScope = $true; break }
         }
     }
     if (-not $inScope) { continue }
@@ -357,7 +360,8 @@ foreach ($file in $files) {
         if ($Include.Count -gt 0) {
             $inScope = $false
             foreach ($pattern in $Include) {
-                if ($file.Name -like $pattern -or $file.FullName -like "*$pattern*") { $inScope = $true; break }
+                $normalizedPattern = if ($pattern -match '[\*\?\[]') { $pattern } else { "*$pattern*" }
+            if ($file.Name -like $normalizedPattern -or $file.FullName -like "*$pattern*") { $inScope = $true; break }
             }
         }
         if (-not $inScope) { continue }
@@ -369,7 +373,7 @@ foreach ($file in $files) {
                 if (Test-NewPackagePrefix $pkg) { continue }
                 $relPath = $pkg -replace '\.', '\'
                 $dir = $allSourceDirs |
-                    Where-Object { $_.FullName.Substring($sourceRootFull.Length).TrimStart('\').EndsWith('\' + $relPath) } |
+                    Where-Object { $_.FullName.Substring($sourceRootFull.Length).TrimStart('\') -eq $relPath } |
                     Sort-Object { $_.FullName.Length } |
                     Select-Object -First 1
                 if (-not $dir) {
