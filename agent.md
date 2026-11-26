@@ -58,6 +58,7 @@ When creating or updating OpenSpec artifacts:
 5. Organize each `{domain}` according to the active schema's artifact layout (`path` fields in `schema.yaml`); never hardcode discipline directories.
 6. State is per-domain: `openspec/artifacts/{domain}/state.yaml` tracks phase progress, steps, and artifact lifecycle. There is no global state file.
 7. Do not create or use `openspec/iterations/` for persistence; do not run archive/merge flows.
+8. Memory is three-level: `state.yaml` (position, approvals, `summary`), `journal/{iteration}/` (append-only evidence), and `artifact-index.json` (derived inventory). Never write history to `state.yaml`; `notes` is deprecated.
 
 ### Sub-Agent Context Protocol
 

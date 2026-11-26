@@ -103,7 +103,8 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
    - `current_step: 0`, `last_approved_step: 0`
    - `approved_steps: []`
    - `pending_steps: [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14A, 14B, 14C, 14D, 15, 16, 17, 18]` (skip TBD step 6; step 19 is phase-close marker)
-   - `scope` and `notes` set to appropriate placeholders
+   - `scope` and `summary` set to appropriate placeholders (history goes to `journal/`, never to `state.yaml`)
+   - `journal` set to `journal/E1` (updated on each iteration resume)
    - `artifacts` populated from schema with `status: not_started`, `created_at_step: null`, `refined_at_steps: []`
     - Keep `Iteration Plan.path` in placeholder form as `08 Project Management/{{#}} {Iteration} Plan.md`; the storage skill resolves `{{#}}` from `iteration` (`E1 -> 01`, `E11 -> 11`) when persisting.
     - Keep `Test Plan.path` in placeholder form as `05 Test/{{#}} {Iteration} Test plan.md`; the storage skill resolves `{{#}}` from `iteration` (`E1 -> 01`, `E11 -> 11`) when persisting.
@@ -115,7 +116,7 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
 3. Increment `iteration` (E1 → E2 → ... En).
 4. Reset `current_step: 0`, `last_approved_step: 0`, `approved_steps: []`.
 5. Populate `pending_steps` with the steps applicable to the new cycle scope.
-6. Update `scope`, `notes`, and `date`.
+6. Update `scope`, `summary`, `journal` (`journal/{iteration}`), and `date`. Do not write history to `state.yaml`; append it to `journal/{iteration}/`.
   7. Keep `Iteration Plan.path` in placeholder form as `08 Project Management/{{#}} {Iteration} Plan.md`; the storage skill resolves the concrete file name from the new `iteration`.
   8. Keep `Test Plan.path` in placeholder form as `05 Test/{{#}} {Iteration} Test plan.md`; the storage skill resolves the concrete file name from the new `iteration`.
   9. Keep `Domain-to-Design Transition Map.path` in placeholder form as `03 Design/Logical View/{{#}} {Iteration} domain-to-design-transition.md`; the storage skill resolves the concrete file name from the new `iteration`, producing a new transition map per iteration.
@@ -480,7 +481,7 @@ After each step that persists artifacts (steps 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 
     - `Vaadin Mapping` sections used,
     - visual non-negotiables and any deferred UI states.
   - Before requesting `OK PASO 14B`, confirm that the selected scenario passed the Logical View review gate and has no unresolved blocking design issues.
-  - Before requesting `OK PASO 14B`, re-run `design-consistency.ps1` on the iteration slice (same arguments as steps 9B and 11, updating `-NewPackages` with any package created by the TDD work so far). Zero `[ERROR]` required; every design correction applied during 14B must pass the validator and be recorded in the Test Plan Revision History and the domain `state.yaml` notes.
+  - Before requesting `OK PASO 14B`, re-run `design-consistency.ps1` on the iteration slice (same arguments as steps 9B and 11, updating `-NewPackages` with any package created by the TDD work so far). Zero `[ERROR]` required; every design correction applied during 14B must pass the validator and be recorded in the Test Plan Revision History and the domain journal (`journal/{iteration}/`).
   - For each selected scenario, follow the TDD loop to incrementally implement the approved design, starting from the scenario's SSD system operations, operation contract events/postconditions, and the responsibilities defined in the referenced design artifacts.
   - Ensure that every implemented scenario has corresponding automated tests that validate expected behavior, edge cases, and the scenario result promised in the `Iteration Plan`.
   - Each TDD test item must record which acceptance scenario(s) from step 14A it satisfies: the TDD loop is the implementation engine that turns the 14A acceptance scenarios green.

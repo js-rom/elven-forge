@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "$comment": "Artifact-level checks shared by the inception and elaboration flows. Only presence and traceability are encoded here; section names and order remain owned by the schema templates. Consumed by scripts/validate_step.py from F3 onwards.",
+  "artifacts": {
+    "Vision and Business Case": {
+      "checks": [
+        {
+          "kind": "headings",
+          "level": 2,
+          "require": [
+            "Revision History",
+            "Introduction",
+            "Positioning",
+            "Stakeholder Descriptions",
+            "Product Overview",
+            "Summary of System Features",
+            "Other Requirements and Constraints"
+          ]
+        }
+      ]
+    },
+    "Use Case Model": {
+      "checks": [
+        { "kind": "headings", "level": 2, "require": ["Use cases"] },
+        { "kind": "plantuml", "min": 1 },
+        { "kind": "pattern", "regex": "\\(\\]\\(\\./use-cases/", "min": 1 }
+      ]
+    },
+    "Use Case brief": {
+      "checks": [
+        { "kind": "headings", "level": 1, "require": [] },
+        { "kind": "pattern", "regex": "(?m)^\\*\\*[^*]+:\\*\\*", "min": 1 }
+      ]
+    },
+    "Use Case fully dressed": {
+      "checks": [
+        {
+          "kind": "headings",
+          "level": 2,
+          "require": [
+            "Goal",
+            "Scope",
+            "Level",
+            "Priary actor",
+            "Stakeholders and Interests",
+            "Preconditions",
+            "Success guarantee",
+            "Main Success Scenario",
+            "Extensions (or Alternate flows)",
+            "Special requirements",
+            "Technology and Data Variations List",
+            "Frequency of Occurrence",
+            "Miscellaneous"
+          ]
+        }
+      ]
+    },
+    "Requirements Ranking": {
+      "checks": [
+        {
+          "kind": "headings",
+          "level": 2,
+          "require": ["Revision History", "Ranking Criteria", "Ranked Candidates", "Selection for Detailed Analysis"]
+        },
+        { "kind": "trace", "from": "Use Case Model", "to": "Requirements Ranking", "rule": "every ranked candidate exists in the use case model" }
+      ]
+    },
+    "Supplementary Specification": {
+      "checks": [
+        {
+          "kind": "headings",
+          "level": 2,
+          "require": [
+            "Revision History",
+            "Introduction",
+            "Table Conventions",
+            "F - Functionality (Cross-Cutting)",
+            "U - Usability",
+            "R - Reliability",
+            "P - Performance",
+            "S - Supportability",
+            "+ - Constraints and External Factors",
+            "Open Issues and Follow-ups"
+          ]
+        }
+      ]
+    },
+    "Technical Memo": {
+      "checks": [
+        {
+          "kind": "headings",
+          "level": 2,
+          "require": [
+            "Revision History",
+            "References",
+            "Issue",
+            "Solution Summary",
+            "Factors",
+            "Solution",
+            "Motivation",
+            "Unresolved Issues",
+            "Alternatives Considered"
+          ]
+        }
+      ]
+    },
+    "Glossary": {
+      "checks": [
+        { "kind": "headings", "level": 3, "require": ["Revision History", "Definitions"] },
+        { "kind": "table_columns", "require": ["Term", "Definition and Information"] }
+      ]
+    },
+    "Domain Model": {
+      "checks": [
+        {
+          "kind": "headings",
+          "level": 2,
+          "require": ["General Model", "Workflow Trace", "Sub-domain Diagrams", "Validation Checklist"]
+        },
+        { "kind": "plantuml", "min": 1 }
+      ]
+    },
+    "Architectural Analysis": {
+      "checks": [
+        {
+          "kind": "headings",
+          "level": 2,
+          "require": [
+            "Revision History",
+            "References",
+            "Scope and Objectives",
+            "FURPS+ Factor Tables",
+            "Prioritized Factors",
+            "Architectural Decisions",
+            "Variation Points",
+            "Evolution Points",
+            "Over-Engineering / Under-Engineering Risks",
+            "Unresolved Issues",
+            "Decision Hierarchy Applied"
+          ]
+        }
+      ]
+    }
+  }
+}

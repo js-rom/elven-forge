@@ -55,8 +55,10 @@ If the domain directory does not exist, register the domain before persisting an
 
 1. Read the domain config template `.agents/skills/storage/openspec/domain-config.template.yaml`, create `openspec/artifacts/{domain}/config.yaml` from it, set `domain` and `artifacts_root`. If no template exists, create the file following the same structure.
 2. Read the active schema (from the `schema` key) and derive the directory set from its artifact `path` values (unique parent directories). Create those directories under `artifacts_root` and keep empty ones versioned with `.gitkeep`.
-3. Create `openspec/artifacts/{domain}/state.yaml` from the active schema's state template `openspec/schemas/{schema}/state.template.yaml` (fallback: seed copy under `.agents/skills/storage/openspec/schemas/{schema}/state.template.yaml`; if no template exists, create the file following the structure of the domain state). Set `domain`.
-4. Register the domain in the global router `openspec/config.yaml` by adding an entry under `domains:`. Do NOT duplicate per-domain settings in the router.
+3. Create `openspec/artifacts/{domain}/journal/` with a `.gitkeep` (episodic memory root; see the convention's Memory Layout).
+4. Create `openspec/artifacts/{domain}/state.yaml` from the active schema's state template `openspec/schemas/{schema}/state.template.yaml` (fallback: seed copy under `.agents/skills/storage/openspec/schemas/{schema}/state.template.yaml`; if no template exists, create the file following the structure of the domain state). Set `domain`.
+5. Register the domain in the global router `openspec/config.yaml` by adding an entry under `domains:`. Do NOT duplicate per-domain settings in the router.
+6. Do NOT create `artifact-index.json`: it is derived data (`.agents/scripts/build_index.py`) and its absence is valid.
 
 ## Step 2: Persist Artifacts
 
@@ -68,6 +70,7 @@ For `openspec` mode, use **master-only persistence**:
 2. Write the content directly to the resolved master path. Create missing directories as needed; keep empty directories versioned with `.gitkeep` when they contain no artifacts.
 3. If the target file already exists, READ it first and UPDATE it (do not overwrite blindly).
    Exception — iteration-scoped artifacts: when the schema `path` contains `{{#}}` or `{{Iteration}}`, the resolution produces a NEW file per iteration (e.g. `01 E1 domain-to-design-transition.md`, `02 E2 domain-to-design-transition.md`). Write it fresh; the read-then-update rule only applies when re-persisting within the SAME iteration.
+4. Never write free-text history to `state.yaml`: the caller owns the `journal/{iteration}/` records. Update `summary` only.
 
 ## Step 3: Read Artifacts
 
@@ -100,5 +103,5 @@ Do only for enabled modes.
 
 | Mode | Recovery |
 |------|----------|
-| `openspec` | read the global router `openspec/config.yaml` (list of `domains`), then read each `openspec/artifacts/{domain}/state.yaml`; resume the domain with `status: in_progress` (if several, ask the user which one to resume) |
+| `openspec` | read the global router `openspec/config.yaml` (list of `domains`), then each `openspec/artifacts/{domain}/state.yaml`; for the domain with `status: in_progress`, read `journal/{iteration}/index.json` and the last two records, then resume from `current_step` (if several domains, ask the user which one to resume) |
 | `none` | State not persisted — explain to user |

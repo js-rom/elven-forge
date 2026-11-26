@@ -94,7 +94,8 @@ You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of 
    - `current_step: 0`, `last_approved_step: 0`
    - `approved_steps: []`
    - `pending_steps: [1, 2, 3, 4, 5, 6, 7, 8, 9]` (chat-only steps; steps 10-12 are automatic/persistence)
-   - `scope` and `notes` set to appropriate placeholders
+   - `scope` and `summary` set to appropriate placeholders (history goes to `journal/`, never to `state.yaml`)
+   - `journal` set to `journal/I1`
    - `artifacts` populated from schema with `status: not_started`, `created_at_step: null`, `refined_at_steps: []`
 
 ### Per-Step Updates

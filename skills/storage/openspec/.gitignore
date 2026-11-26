@@ -1,0 +1,5 @@
+# Derived data (regenerate with .agents/scripts/build_index.py)
+artifacts/*/artifact-index.json
+
+# Safety backups from state migrations
+artifacts/*/state.yaml.bak*

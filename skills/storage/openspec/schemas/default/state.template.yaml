@@ -18,9 +18,12 @@
 #   1. Phase skill initializes this file at phase start (before step 1).
 #   2. At each step start: update current_step, mark step artifacts as in_progress.
 #   3. After each OK PASO N: move N from pending_steps to approved_steps,
-#      update last_approved_step, mark step artifacts as approved.
+#      update last_approved_step, register the approval in `approvals`, and mark
+#      step artifacts as approved.
 #   4. After each storage invocation: mark persisted artifacts as persisted.
-#   5. On phase close: set status to completed.
+#   5. Write history and evidence to journal/{iteration}/, never to this file.
+#   6. Keep `summary` under five lines; it is a pointer, not a log.
+#   7. On phase close: set status to completed.
 # =============================================================================
 
 # --- Phase & Step Tracking ---
@@ -36,9 +39,14 @@ last_approved_step: 0                 # last step with OK PASO N approval
 approved_steps: []                    # steps that have received OK PASO N
 pending_steps: []                     # steps yet to be completed (populated at phase init)
 
+# --- Approvals (gate binding) ---
+
+approvals: []                         # one entry per gate: {phase, step, token, draft_hash, persisted_hash, at}
+
 # --- Iteration Scope ---
 scope: ""                             # brief description of iteration focus
-notes: ""                             # additional context, decisions, open issues
+summary: ""                           # <= 5 lines: position and pending work; history lives in journal/
+journal: ""                           # journal directory for this iteration, e.g. journal/E1
 
 # --- Artifact Lifecycle Tracking ---
 # Populated from schema.yaml at phase start.

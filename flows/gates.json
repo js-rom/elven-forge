@@ -1,0 +1,28 @@
+{
+  "$comment": "Gate token normalization for the UP agent system. Canonical form: 'OK <STEP>[.<SUBGATE>]'. Legacy aliases are accepted and never renamed for the user.",
+  "version": 1,
+  "canonical": "OK <STEP>[.<SUBGATE>]",
+  "resolution": "phase_from_state",
+  "phases": {
+    "inception": {
+      "steps": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+      "subgates": {}
+    },
+    "elaboration": {
+      "steps": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9A", "9B", "10", "11", "12", "13", "14A", "14B", "14C", "14D", "15", "16", "17", "18", "19"],
+      "subgates": {
+        "5": ["SYSTEM", "VISUAL", "INTERACTION", "VAADIN"],
+        "14B": ["IMPL", "CASES"]
+      }
+    }
+  },
+  "aliases": {
+    "OK PASO 14B": "OK 14B",
+    "OK PASO 14B IMPLEMENTAR": "OK 14B.IMPL",
+    "OK DESIGN SYSTEM": "OK 5.SYSTEM",
+    "OK VISUAL": "OK 5.VISUAL",
+    "OK INTERACTION": "OK 5.INTERACTION",
+    "OK VAADIN": "OK 5.VAADIN",
+    "OK CASOS 14B MODO AUTOMATIC": "OK 14B.CASES"
+  }
+}
