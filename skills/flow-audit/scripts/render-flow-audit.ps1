@@ -95,6 +95,26 @@ foreach ($step in ($steps | Sort-Object iteration, step)) {
     [void]$sb.AppendLine("| $(Format-Text $step.iteration) | $(Format-Text $step.step) | " + ($cells -join " | ") + " |")
 }
 [void]$sb.AppendLine("")
+$agentMetricsPath = Join-Path (Split-Path -Parent $LedgerPath) "Agent Metrics.json"
+if (Test-Path -LiteralPath $agentMetricsPath) {
+    $agent = Get-Content -LiteralPath $agentMetricsPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    [void]$sb.AppendLine("## Metricas de agente")
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine("- Gate rechazados: **$(Format-Text $agent.summary.gate_rejections)**.")
+    [void]$sb.AppendLine("- Errores de validador: **$(Format-Text $agent.summary.validator_errors)**.")
+    [void]$sb.AppendLine("- Rutas atras: **$(Format-Text $agent.summary.routes_back)**.")
+    [void]$sb.AppendLine("- Bytes de state: **$(Format-Text $agent.summary.state_read_bytes)**.")
+    [void]$sb.AppendLine("- Eventos registrados: **$(Format-Text $agent.events.total)**.")
+    [void]$sb.AppendLine("")
+    if (@($agent.steps).Count -gt 0) {
+        [void]$sb.AppendLine("| Paso | Gate rechazados | Errores de validador | Rutas atras |")
+        [void]$sb.AppendLine("| :--- | ---: | ---: | ---: |")
+        foreach ($row in @($agent.steps)) {
+            [void]$sb.AppendLine("| $(Format-Text $row.step) | $(Format-Text $row.gate_rejections) | $(Format-Text $row.validator_errors) | $(Format-Text $row.routes_back) |")
+        }
+        [void]$sb.AppendLine("")
+    }
+}
 [void]$sb.AppendLine("## Hallazgos manuales")
 [void]$sb.AppendLine("")
 [void]$sb.AppendLine("| Iteracion | Paso | Hallazgo | Impacto |")

@@ -12,6 +12,7 @@
 - Every item traces to: Iteration Plan item, use case/scenario, UCR section, SSD reference, Operation Contract postcondition; plus architecture, persistence or UI references when applicable.
 - For UI scope: at least one fidelity item per target view, traced to `state_id`, `transition.id`, the Vaadin Mapping section and the mock path.
 - Code and tests are file-based TDD outputs; only `Test Plan` is a persisted artifact.
+- For multi-batch TDD, the worker drafts the test slice and batch plan under `.atl/staging/{domain}/{iteration}/14B/`; the orchestrator presents it, and storage persists the approved `Test Plan`. Code and tests are written in place only after `OK 14B.IMPL`.
 
 ## Preconditions
 - `OK 14A` approved.

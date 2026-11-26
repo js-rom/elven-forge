@@ -29,6 +29,7 @@ from pathlib import Path
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from migrate_state import parse_artifacts, parse_scalar, read_state, read_state_fields  # noqa: E402
+from _metrics import record_event  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GATES_PATH = REPO_ROOT / ".agents" / "flows" / "gates.json"
@@ -333,6 +334,21 @@ def main(argv: list[str] | None = None) -> int:
                 "at": datetime.now().isoformat(timespec="seconds"),
             }
             result["recorded"] = append_or_update_approval(state_path, entry, persist=args.persist)
+
+    record_event(
+        state_path,
+        {
+            "tool": "gate",
+            "phase": phase,
+            "step": str(result["step"]),
+            "iteration": fields.get("iteration", "").strip('"'),
+            "domain": fields.get("domain", "").strip('"'),
+            "ok": result["ok"],
+            "errors": len(result["errors"]),
+            "warnings": len(warnings),
+            "canonical": result.get("canonical"),
+        },
+    )
 
     result["warnings"] = warnings
     print(json.dumps(result, indent=2, ensure_ascii=False))

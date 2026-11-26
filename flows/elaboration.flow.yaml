@@ -175,7 +175,6 @@ steps:
     gates: ["OK 14B", "OK 14B.IMPL", "OK 14B.CASES"]
     writes_code: true
     pre: [design_consistency]
-    budget: { tokens: 60000, tool_calls: 40 }
     inputs:
       require: [Iteration Plan, Use Case Realization, Acceptance Test Plan]
       glob: ["03 Design/Logical View/*", "05 Test/*"]

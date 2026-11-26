@@ -84,6 +84,13 @@ Key ideas: short timeboxed iterations; program early; test early and realistical
 - `summary` is at most five lines. History and evidence go to `journal/{iteration}/` (append-only). Never write `notes` to `state.yaml`.
 - Recovery: read the router, the domain state, `journal/{iteration}/index.json`, and the last two records.
 
+# Budget Contract (MANDATORY)
+
+- Read `.agents/flows/budgets.json`; the step uses its phase override or the defaults.
+- Track tokens, tool calls and wall-clock time for the current step.
+- If the budget is exhausted: stop, write a journal record with the partial progress and what remains, and ask for a decision. Do not continue silently.
+- On large steps, report the budget outcome in the gate turn.
+
 # Gates
 
 - Step 5 has four sub-gates before the step gate: `OK 5.SYSTEM`, `OK 5.VISUAL`, `OK 5.INTERACTION`, `OK 5.VAADIN`, then `OK 5`.

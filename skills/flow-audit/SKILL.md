@@ -44,6 +44,7 @@ is preferred after PASO 18 starts recording step events.
 - `state.yaml` notes and approved steps.
 - Artifact revision histories for rework evidence.
 - Test plans, acceptance plans, and test results when available.
+- Agent telemetry: `.atl/metrics/agent-events.jsonl` (gate and validator runs) and `08 Project Management/Agent Metrics.json` (aggregate).
 
 # Metrics
 
@@ -57,6 +58,10 @@ is preferred after PASO 18 starts recording step events.
 | `rework_count` | Reopened steps or explicit correction loops |
 | `tooling_days` | Dates spent only on generated, todo, submodule, or tooling files |
 | `code_test_ratio` | Code/test commits vs documentation/artifact commits |
+| `gate_rejections` | Gate runs rejected for a step |
+| `validator_errors` | Errors reported by `validate_step.py` for a step |
+| `routes_back` | Journal records that mention a route back or a reopen |
+| `state_read_bytes` | Size of `state.yaml` at measurement time |
 
 Do not report wait time or approval latency in retrospective mode unless the
 source records contain reliable timestamps.
@@ -87,10 +92,12 @@ Rules:
 1. Read the existing flow ledger. It must contain `sources` with iteration,
    `start_ref`, `end_ref`, and status.
 2. Run `build-flow-audit.ps1` to rebuild step metrics from git.
-3. Review `unclassified` commits and manual findings.
-4. Run `render-flow-audit.ps1` to generate the Markdown report.
-5. Run `validate-flow-audit.ps1`.
-6. Present the top bottlenecks and proposed experiments to the user.
+3. Run `python .agents/scripts/agent_metrics.py --domain {domain} --iteration {iteration}`
+   to write `Agent Metrics.json`.
+4. Review `unclassified` commits and manual findings.
+5. Run `render-flow-audit.ps1` to generate the Markdown report.
+6. Run `validate-flow-audit.ps1`.
+7. Present the top bottlenecks and proposed experiments to the user.
 
 ## Automatic PASO 18 audit
 
@@ -98,11 +105,12 @@ After `OK PASO 18`, after the elaboration history is persisted:
 
 1. Add or update the closed iteration in `sources`.
 2. Run `build-flow-audit.ps1`.
-3. Run `render-flow-audit.ps1`.
-4. Run `validate-flow-audit.ps1`.
-5. Persist both artifacts through the storage skill.
-6. Report a short summary: top steps, rework signals, and recommended experiments.
-7. Do not add a new approval gate; the audit is automatic and non-blocking.
+3. Run `python .agents/scripts/agent_metrics.py --domain {domain} --iteration {iteration}`.
+4. Run `render-flow-audit.ps1`.
+5. Run `validate-flow-audit.ps1`.
+6. Persist both artifacts through the storage skill.
+7. Report a short summary: top steps, rework signals, and recommended experiments.
+8. Do not add a new approval gate; the audit is automatic and non-blocking.
 
 ## Instrumented mode
 
@@ -115,6 +123,8 @@ When step timestamps are available, add:
 - `approval_attempts`
 - `reopen_count`
 
+Gate and validator runs are already instrumented in `.atl/metrics/agent-events.jsonl`;
+`agent_metrics.py` turns them into `gate_rejections`, `validator_errors` and `routes_back`.
 Use them to calculate lead time, flow efficiency, wait time, and first-pass yield.
 Do not fabricate these fields in retrospective records.
 
@@ -126,13 +136,14 @@ The report MUST include:
 2. Coverage and limitations.
 3. Per-iteration summary.
 4. Step metrics table.
-5. Commit-day heatmap.
-6. Top bottlenecks by commit days and commit count.
-7. Overlap and rework findings.
-8. Tooling and unclassified work.
-9. Manual findings.
-10. Improvement hypotheses and experiments.
-11. Confidence and next measurement date.
+5. Agent flow metrics.
+6. Commit-day heatmap.
+7. Top bottlenecks by commit days and commit count.
+8. Overlap and rework findings.
+9. Tooling and unclassified work.
+10. Manual findings.
+11. Improvement hypotheses and experiments.
+12. Confidence and next measurement date.
 
 # Improvement Guardrails
 
@@ -151,6 +162,7 @@ The report MUST include:
 - Mixing retrospective estimates with instrumented timestamps without labeling them.
 - Concluding a step is slow only because it has more commits.
 - Recommending fewer tests or weaker gates without measuring defect escape.
+- Treating gate rejections or validator errors as a measure of individual performance.
 - Editing the generated report instead of the ledger and sources.
 
 # Results
@@ -162,4 +174,5 @@ Return:
 - Coverage and confidence.
 - Top 3 bottlenecks with evidence.
 - Top improvement experiments.
+- Agent metrics summary (gate rejections, validator errors, routes back).
 - Data gaps that require instrumentation.

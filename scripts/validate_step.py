@@ -25,6 +25,7 @@ from urllib.parse import unquote
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from migrate_state import parse_artifacts, parse_scalar, read_state, read_state_fields  # noqa: E402
+from _metrics import record_event  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 AGENTS_DIR = REPO_ROOT / ".agents"
@@ -332,6 +333,20 @@ def main(argv: list[str] | None = None) -> int:
         "errors": errors,
         "warnings": warnings,
     }
+    record_event(
+        state_path,
+        {
+            "tool": "validate",
+            "phase": phase,
+            "step": args.step,
+            "iteration": parse_value(fields.get("iteration", "")),
+            "domain": parse_value(fields.get("domain", "")),
+            "ok": not errors,
+            "errors": len(errors),
+            "warnings": len(warnings),
+            "checks": [item["kind"] for item in results],
+        },
+    )
     print(json.dumps(report, indent=2, ensure_ascii=False))
     return 0 if not errors else 1
 

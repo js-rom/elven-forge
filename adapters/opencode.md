@@ -5,7 +5,7 @@ Maps the abstract roles of `contracts/roles.yaml` to OpenCode V2 mechanisms.
 | Role | Mechanism | Path |
 |---|---|---|
 | Orchestrator | Current session (primary agent) | `AGENTS.md` -> `.agents/agent.md` |
-| Worker | Current session, writes to `.atl/staging` | — |
+| Worker | Subagent, writes only to `.atl/staging` | `.opencode/agents/up-worker.md` |
 | Reviewer | Subagent, read-only | `.opencode/agents/up-reviewer.md` |
 | Validator | Scripts | `.agents/scripts/validate_step.py`, `.agents/scripts/gate.py` |
 

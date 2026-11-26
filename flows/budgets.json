@@ -1,0 +1,28 @@
+{
+  "$comment": "Per-step budgets. A step uses its phase override or the defaults. Enforcement is procedural: the orchestrator stops and reports when the budget is exhausted.",
+  "version": 1,
+  "defaults": {
+    "tokens": 60000,
+    "tool_calls": 40,
+    "wall_clock_minutes": 30
+  },
+  "phases": {
+    "elaboration": {
+      "1": { "tokens": 50000, "tool_calls": 30, "wall_clock_minutes": 25 },
+      "5": { "tokens": 80000, "tool_calls": 50, "wall_clock_minutes": 40 },
+      "9B": { "tokens": 80000, "tool_calls": 50, "wall_clock_minutes": 40 },
+      "11": { "tokens": 60000, "tool_calls": 40, "wall_clock_minutes": 30 },
+      "14A": { "tokens": 60000, "tool_calls": 40, "wall_clock_minutes": 30 },
+      "14B": { "tokens": 120000, "tool_calls": 80, "wall_clock_minutes": 60 },
+      "14C": { "tokens": 60000, "tool_calls": 40, "wall_clock_minutes": 30 },
+      "14D": { "tokens": 80000, "tool_calls": 50, "wall_clock_minutes": 40 },
+      "18": { "tokens": 60000, "tool_calls": 40, "wall_clock_minutes": 30 }
+    },
+    "inception": {
+      "1": { "tokens": 40000, "tool_calls": 25, "wall_clock_minutes": 20 },
+      "5": { "tokens": 50000, "tool_calls": 30, "wall_clock_minutes": 25 },
+      "6": { "tokens": 80000, "tool_calls": 50, "wall_clock_minutes": 40 },
+      "9": { "tokens": 40000, "tool_calls": 25, "wall_clock_minutes": 20 }
+    }
+  }
+}

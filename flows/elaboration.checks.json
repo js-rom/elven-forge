@@ -132,7 +132,6 @@
       "gates": ["OK 14B", "OK 14B.IMPL", "OK 14B.CASES"],
       "pre": ["approved.14A", "design_consistency"],
       "writes_code": true,
-      "budget": { "tokens": 60000, "tool_calls": 40 },
       "on_fail": { "scope": "1", "design": "9B", "persistence": "12", "ui": "5" }
     },
     "14C": {

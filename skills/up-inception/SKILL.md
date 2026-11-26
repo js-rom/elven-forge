@@ -71,6 +71,13 @@ This is not a requirements-complete phase. Most artifacts are partial by design 
 - Domain config values refined during steps 1-9 are persisted in the same batch.
 - After the batch, set every persisted artifact to `status: persisted` and write one journal record.
 
+# Budget Contract (MANDATORY)
+
+- Read `.agents/flows/budgets.json`; the step uses its phase override or the defaults.
+- Track tokens, tool calls and wall-clock time for the current step.
+- If the budget is exhausted: stop, write a journal record with the partial progress and what remains, and ask for a decision. Do not continue silently.
+- On large steps, report the budget outcome in the gate turn.
+
 # State Tracking Contract (MANDATORY)
 
 - Initialize at step 0: `phase: inception`, `iteration: I1`, `status: in_progress`, `pending_steps: [1, 2, 3, 4, 5, 6, 7, 8, 9]`, `summary`, `journal: journal/I1`, `approvals: []`.
