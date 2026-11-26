@@ -1,0 +1,129 @@
+# Inception flow — readable map for the orchestrator.
+# Machine manifest: flows/inception.checks.json.
+# Step contract: steps/inception/<file>.md (load only the current step).
+# Gates: flows/gates.json (legacy forms accepted by scripts/gate.py).
+#
+# Persistence: a single batch at step 10. Steps 1-9 are chat-only.
+# Steps 10-12 are automatic: no approval token, but they must be reported.
+
+phase: inception
+version: 1
+persist:
+  mode: batch
+  at: "10"
+
+steps:
+  - id: "0"
+    title: Domain bootstrap
+    contract: steps/inception/00-domain-bootstrap.md
+    produces: []
+    gates: []
+    writes: bootstrap
+    auto: true
+
+  - id: "1"
+    title: Vision (first draft)
+    contract: steps/inception/01-vision-draft.md
+    produces: [Vision and Business Case]
+    gates: ["OK 1"]
+    inputs:
+      require: [project idea, domain context]
+      glob: ["02 Requirements/*"]
+
+  - id: "2"
+    title: Vision (goals and scope)
+    contract: steps/inception/02-vision-scope.md
+    produces: [Vision and Business Case]
+    gates: ["OK 2"]
+    inputs:
+      require: [Vision and Business Case]
+      glob: ["02 Requirements/*"]
+
+  - id: "3"
+    title: Actor-goal table
+    contract: steps/inception/03-actor-goal-table.md
+    produces: [Use Case Model]
+    gates: ["OK 3"]
+    inputs:
+      require: [Vision and Business Case]
+
+  - id: "4"
+    title: Use case diagram and list
+    contract: steps/inception/04-use-case-model.md
+    produces: [Use Case Model]
+    gates: ["OK 4"]
+    inputs:
+      require: [Use Case Model]
+      glob: ["02 Requirements/use-cases/*"]
+
+  - id: "5"
+    title: Use case briefs
+    contract: steps/inception/05-use-case-briefs.md
+    produces: [Use Case brief]
+    gates: ["OK 5"]
+    inputs:
+      require: [Use Case Model]
+      glob: ["02 Requirements/use-cases/*"]
+
+  - id: "6"
+    title: Ranking and 10% fully dressed
+    contract: steps/inception/06-ranking-10pct.md
+    produces: [Requirements Ranking, Use Case fully dressed]
+    gates: ["OK 6"]
+    inputs:
+      require: [Use Case Model, Use Case brief]
+      glob: ["02 Requirements/use-cases/*"]
+
+  - id: "7"
+    title: Deep investigation (10%)
+    contract: steps/inception/07-deep-investigation.md
+    produces: []
+    gates: ["OK 7"]
+    inputs:
+      require: [Requirements Ranking, Use Case fully dressed]
+      glob: ["02 Requirements/*"]
+
+  - id: "8"
+    title: Architectural analysis
+    contract: steps/inception/08-architectural-analysis.md
+    produces: [Supplementary Specification, Technical Memo]
+    gates: ["OK 8"]
+    inputs:
+      require: [Vision and Business Case, Use Case Model]
+      glob: ["02 Requirements/Technical memos/*"]
+
+  - id: "9"
+    title: Vision (final)
+    contract: steps/inception/09-vision-final.md
+    produces: [Vision and Business Case]
+    gates: ["OK 9"]
+    inputs:
+      require: [Vision and Business Case, Use Case Model, Requirements Ranking, Supplementary Specification]
+
+  - id: "10"
+    title: Persist batch (automatic)
+    contract: steps/inception/10-persist-batch.md
+    produces: []
+    gates: []
+    persist: batch
+    auto: true
+    inputs:
+      require: [Vision and Business Case, Use Case Model, Use Case brief, Requirements Ranking, Use Case fully dressed, Supplementary Specification, Technical Memo, Glossary]
+
+  - id: "11"
+    title: Development environment (automatic)
+    contract: steps/inception/11-development-environment.md
+    produces: []
+    gates: []
+    auto: true
+    writes: outside_artifacts
+    requires_confirmation: true
+
+  - id: "12"
+    title: Phase close (automatic)
+    contract: steps/inception/12-phase-close.md
+    produces: []
+    gates: []
+    auto: true
+    persist: none
+    close: true

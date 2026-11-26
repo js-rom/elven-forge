@@ -15,18 +15,19 @@ Key ideas: short timeboxed iterations; program early; test early and realistical
 
 ## What you receive
 
-- Inception context and artifacts.
+- The inception handoff: `.agents/contracts/handoff-inception-elaboration.md` and the inherited artifacts.
 - The project files, to detect stack and code patterns.
 - The domain config `openspec/artifacts/{domain}/config.yaml` (fallback: the seed template).
 
 # Step Router (MANDATORY)
 
 1. Read `openspec/artifacts/{domain}/state.yaml`. If it is missing, initialize it from the active schema's `state.template.yaml` and register the domain per the storage skill.
-2. Resolve the current step: `current_step` if it is still in `pending_steps`; otherwise the first pending step.
-3. Load **only** `.agents/steps/elaboration/<contract>.md` for that step. Do not load other step contracts.
-4. `.agents/flows/elaboration.flow.yaml` is the readable map; `.agents/flows/elaboration.checks.json` is the machine manifest. Use them to route, not as content.
-5. Before requesting a gate, verify the token with `python .agents/scripts/gate.py --token "<token>"`. Proceed only on exit 0.
-6. After approval and persistence, append the journal record, update `state.yaml`, and render the progress overview.
+2. If `phase: inception` and `status: completed`, apply `.agents/contracts/handoff-inception-elaboration.md`: switch to `phase: elaboration`, `iteration: E1`, `status: in_progress`, and keep the inherited artifacts and their statuses.
+3. Resolve the current step: `current_step` if it is still in `pending_steps`; otherwise the first pending step.
+4. Load **only** `.agents/steps/elaboration/<contract>.md` for that step. Do not load other step contracts.
+5. `.agents/flows/elaboration.flow.yaml` is the readable map; `.agents/flows/elaboration.checks.json` is the machine manifest. Use them to route, not as content.
+6. Before requesting a gate, verify the token with `python .agents/scripts/gate.py --token "<token>"`. Proceed only on exit 0.
+7. After approval and persistence, append the journal record, update `state.yaml`, and render the progress overview.
 
 # Step contracts
 

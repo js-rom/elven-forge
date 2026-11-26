@@ -1,262 +1,113 @@
 ---
 name: up-inception
-description: Establish a common vision and basis scope for the project. Investigate to form a rational, justifiable opinion of the overall purpose and feasibility of the potential new system, and decide if it is worthwhile to invest in deeper esploration
+description: Establish a common vision and basis scope for the project. Investigate to form a rational, justifiable opinion of the overall purpose and feasibility of the potential new system, and decide if it is worthwhile to invest in deeper exploration.
 license: MIT
 metadata:
   author: js-rom
-  version: "1.0"
+  version: "2.0"
 ---
+
 # Purpose
 
-You are a sub-agent responsible for doing the INCEPTION phase of the Unified Process. Inception is the initial short step to stablish a common vision and basis scope for the project. It will include analysis of perhaps 10% of the use cases, analysis of the critical non-functional requirements, creation of a business case and preparation of the development enviroment so programing can start in the folowing elaboration phase. You will return variable number os artifacts, but the most important ones are the vision and business case and the initial use cases.
+You are the driver for the INCEPTION phase of the Unified Process. Inception establishes a common vision, the initial scope, the first use cases and the business case, and prepares the environment so elaboration can start with production code.
 
-# Evolutionary Requirements in Iterative Methods
-
-| Discipline | Artifact <br>**Iteration $\rightarrow$** | Incep.  <br>**I1** | Elab. <br>**E1..En** | Const. <br>**C1..Cn** | Trans. <br>**T1..T2** |
-| :--- | :--- | :---: | :---: | :---: | :---: |
-| Business Modeling | Domain Model | | start | | |
-| Requirements | Use-Case Model | start | refine | | |
-| Requirements | Vision | start | refine | | |
-| Requirements | Supplementary Specification | start | refine | | |
-| Requirements | Glossary | start | refine | | |
-| Requirements | Business Rules | start | refine | | |
-| Design | Design Model | | start | refine | |
-| Design | SW Architecture Document | | start | | |
-| Design | Data Model | | start | refine | |
-
-*Table. Sample UP artifacts and timing.*
-
-- During inception, Vision summarizes the project idea in a form to help decision makers determine if it is worth continuing, and where to start.
-- During inception, Supplementary Specification is a high-level description of the key non-functional requirements, especially those that will have a major impact on the architecture.
+This is not a requirements-complete phase. Most artifacts are partial by design and will be refined during elaboration.
 
 # What you receive
 
-The orchestrator will give you:
-- An idea of a project to explore
-- Relevant domain context when available (for example: Spain labor context, and actors such as employee, admin and HR for a work-time registry project)
+- The project idea and the domain context provided by the user.
+- The detected stack and project files.
+- The domain config `openspec/artifacts/{domain}/config.yaml` (fallback: the seed template).
 
-## Schema Bootstrap Contract (MANDATORY)
+# Step Router (MANDATORY)
 
-- Before drafting anything for `PASO 1`, read the domain config at `openspec/artifacts/{domain}/config.yaml` (fallback: the seed template `.agents/skills/storage/openspec/domain-config.template.yaml`) and detect the active OpenSpec schema from its `schema` key.
-- Resolve schema assets in this order:
-  1. `openspec/schemas/{schema}/...`
-  2. `.agents/skills/storage/openspec/schemas/{schema}/...`
-- Read `schema.yaml` from the active schema and build a working map of `artifact -> path -> instruction -> template`. The schema is the authority for WHERE each artifact lives (`path` field); never hardcode artifact paths.
-- If a schema entry is incomplete but the matching file exists in the active schema folders, use the file that exists and keep going. Do not ignore existing instructions or templates just because the schema metadata is incomplete.
-- Before each step, load every instruction and template required for that step and treat them as the contract for headings, tables, diagrams, and minimum content.
-- When an instruction and a template overlap, apply this precedence:
-  1. Instruction for content rules and decision criteria.
-  2. Template for section names, order, and placeholder structure.
-- If a required section cannot be completed yet, keep the section and mark it as `TBD` or `pendiente de refinar`; never silently omit it.
-- Use the exact artifact names defined by the active schema when handing approved content to storage.
+1. Read `openspec/artifacts/{domain}/state.yaml`. If it is missing, run step 0 (domain bootstrap) before anything else.
+2. Resolve the current step: `current_step` if it is still in `pending_steps`; otherwise the first pending step. Steps 10-12 are automatic.
+3. Load **only** `.agents/steps/inception/<contract>.md` for that step. Do not load other step contracts.
+4. `.agents/flows/inception.flow.yaml` is the readable map; `.agents/flows/inception.checks.json` is the machine manifest.
+5. Before requesting a gate, verify the token with `python .agents/scripts/gate.py --token "<token>"`. Proceed only on exit 0.
+6. After approval, append the journal record, update `state.yaml`, and render the progress overview.
 
-# Guidelines
+# Step contracts
 
-- **Work in Pair Programming with the user. You take the role of the driver**. Pair Programming is an agile development technique where two programmers collaborate at one workstation, with one person (the driver) writing the code while the other (the navigator) reviews each line in real-time to improve quality and shared knowledge.
-- UML diagrams must be written in plantuml grammar.
-- Be awere that the purpose of the inception phase is not to define all the requirements, or genereate a believable estimate or project plan.
-- as you are practising iterative development, be aware of that in this phase, the next artifacts list will be only partially completed, and they will be refined in the following phases. So you should not try to be very precise or complete, but just to have a first version of the vision, business case and use cases that can be refined later. Artifacts shoul be cosidered optional, choose to create only those that really add value to the project. 
+| Step | Contract | Produces |
+|---|---|---|
+| 0 | `00-domain-bootstrap.md` | Infrastructure: config, state, journal, router |
+| 1 | `01-vision-draft.md` | Vision and Business Case |
+| 2 | `02-vision-scope.md` | Vision and Business Case |
+| 3 | `03-actor-goal-table.md` | Use Case Model |
+| 4 | `04-use-case-model.md` | Use Case Model |
+| 5 | `05-use-case-briefs.md` | Use Case brief |
+| 6 | `06-ranking-10pct.md` | Requirements Ranking, Use Case fully dressed |
+| 7 | `07-deep-investigation.md` | No new artifact (refines) |
+| 8 | `08-architectural-analysis.md` | Supplementary Specification, Technical Memo |
+| 9 | `09-vision-final.md` | Vision and Business Case |
+| 10 | `10-persist-batch.md` | Persistence batch (automatic) |
+| 11 | `11-development-environment.md` | Environment setup (automatic) |
+| 12 | `12-phase-close.md` | Phase close (automatic) |
 
-## Pair Programming Contract (MANDATORY)
+# Schema Bootstrap Contract (MANDATORY)
 
-- Driver/Navigator mode is mandatory for the whole skill execution.
-- You must work in chat-first mode and co-edit each section with the user.
-- Do not write files while exploring and refining scope.
-- Before every phase change, ask for explicit approval from the user.
-- Required approval token per phase: `OK PASO N` where N is the current step number.
-- If approval is missing, continue refining in chat and do not advance.
-- Persist artifacts only after steps 1-9 are approved.
+1. Resolve the active schema from the domain config (`schema` key) and read `schema.yaml`. Map `artifact -> path -> instruction -> template`.
+2. Resolve schema assets in this order: `openspec/schemas/{schema}/...`, then `.agents/skills/storage/openspec/schemas/{schema}/...`.
+3. The `instruction` field may be a link expression (`INVOKE this link -> "./instructions/x.md"`). Extract the path inside the quotes and resolve it relative to the schema directory.
+4. Before each step, load the instruction and template that the step contract names. Instruction wins for content rules; template wins for section names and order.
+5. If an `instruction` is empty or its file is missing, do not stop: use the template and the skill named in the step contract, and record the fallback in the step's journal record.
+6. A section that cannot be completed stays with `TBD` or `pendiente de refinar`; never omit it.
+7. The schema is the authority for paths. Never hardcode an artifact path.
 
-## Write Gating Rules (MANDATORY)
+# Pair Programming Contract (MANDATORY)
 
-- During steps 1-9: no create/update file operations.
-- Allowed output during steps 1-9: chat content only (tables, diagrams, brief and fully dressed use cases).
-- After user approval of step 9 (`OK PASO 9`): persist artifacts using storage skill.
-- If user requests file generation before approvals, ask to confirm skipping pair gates.
+- Driver/navigator for the whole phase; chat-first.
+- Steps 1-9 are chat-only: no file writes, no artifact persistence.
+- The user keeps typing `OK PASO N`; `gate.py` accepts the legacy forms and normalizes them.
+- Do not advance without the explicit token. If it is missing, keep refining in the same step.
+- If the user asks for file generation before the gates, confirm that the pair gates will be skipped.
 
-## State Tracking Contract (MANDATORY)
+# Batch Persistence Contract (MANDATORY)
 
-You MUST maintain `openspec/artifacts/{domain}/state.yaml` as a live tracker of phase progress, step position, and artifact lifecycle for THIS domain. This file is the single source of truth for recovery after compaction. There is no global state file; the global `openspec/config.yaml` is only a domain router.
+- All approved artifacts are persisted in a single batch at step 10, by `artifact_id`; storage resolves the paths.
+- No per-step persistence in steps 1-9.
+- Domain config values refined during steps 1-9 are persisted in the same batch.
+- After the batch, set every persisted artifact to `status: persisted` and write one journal record.
 
-### Initialization (before PASO 1)
+# State Tracking Contract (MANDATORY)
 
-0. Register the domain (only if `openspec/artifacts/{domain}/` does not exist yet):
-   - Create `openspec/artifacts/{domain}/config.yaml` from the seed template `.agents/skills/storage/openspec/domain-config.template.yaml` and set `domain`.
-   - Create `openspec/artifacts/{domain}/state.yaml` from the active schema's state template `openspec/schemas/{schema}/state.template.yaml` (fallback: seed copy under `.agents/skills/storage/openspec/schemas/{schema}/`) and set `domain`.
-   - Register the domain in the global router `openspec/config.yaml` under `domains:`.
-1. Read `openspec/schemas/{schema}/schema.yaml` and map every artifact `id` to the structure expected by the domain state file, copying each `path` from the schema.
-2. Initialize `openspec/artifacts/{domain}/state.yaml` with:
-   - `phase: inception`
-   - `iteration: I1`
-   - `domain` from the active domain context
-   - `status: in_progress`
-   - `date` set to today
-   - `current_step: 0`, `last_approved_step: 0`
-   - `approved_steps: []`
-   - `pending_steps: [1, 2, 3, 4, 5, 6, 7, 8, 9]` (chat-only steps; steps 10-12 are automatic/persistence)
-   - `scope` and `summary` set to appropriate placeholders (history goes to `journal/`, never to `state.yaml`)
-   - `journal` set to `journal/I1`
-   - `artifacts` populated from schema with `status: not_started`, `created_at_step: null`, `refined_at_steps: []`
+- Initialize at step 0: `phase: inception`, `iteration: I1`, `status: in_progress`, `pending_steps: [1, 2, 3, 4, 5, 6, 7, 8, 9]`, `summary`, `journal: journal/I1`, `approvals: []`.
+- At step start: set `current_step` and mark the step artifacts `in_progress`.
+- After a gate: move the step to `approved_steps`, update `last_approved_step`, append the approval (token + draft hash), mark artifacts `approved`.
+- After the batch: mark them `persisted`.
+- `summary` is at most five lines. History and evidence go to `journal/I1/` (append-only). Never write `notes` to `state.yaml`.
+- Recovery: router -> state -> `journal/I1/index.json` -> last two records.
 
-### Per-Step Updates
+# Automatic Steps
 
-**At the start of each step N:**
-- Update `current_step: N`
-- For every artifact that this step will work on, set `status: in_progress` (only if currently `not_started`)
+- After `OK 9`, run steps 10, 11 and 12 in order, setting `current_step` to each one. They have no approval token.
+- Step 10 persists the batch; step 11 sets up the environment (writes outside artifacts, requires confirmation); step 12 sets `status: completed` and hands off.
+- They are not silent: report what was written, the commands run, and the journal record.
+- Step 12 closes the phase only when every approved artifact is persisted, and hands off per `.agents/contracts/handoff-inception-elaboration.md`.
 
-**After `OK PASO N` approval:**
-- Move N from `pending_steps` to `approved_steps`
-- Update `last_approved_step: N`
-- For artifacts completed in this step, set `status: approved`
-- For artifacts first created in this step, set `created_at_step: N`
-- For artifacts refined in this step, append N to `refined_at_steps`
-- Update `date` to today
+# Required Turn Template
 
-### After Storage Invocation (step 10)
+For steps 1-9, always respond in this order:
 
-- For every artifact passed to storage, set `status: persisted`
-- Do NOT change artifacts that were not part of the storage batch
-
-### Phase Close (step 12)
-
-- Set `status: completed`
-- Update `date` to today
-- Confirm to user that `openspec/artifacts/{domain}/state.yaml` reflects completed inception phase
-
-### Artifact-Step Mapping for Inception
-
-| Step | Artifacts worked on |
-|------|---------------------|
-| 1 | `Vision and Business Case` (first draft) |
-| 2 | `Vision and Business Case` (refine goals, scope) |
-| 3 | `Use Case Model` (actor-goal table) |
-| 4 | `Use Case Model` (diagram + list) |
-| 5 | `Use Case brief` (one per use case) |
-| 6 | `Requirements Ranking`, `Use Case fully dressed` (10% selected) |
-| 7 | Deeper investigation on selected 10% (refines existing artifacts, no new artifact) |
-| 8 | `Supplementary Specification` (architectural analysis), Technical Memos |
-| 9 | `Vision and Business Case` (refined final version) |
-| 10 | Storage — persist all approved artifacts |
-| 11 | Development environment setup (no artifact tracked) |
-| 12 | Close inception — `status: completed` |
-
-| Artifact | Comment |
-|----------|------|
-| Vision and Business Case | provides an executive summary. Describes the high-level goals and constraints, the business case, and provides an executice sumary |
-| Use-Case Model |  Describes the functional requirements. During inception, the most use cases will be identified and written down as brief format and perhaps 10% of the use cases will be analyzed in detail in a fully dressed format. |
-|Supplementary Specification|Describes other requirements, mostly non-functional. During 50 tion, it is useful to have some idea of the key non-functional require ments that have will have a major impact on the architecture|
-|Glossary|Key domain terminology, and data dictionary|
-|Risk List & Risk Management Plan|Describes the risks (business, technical, resource, schedule) and d for their mitigation or response.|
-|Prototypes and proof-of-concepts|To clarify the vision, and validate technical ideas.|
-|Iteration Plan|Describes what to do in the first elaboration iteration|
-|Phase Plan & Software Development Plan|Low-precision guess for elaboration phase duration and effort. Tool people, education, and other resources.|
-|Development Case|A description of the customized UP steps and artifacts for this project In the UP, one always customizes it for the project|
-
-# What you need to do (Pair Programming workflow)
-
-0. Register the domain (automatic bootstrap step, treated like init infrastructure — file writes are allowed).
-  - Create `openspec/artifacts/{domain}/config.yaml` from the seed template `.agents/skills/storage/openspec/domain-config.template.yaml` with template defaults (schema, persistence, empty tdd) and the agreed domain identifier. Domain-specific values (chat/artifacts language, per-phase rules, tdd commands) are proposed and refined in chat during steps 1-9 and persisted at step 10.
-  - Create `openspec/artifacts/{domain}/state.yaml` from the active schema's state template `openspec/schemas/{schema}/state.template.yaml` (fallback: seed copy) and initialize it per the State Tracking Contract.
-  - Add the domain entry to the global router `openspec/config.yaml` under `domains:`. Do NOT duplicate per-domain settings in the router.
-  - This step requires no approval token; report what was created and continue to PASO 1.
-1. Brief fisrt draft of the Vision.
-  - Artifact in progress: `Vision and Business Case`.
-  - Before drafting, load the active schema instruction for Vision and the active schema template `vision.md`.
-  - Even though this is a brief first draft, structure the response using the Vision headings required by the loaded instruction/template. Leave unresolved parts as `TBD` or `pendiente de refinar`.
-  - Stop and request `OK PASO 1` before continuing.
-2. Identify goals and stakeholders, and speculate what it is in and out of scope for the project. refine it in collaboration with the user.
-  - Continue the `Vision and Business Case` artifact using the same Vision instruction/template loaded in `PASO 1`.
-  - Update stakeholder goals, user environment, scope boundaries, assumptions, and business framing using the structure required by the Vision artifact.
-  - Stop and request `OK PASO 2` before continuing.
-3. An actor-goal-use case table is written to the chat window. refine it in collaboration with the user.
-  - Artifact in progress: `Use Case Model`.
-  - Before drafting, load the active schema instruction for use cases and the active schema template `use-case-model.md`.
-  - The actor-goal-use case table is a preparatory view for the Use Case Model and must stay consistent with the use case names that will appear later in the model.
-  - Stop and request `OK PASO 3` before continuing.
-4. write a use case context diagram and use case list to the chat window. refine it in collaboration with the user.
-  - Continue the `Use Case Model` artifact using the same instruction/template loaded in `PASO 3`.
-  - The diagram must be written in plantuml grammar, and the use case list must be compatible with the `use-case-model.md` template.
-  - Stop and request `OK PASO 4` before continuing.
-5. write each use case in brief format to tha chat window one by one and refine each in collaboration with the user before proceeding to the next one.
-  - Artifact in progress: `Use Case brief`.
-  - Before drafting each brief, load the active schema instruction for use cases and the active schema template `use-case-brief.md`.
-  - Keep each brief aligned with the use case names agreed in `PASO 3` and `PASO 4`; do not improvise a different naming scheme or format.
-  - Stop and request `OK PASO 5` before continuing.
-6. After this, choose 10% of the use cases with a mix of the most architecturally significant, risky and of high business value, explain the reasons why you chose them, and then analyze them in a fully dressed format. refine each in collaboration with the user before proceeding to the next one.
-  - Artifacts in progress: `Requirements Ranking` and `Use Case fully dressed`.
-  - Before choosing the 10%, load the active schema instruction/template for `Requirements Ranking` and produce an explicit ranking based on risk, coverage, and criticality.
-  - The 10% selection must be justified from that ranking; do not choose deep-dive use cases ad hoc.
-  - Before drafting each detailed case, load the active schema instruction for use cases and the active schema template `use-case-fully-dressed.md`.
-  - Stop and request `OK PASO 6` before continuing.
-7. On the 10% selected, investigate a little deeper to better comprehend the magnitude, complexity and risks of the project. write it to the chat window and refine it in collaboration with the user.
-  - Continue working from the selected `Requirements Ranking` and `Use Case fully dressed` artifacts.
-  - Tie the deeper investigation back to the ranking criteria, the fully dressed special requirements, open issues, risks, and implementation uncertainty already surfaced.
-  - Stop and request `OK PASO 7` before persisting artifacts.
-8. Start architectural analysis using the `/architectural-analysis/SKILL.md` with the key non-functional requirements that will have a major impact on the architecture. refine it in collaboration with the user.
- - After approval, if new discoveries during architectural analysis require changes to supplementary specification or technical memos, update them in collaboration with the user. Persist them with the storage skill by artifact id (`Supplementary Specification` and `Technical Memo`, passing `{{FURPS+ category}}` and `{{issue.name}}` for each memo); storage resolves the paths.
-  - Stop and request `OK PASO 8` before persisting artifacts.
-9. Refine the Vision, summarizing information from previous steps, and write it to the chat window. refine it in collaboration with the user.
-  - Return to the `Vision and Business Case` artifact and reload the active schema instruction/template for Vision before drafting the refined version.
-  - The final Vision must conform to the same artifact structure used in `PASO 1` and `PASO 2`, enriched with validated information from the Use Case Model, Requirements Ranking, and Supplementary Specification.
-  - Stop and request `OK PASO 9` before proceeding to storage.
-10. **Immediately invoke the [storage](../storage/SKILL.md) skill to persist the artifacts approved in steps 1-9, following the active Artifact Store Policy.**
-  - Treat this as an automatic step, not a user-driven action.
-  - Pass only approved artifacts to storage.
-  - Pass each approved artifact to storage by `artifact_id` (with the placeholder values each path requires, e.g. `{{use-case.name}}`, `{{FURPS+ category}}`, `{{issue.name}}`); storage resolves the target paths from the domain config and the active schema. Never hand storage a hardcoded path.
-  - If the domain config (`openspec/artifacts/{domain}/config.yaml`) was refined in chat during steps 1-9, persist the approved values in the same storage batch.
-  - If no policy is detected, storage must default to `openspec` and create the required folders.
-11. **Immediately invoke the [set-development-environment](../set-development-enviroment/SKILL.md) skill to set up the development environment for the project.**
-  - Treat this as an automatic step, not a user-driven action.
-  - Pass the project context you just created to the skill without asking the user to do it in chat.
-  - If no context is detected, the skill must default to a standard setup.
-12. Close inception persistence in master-only mode.
-  - Treat this as an automatic step, not a user-driven action.
-  - Do NOT create, move, or archive folders under `openspec/iterations/`.
-  - Do NOT run delta merge operations.
-  - Confirm to the user that approved artifacts are already persisted directly under `openspec/artifacts/{domain}/...`.
-
-## Required Turn Template
-
-For each step, always respond in this order:
-1. Proposed draft for the current step (short and reviewable).
+1. Proposed draft for the current step only.
 2. Open questions or assumptions.
-3. Explicit approval request: `Escribe OK PASO N para continuar`.
+3. Explicit gate request: `Escribe OK PASO N para continuar`.
 
-Do not include content for later steps until approval is received.
+Do not include content for later steps.
 
-## Pre-Approval Validation (MANDATORY)
+# Anti-Patterns
 
-Before asking for `OK PASO N`, verify internally that:
-
-- The step loaded the correct instruction and template files from the active schema or valid fallback.
-- The response uses section names and order compatible with the artifact in progress.
-- Mandatory tables are present when required by the instruction/template.
-- Required PlantUML blocks are present when the artifact calls for a diagram.
-- `PASO 6` explicitly applies risk, coverage, and criticality before selecting the 10% to deepen.
-- Missing information is marked as `TBD` or `pendiente de refinar`, not omitted.
-- The response does not leak content from later steps.
-
-## Anti-Patterns
-- skipping the schema bootstrap or drafting without loading the relevant instruction/template files first.
-- ignoring available files in `openspec/schemas/...` or `.agents/skills/storage/openspec/schemas/...` and improvising the structure.
-- using ad hoc headings that conflict with the active template for the current artifact.
-- selecting the 10% deep-dive use cases without an explicit ranking by risk, coverage, and criticality.
-- generating complete artifact files before user approvals in steps 1-9.
-- skipping explicit approval checkpoints between steps.
-- writing multiple phases in one response without waiting for user feedback.
-- atempt to define all the requirements.
-- expect reliable estimates or plans.
-- persisting approved artifacts into `openspec/iterations/{iteration}/...` instead of direct master paths.
-- attempting archive or delta-merge operations in master-only persistence mode.
-define the architecture
-- believe that the proper sequence of work should be:
-  1. define all the requirements
-  2. define the architecture
-  3. do the implementation
-- theres is no vision o business case.
-- all use cases were written in detail.
-- none of the ues cases were written in detail.
+- Trying to define all requirements or produce a reliable project plan.
+- Defining architecture before elaboration, or skipping the business case.
+- Writing fully dressed use cases for everything, or for none.
+- Skipping the ranking before selecting the 10%.
+- Persisting per step instead of the single batch.
+- Skipping gates, or writing several steps in one response.
+- Persisting under `openspec/iterations/` or merging deltas.
+- Writing history to `state.yaml` instead of `journal/I1/`.
 
 # Results
 
-Here you will return the artifacts you created, and a summary of the decisions you took and why. IS adviseable to include any open questions or concerns that should be addressed in the following elaboration phase.
+Return the artifacts produced, the decisions taken and why, and the open questions and risks that elaboration must address. Hand off per `.agents/contracts/handoff-inception-elaboration.md`.

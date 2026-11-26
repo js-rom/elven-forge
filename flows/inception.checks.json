@@ -1,0 +1,111 @@
+{
+  "$comment": "Machine manifest for the inception phase. flow.yaml is the readable map; this file is what scripts consume. Persistence is a single batch at step 10; steps 10-12 are automatic.",
+  "version": 1,
+  "phase": "inception",
+  "persist": { "mode": "batch", "at": "10" },
+  "steps": {
+    "0": {
+      "title": "Domain bootstrap",
+      "contract": "steps/inception/00-domain-bootstrap.md",
+      "produces": [],
+      "gates": [],
+      "persist": "bootstrap",
+      "writes": "bootstrap",
+      "auto": true,
+      "pre": []
+    },
+    "1": {
+      "title": "Vision (first draft)",
+      "contract": "steps/inception/01-vision-draft.md",
+      "produces": ["Vision and Business Case"],
+      "gates": ["OK 1"],
+      "pre": ["state.phase==inception"]
+    },
+    "2": {
+      "title": "Vision (goals and scope)",
+      "contract": "steps/inception/02-vision-scope.md",
+      "produces": ["Vision and Business Case"],
+      "gates": ["OK 2"],
+      "pre": ["approved.1"]
+    },
+    "3": {
+      "title": "Actor-goal table",
+      "contract": "steps/inception/03-actor-goal-table.md",
+      "produces": ["Use Case Model"],
+      "gates": ["OK 3"],
+      "pre": ["approved.2"]
+    },
+    "4": {
+      "title": "Use case diagram and list",
+      "contract": "steps/inception/04-use-case-model.md",
+      "produces": ["Use Case Model"],
+      "gates": ["OK 4"],
+      "pre": ["approved.3"]
+    },
+    "5": {
+      "title": "Use case briefs",
+      "contract": "steps/inception/05-use-case-briefs.md",
+      "produces": ["Use Case brief"],
+      "gates": ["OK 5"],
+      "pre": ["approved.4"]
+    },
+    "6": {
+      "title": "Ranking and 10% fully dressed",
+      "contract": "steps/inception/06-ranking-10pct.md",
+      "produces": ["Requirements Ranking", "Use Case fully dressed"],
+      "gates": ["OK 6"],
+      "pre": ["approved.5"]
+    },
+    "7": {
+      "title": "Deep investigation (10%)",
+      "contract": "steps/inception/07-deep-investigation.md",
+      "produces": [],
+      "gates": ["OK 7"],
+      "pre": ["approved.6"]
+    },
+    "8": {
+      "title": "Architectural analysis",
+      "contract": "steps/inception/08-architectural-analysis.md",
+      "produces": ["Supplementary Specification", "Technical Memo"],
+      "gates": ["OK 8"],
+      "pre": ["approved.7"]
+    },
+    "9": {
+      "title": "Vision (final)",
+      "contract": "steps/inception/09-vision-final.md",
+      "produces": ["Vision and Business Case"],
+      "gates": ["OK 9"],
+      "pre": ["approved.8"]
+    },
+    "10": {
+      "title": "Persist batch (automatic)",
+      "contract": "steps/inception/10-persist-batch.md",
+      "produces": [],
+      "gates": [],
+      "persist": "batch",
+      "auto": true,
+      "pre": ["approved.9"]
+    },
+    "11": {
+      "title": "Development environment (automatic)",
+      "contract": "steps/inception/11-development-environment.md",
+      "produces": [],
+      "gates": [],
+      "persist": "none",
+      "writes": "outside_artifacts",
+      "requires_confirmation": true,
+      "auto": true,
+      "pre": ["approved.10"]
+    },
+    "12": {
+      "title": "Phase close (automatic)",
+      "contract": "steps/inception/12-phase-close.md",
+      "produces": [],
+      "gates": [],
+      "persist": "none",
+      "auto": true,
+      "pre": ["approved.11", "all_persisted"],
+      "close": true
+    }
+  }
+}
