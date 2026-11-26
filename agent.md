@@ -25,6 +25,9 @@ This workflow is the planning layer for iterative and incremental Unified Proces
 
 - /up-init -> run up-init
 - /up-inception <topic> -> run up-inception
+- /up-elaboration [step] -> run up-elaboration
+
+Command definitions live in `.opencode/commands/`; the skills remain portable.
 
 ### Dependency Graph
 

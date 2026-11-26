@@ -23,6 +23,7 @@
 - Warnings are accepted only with a written rationale.
 
 ## Evidence required
+- `up-reviewer` verdict using `rubrics/logical-view.md`; a `NO` blocks the gate.
 - Validator output (0 errors).
 - Findings table with route: 8, 9A, 9B or 10.
 - Readiness statement per use case.

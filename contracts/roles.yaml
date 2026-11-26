@@ -1,0 +1,22 @@
+# Abstract roles for the UP agent system.
+# Adapters map these roles to a concrete runtime (see adapters/opencode.md).
+version: 1
+roles:
+  orchestrator:
+    can_edit: false
+    can_persist: true
+    can_gate: true
+    owns: [routing, state, gates]
+  worker:
+    can_edit: true
+    writes: [.atl/staging]
+    owns: [drafting]
+  reviewer:
+    can_edit: false
+    reads: [openspec, .atl/staging, .agents/rubrics, .agents/contracts]
+    output: json
+    owns: [evaluation]
+  validator:
+    can_edit: false
+    runs: [.agents/scripts/validate_step.py, .agents/scripts/gate.py]
+    owns: [mechanical_checks]

@@ -1,0 +1,107 @@
+{
+  "$comment": "Validation rules per step. Routing lives in <phase>.checks.json; this file says what a conforming artifact looks like. Checks may reuse an artifact entry from shared.checks.json with {use: <artifact id>}.",
+  "version": 1,
+  "elaboration": {
+    "2": {
+      "artifact": "Domain Model",
+      "checks": [{ "use": "Domain Model" }]
+    },
+    "3": {
+      "artifact": "System Sequence Diagram",
+      "checks": [
+        { "kind": "headings", "level": 2, "require": ["Traceability"] },
+        { "kind": "plantuml", "min": 1 }
+      ]
+    },
+    "4": {
+      "artifact": "Operation Contracts",
+      "checks": [
+        { "kind": "headings", "level": 2, "require": ["Validation Checklist"] },
+        { "kind": "pattern", "regex": "(?m)^## Scenario\\b", "min": 1 },
+        { "kind": "pattern", "regex": "(?m)^## Operation Contract:", "min": 1 }
+      ]
+    },
+    "10": {
+      "artifact": "Use Case Realization",
+      "checks": [
+        {
+          "kind": "headings",
+          "level": 2,
+          "require": [
+            "Revision History",
+            "Goal",
+            "Inputs and References",
+            "Scenario Mapping",
+            "Scenario Realizations",
+            "Consolidated Design Class View (Use Case Level)",
+            "Validation Checklist"
+          ]
+        },
+        { "kind": "links" }
+      ],
+      "rubric": "rubrics/use-case-realization.md"
+    },
+    "11": {
+      "checks": [
+        { "kind": "evidence", "regex": "design-consistency.*0\\s*ERROR" }
+      ],
+      "rubric": "rubrics/logical-view.md"
+    },
+    "14B": {
+      "artifact": "Test Plan",
+      "checks": [
+        {
+          "kind": "headings",
+          "level": 2,
+          "require": ["Revision History", "Planning Context", "Agreed Test List (Step 1 Output)", "Traceability"]
+        },
+        { "kind": "trace", "from": "Iteration Plan", "to": "Test Plan", "strict": false }
+      ],
+      "rubric": "rubrics/test-plan.md"
+    },
+    "14D": {
+      "artifact": "Test Plan",
+      "checks": [
+        { "kind": "headings", "level": 2, "require": ["Implementation Conformance Review (14D)"] },
+        { "kind": "pattern", "regex": "\\bMATCH\\b", "min": 1 }
+      ],
+      "rubric": "rubrics/conformance.md"
+    }
+  },
+  "inception": {
+    "3": {
+      "artifact": "Use Case Model",
+      "checks": [{ "use": "Use Case Model" }]
+    },
+    "4": {
+      "artifact": "Use Case Model",
+      "checks": [{ "use": "Use Case Model" }]
+    },
+    "5": {
+      "artifact": "Use Case brief",
+      "checks": [{ "use": "Use Case brief" }]
+    },
+    "6": {
+      "artifact": "Requirements Ranking",
+      "checks": [
+        { "use": "Requirements Ranking" },
+        { "kind": "trace", "from": "Use Case Model", "to": "Requirements Ranking", "strict": true }
+      ],
+      "rubric": "rubrics/use-case-model.md"
+    },
+    "9": {
+      "artifact": "Vision and Business Case",
+      "checks": [{ "use": "Vision and Business Case" }],
+      "rubric": "rubrics/vision.md"
+    },
+    "10": {
+      "checks": [{ "kind": "all_persisted" }]
+    },
+    "12": {
+      "checks": [
+        { "kind": "all_persisted" },
+        { "kind": "state_field", "field": "status", "equals": "completed" }
+      ]
+    }
+  }
+}

@@ -23,6 +23,7 @@
 ## Evidence required
 - Build evidence (compile command and result).
 - Conformance matrix.
+- `up-reviewer` verdict using `rubrics/conformance.md`; a `NO` blocks the gate.
 - Non-`MATCH` rows with route: new TDD item in `Test Plan` -> 14B -> 14C -> 14D.
 
 ## Anti-patterns

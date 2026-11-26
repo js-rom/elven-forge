@@ -21,6 +21,7 @@
 ## Evidence required
 - Final draft in chat.
 - List of `TBD` items resolved and remaining.
+- `up-reviewer` verdict using `rubrics/vision.md`; a `NO` blocks the gate.
 - `OK 9` request before the persistence batch.
 
 ## Anti-patterns

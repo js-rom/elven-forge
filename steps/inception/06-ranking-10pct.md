@@ -24,6 +24,7 @@
 - Ranking table.
 - Selection list with reasons.
 - One draft per selected use case.
+- Advisory `up-reviewer` pass using `rubrics/use-case-model.md`.
 - `OK 6` request.
 
 ## Anti-patterns

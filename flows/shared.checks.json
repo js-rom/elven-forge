@@ -12,9 +12,11 @@
             "Introduction",
             "Positioning",
             "Stakeholder Descriptions",
-            "Product Overview",
-            "Summary of System Features",
-            "Other Requirements and Constraints"
+            "Product Overview"
+          ],
+          "any_of": [
+            ["Summary of System Features", "Success Criteria"],
+            ["Other Requirements and Constraints", "Constraints"]
           ]
         }
       ]
@@ -23,12 +25,13 @@
       "checks": [
         { "kind": "headings", "level": 2, "require": ["Use cases"] },
         { "kind": "plantuml", "min": 1 },
-        { "kind": "pattern", "regex": "\\(\\]\\(\\./use-cases/", "min": 1 }
+        { "kind": "pattern", "regex": "\\]\\(\\.[/]?use-cases/", "min": 1 }
       ]
     },
     "Use Case brief": {
       "checks": [
         { "kind": "headings", "level": 1, "require": [] },
+        { "kind": "pattern", "regex": "(?m)^#\\s+\\S", "min": 1 },
         { "kind": "pattern", "regex": "(?m)^\\*\\*[^*]+:\\*\\*", "min": 1 }
       ]
     },
@@ -41,18 +44,18 @@
             "Goal",
             "Scope",
             "Level",
-            "Priary actor",
             "Stakeholders and Interests",
             "Preconditions",
             "Success guarantee",
-            "Main Success Scenario",
             "Extensions (or Alternate flows)",
             "Special requirements",
             "Technology and Data Variations List",
             "Frequency of Occurrence",
             "Miscellaneous"
-          ]
-        }
+          ],
+          "any_of": [["Primary actor", "Priary actor"]]
+        },
+        { "kind": "pattern", "regex": "(?m)^## Main Success Scenario", "min": 1 }
       ]
     },
     "Requirements Ranking": {
@@ -115,7 +118,9 @@
         {
           "kind": "headings",
           "level": 2,
-          "require": ["General Model", "Workflow Trace", "Sub-domain Diagrams", "Validation Checklist"]
+          "require": ["Sub-domain Diagrams", "Validation Checklist"],
+          "any_of": [["General Model", "Conceptual Model"]],
+          "optional": ["Workflow Trace", "Trace to Use Cases"]
         },
         { "kind": "plantuml", "min": 1 }
       ]
