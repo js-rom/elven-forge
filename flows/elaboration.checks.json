@@ -1,0 +1,194 @@
+{
+  "$comment": "Machine manifest for the elaboration phase. flow.yaml is the readable map; this file is what scripts consume. Output contract and rubric live in the step contract (steps/elaboration/*.md).",
+  "version": 1,
+  "phase": "elaboration",
+  "persist": { "mode": "per_step" },
+  "steps": {
+    "0": {
+      "title": "Glossary (on demand)",
+      "contract": "steps/elaboration/00-glossary.md",
+      "produces": ["Glossary"],
+      "gates": [],
+      "persist": "on_demand",
+      "pre": ["state.phase==elaboration"]
+    },
+    "1": {
+      "title": "Iteration Plan",
+      "contract": "steps/elaboration/01-iteration-plan.md",
+      "produces": ["Requirements Ranking", "Iteration Plan", "Elaboration Iterations Ledger"],
+      "gates": ["OK 1"],
+      "pre": ["state.phase==elaboration"]
+    },
+    "2": {
+      "title": "Domain Model",
+      "contract": "steps/elaboration/02-domain-model.md",
+      "produces": ["Domain Model"],
+      "gates": ["OK 2"],
+      "pre": ["approved.1"]
+    },
+    "3": {
+      "title": "System Sequence Diagrams",
+      "contract": "steps/elaboration/03-ssd.md",
+      "produces": ["System Sequence Diagram"],
+      "gates": ["OK 3"],
+      "pre": ["approved.2"]
+    },
+    "4": {
+      "title": "Operation Contracts",
+      "contract": "steps/elaboration/04-operation-contracts.md",
+      "produces": ["Operation Contracts"],
+      "gates": ["OK 4"],
+      "pre": ["approved.3"]
+    },
+    "5": {
+      "title": "UI Design",
+      "contract": "steps/elaboration/05-ui-design.md",
+      "produces": ["Design System", "Visual Specs", "Interaction Spec", "UI Technology Mapping"],
+      "gates": ["OK 5", "OK 5.SYSTEM", "OK 5.VISUAL", "OK 5.INTERACTION", "OK 5.VAADIN"],
+      "pre": ["approved.4"]
+    },
+    "6": {
+      "title": "Reports Design (TBD)",
+      "contract": "steps/elaboration/06-reports-design.md",
+      "produces": [],
+      "gates": [],
+      "persist": "none",
+      "status": "tbd"
+    },
+    "7": {
+      "title": "Architectural Analysis",
+      "contract": "steps/elaboration/07-architectural-analysis.md",
+      "produces": ["Architectural Analysis", "Technical Memo", "Supplementary Specification"],
+      "gates": ["OK 7"],
+      "pre": ["approved.4"]
+    },
+    "8": {
+      "title": "Logical View (packages)",
+      "contract": "steps/elaboration/08-logical-view-packages.md",
+      "produces": ["Logical View Package Diagram"],
+      "gates": ["OK 8"],
+      "pre": ["approved.7"]
+    },
+    "9A": {
+      "title": "Domain-to-Design Transition",
+      "contract": "steps/elaboration/09a-domain-to-design.md",
+      "produces": ["Domain-to-Design Transition Map"],
+      "gates": ["OK 9A"],
+      "pre": ["approved.8"],
+      "on_fail": { "packages": "8" }
+    },
+    "9B": {
+      "title": "Scenario Design (sequence + class)",
+      "contract": "steps/elaboration/09b-scenario-design.md",
+      "produces": ["Design Sequence Diagram", "Logical View Class Diagram"],
+      "gates": ["OK 9B"],
+      "pre": ["approved.9A"],
+      "on_fail": { "transition": "9A", "packages": "8" }
+    },
+    "10": {
+      "title": "Use Case Realization",
+      "contract": "steps/elaboration/10-use-case-realization.md",
+      "produces": ["Use Case Realization"],
+      "gates": ["OK 10"],
+      "pre": ["approved.9B"],
+      "on_fail": { "design": "9B" }
+    },
+    "11": {
+      "title": "Reviewer pass (Logical View)",
+      "contract": "steps/elaboration/11-reviewer-pass.md",
+      "produces": [],
+      "gates": ["OK 11"],
+      "pre": ["approved.10", "design_consistency"],
+      "on_fail": { "packages": "8", "transition": "9A", "design": "9B", "ucr": "10" }
+    },
+    "12": {
+      "title": "Data Model + JPA Mapping",
+      "contract": "steps/elaboration/12-data-model-jpa.md",
+      "produces": ["Data Model", "JPA Mapping"],
+      "gates": ["OK 12"],
+      "pre": ["approved.11"],
+      "on_fail": { "design": "11" }
+    },
+    "13": {
+      "title": "SW Architecture Document",
+      "contract": "steps/elaboration/13-sw-architecture-document.md",
+      "produces": ["SW Architecture Document"],
+      "gates": ["OK 13"],
+      "pre": ["approved.12"]
+    },
+    "14A": {
+      "title": "Acceptance tests (ATDD)",
+      "contract": "steps/elaboration/14a-acceptance-atdd.md",
+      "produces": ["Acceptance Test Plan"],
+      "gates": ["OK 14A"],
+      "pre": ["approved.13"],
+      "writes_code": true,
+      "on_fail": { "scope": "1", "design": "9B" }
+    },
+    "14B": {
+      "title": "TDD (code + tests)",
+      "contract": "steps/elaboration/14b-tdd.md",
+      "produces": ["Test Plan"],
+      "gates": ["OK 14B", "OK 14B.IMPL", "OK 14B.CASES"],
+      "pre": ["approved.14A", "design_consistency"],
+      "writes_code": true,
+      "budget": { "tokens": 60000, "tool_calls": 40 },
+      "on_fail": { "scope": "1", "design": "9B", "persistence": "12", "ui": "5" }
+    },
+    "14C": {
+      "title": "Acceptance execution (GREEN)",
+      "contract": "steps/elaboration/14c-acceptance-green.md",
+      "produces": ["Acceptance Test Plan"],
+      "gates": ["OK 14C"],
+      "pre": ["approved.14B"],
+      "writes_code": true,
+      "on_fail": { "implementation": "14B", "design": "9B" }
+    },
+    "14D": {
+      "title": "Conformance (implementation vs Logical View)",
+      "contract": "steps/elaboration/14d-conformance.md",
+      "produces": ["Test Plan"],
+      "gates": ["OK 14D"],
+      "pre": ["approved.14C", "design_consistency"],
+      "on_fail": { "implementation": "14B", "design": "9B", "packages": "8", "transition": "9A" }
+    },
+    "15": {
+      "title": "Refine Requirements Ranking",
+      "contract": "steps/elaboration/15-requirements-ranking.md",
+      "produces": ["Requirements Ranking"],
+      "gates": ["OK 15"],
+      "pre": ["approved.14D"]
+    },
+    "16": {
+      "title": "Use Case fully dressed (10%)",
+      "contract": "steps/elaboration/16-fully-dressed.md",
+      "produces": ["Use Case fully dressed"],
+      "gates": ["OK 16"],
+      "pre": ["approved.15"]
+    },
+    "17": {
+      "title": "Cycle close",
+      "contract": "steps/elaboration/17-cycle-close.md",
+      "produces": [],
+      "gates": ["OK 17"],
+      "pre": ["approved.16"],
+      "persist": "none"
+    },
+    "18": {
+      "title": "Elaboration history + flow audit",
+      "contract": "steps/elaboration/18-history-flow-audit.md",
+      "produces": ["Elaboration Iterations Ledger", "Elaboration Iterations History", "Flow Audit Ledger", "Flow Audit Report"],
+      "gates": ["OK 18"],
+      "pre": ["approved.17"]
+    },
+    "19": {
+      "title": "Phase close",
+      "contract": "steps/elaboration/19-phase-close.md",
+      "produces": [],
+      "gates": [],
+      "pre": ["approved.18"],
+      "persist": "none",
+      "close": true
+    }
+  }
+}

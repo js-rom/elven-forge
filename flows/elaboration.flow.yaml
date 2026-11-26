@@ -1,0 +1,248 @@
+# Elaboration flow — readable map for the orchestrator.
+# Machine manifest: flows/elaboration.checks.json (what scripts consume).
+# Step contract: steps/elaboration/<file>.md (what the agent loads for the current step).
+# Gates: flows/gates.json (canonical tokens; legacy forms are accepted by scripts/gate.py).
+#
+# Rule: load ONLY the contract of the current step. Do not read later steps.
+
+phase: elaboration
+version: 1
+persist:
+  mode: per_step
+
+steps:
+  - id: "0"
+    title: Glossary (on demand)
+    contract: steps/elaboration/00-glossary.md
+    produces: [Glossary]
+    gates: []
+    persist: on_demand
+
+  - id: "1"
+    title: Iteration Plan
+    contract: steps/elaboration/01-iteration-plan.md
+    produces: [Requirements Ranking, Iteration Plan, Elaboration Iterations Ledger]
+    gates: ["OK 1"]
+    inputs:
+      require: [Requirements Ranking, Use Case Model]
+      glob: ["08 Project Management/*", "02 Requirements/*"]
+
+  - id: "2"
+    title: Domain Model
+    contract: steps/elaboration/02-domain-model.md
+    produces: [Domain Model]
+    gates: ["OK 2"]
+    inputs:
+      require: [Iteration Plan, Use Case Model, Glossary]
+      glob: ["01 Business Modeling/*", "02 Requirements/use-cases/*"]
+
+  - id: "3"
+    title: System Sequence Diagrams
+    contract: steps/elaboration/03-ssd.md
+    produces: [System Sequence Diagram]
+    gates: ["OK 3"]
+    inputs:
+      require: [Iteration Plan, Domain Model]
+      glob: ["02 Requirements/SSDs/*", "02 Requirements/use-cases/*"]
+
+  - id: "4"
+    title: Operation Contracts
+    contract: steps/elaboration/04-operation-contracts.md
+    produces: [Operation Contracts]
+    gates: ["OK 4"]
+    inputs:
+      require: [System Sequence Diagram, Domain Model]
+      glob: ["02 Requirements/Operation Contracts/*"]
+
+  - id: "5"
+    title: UI Design
+    contract: steps/elaboration/05-ui-design.md
+    produces: [Design System, Visual Specs, Interaction Spec, UI Technology Mapping]
+    gates: ["OK 5", "OK 5.SYSTEM", "OK 5.VISUAL", "OK 5.INTERACTION", "OK 5.VAADIN"]
+    inputs:
+      require: [System Sequence Diagram, Operation Contracts, Supplementary Specification, Glossary]
+      glob: ["03 Design/UI/*"]
+
+  - id: "6"
+    title: Reports Design (TBD)
+    contract: steps/elaboration/06-reports-design.md
+    produces: []
+    gates: []
+    status: tbd
+
+  - id: "7"
+    title: Architectural Analysis
+    contract: steps/elaboration/07-architectural-analysis.md
+    produces: [Architectural Analysis, Technical Memo, Supplementary Specification]
+    gates: ["OK 7"]
+    inputs:
+      require: [Vision and Business Case, Use Case Model, Supplementary Specification]
+      glob: ["02 Requirements/Technical memos/*"]
+
+  - id: "8"
+    title: Logical View (packages)
+    contract: steps/elaboration/08-logical-view-packages.md
+    produces: [Logical View Package Diagram]
+    gates: ["OK 8"]
+    inputs:
+      require: [Iteration Plan, Domain Model, Architectural Analysis]
+      glob: ["03 Design/Logical View/*packageDiagram*"]
+
+  - id: "9A"
+    title: Domain-to-Design Transition
+    contract: steps/elaboration/09a-domain-to-design.md
+    produces: [Domain-to-Design Transition Map]
+    gates: ["OK 9A"]
+    inputs:
+      require: [Domain Model, System Sequence Diagram, Operation Contracts, Logical View Package Diagram]
+      glob: ["03 Design/Logical View/*"]
+    on_fail:
+      packages: "8"
+
+  - id: "9B"
+    title: Scenario Design (sequence + class)
+    contract: steps/elaboration/09b-scenario-design.md
+    produces: [Design Sequence Diagram, Logical View Class Diagram]
+    gates: ["OK 9B"]
+    inputs:
+      require: [Domain-to-Design Transition Map, System Sequence Diagram, Operation Contracts]
+      glob: ["03 Design/Logical View/*"]
+    on_fail:
+      transition: "9A"
+      packages: "8"
+
+  - id: "10"
+    title: Use Case Realization
+    contract: steps/elaboration/10-use-case-realization.md
+    produces: [Use Case Realization]
+    gates: ["OK 10"]
+    inputs:
+      require: [Domain-to-Design Transition Map, Design Sequence Diagram, Logical View Class Diagram]
+      glob: ["02 Requirements/*", "03 Design/Logical View/*"]
+    on_fail:
+      design: "9B"
+
+  - id: "11"
+    title: Reviewer pass (Logical View)
+    contract: steps/elaboration/11-reviewer-pass.md
+    produces: []
+    gates: ["OK 11"]
+    pre: [design_consistency]
+    inputs:
+      require: [Logical View Package Diagram, Domain-to-Design Transition Map, Use Case Realization]
+    on_fail:
+      packages: "8"
+      transition: "9A"
+      design: "9B"
+      ucr: "10"
+
+  - id: "12"
+    title: Data Model + JPA Mapping
+    contract: steps/elaboration/12-data-model-jpa.md
+    produces: [Data Model, JPA Mapping]
+    gates: ["OK 12"]
+    inputs:
+      require: [Domain Model, Operation Contracts, Use Case Realization]
+      glob: ["03 Design/Data Model/*"]
+    on_fail:
+      design: "11"
+
+  - id: "13"
+    title: SW Architecture Document
+    contract: steps/elaboration/13-sw-architecture-document.md
+    produces: [SW Architecture Document]
+    gates: ["OK 13"]
+    inputs:
+      require: [Architectural Analysis, Logical View, Data Model]
+
+  - id: "14A"
+    title: Acceptance tests (ATDD)
+    contract: steps/elaboration/14a-acceptance-atdd.md
+    produces: [Acceptance Test Plan]
+    gates: ["OK 14A"]
+    writes_code: true
+    inputs:
+      require: [Iteration Plan, Use Case Realization, Interaction Spec]
+      glob: ["05 Test/*", "src/test/resources/features/*"]
+    on_fail:
+      scope: "1"
+      design: "9B"
+
+  - id: "14B"
+    title: TDD (code + tests)
+    contract: steps/elaboration/14b-tdd.md
+    produces: [Test Plan]
+    gates: ["OK 14B", "OK 14B.IMPL", "OK 14B.CASES"]
+    writes_code: true
+    pre: [design_consistency]
+    budget: { tokens: 60000, tool_calls: 40 }
+    inputs:
+      require: [Iteration Plan, Use Case Realization, Acceptance Test Plan]
+      glob: ["03 Design/Logical View/*", "05 Test/*"]
+    on_fail:
+      scope: "1"
+      design: "9B"
+      persistence: "12"
+      ui: "5"
+
+  - id: "14C"
+    title: Acceptance execution (GREEN)
+    contract: steps/elaboration/14c-acceptance-green.md
+    produces: [Acceptance Test Plan]
+    gates: ["OK 14C"]
+    writes_code: true
+    on_fail:
+      implementation: "14B"
+      design: "9B"
+
+  - id: "14D"
+    title: Conformance (implementation vs Logical View)
+    contract: steps/elaboration/14d-conformance.md
+    produces: [Test Plan]
+    gates: ["OK 14D"]
+    pre: [design_consistency]
+    inputs:
+      require: [Logical View, Use Case Realization, Iteration Plan, SW Architecture Document]
+    on_fail:
+      implementation: "14B"
+      design: "9B"
+      packages: "8"
+      transition: "9A"
+
+  - id: "15"
+    title: Refine Requirements Ranking
+    contract: steps/elaboration/15-requirements-ranking.md
+    produces: [Requirements Ranking]
+    gates: ["OK 15"]
+
+  - id: "16"
+    title: Use Case fully dressed (10%)
+    contract: steps/elaboration/16-fully-dressed.md
+    produces: [Use Case fully dressed]
+    gates: ["OK 16"]
+    inputs:
+      require: [Requirements Ranking, Use Case Model]
+
+  - id: "17"
+    title: Cycle close
+    contract: steps/elaboration/17-cycle-close.md
+    produces: []
+    gates: ["OK 17"]
+    persist: none
+
+  - id: "18"
+    title: Elaboration history + flow audit
+    contract: steps/elaboration/18-history-flow-audit.md
+    produces: [Elaboration Iterations Ledger, Elaboration Iterations History, Flow Audit Ledger, Flow Audit Report]
+    gates: ["OK 18"]
+    inputs:
+      require: [Iteration Plan, Requirements Ranking, Use Case Model]
+      glob: ["08 Project Management/*", "src/**", ".git"]
+
+  - id: "19"
+    title: Phase close
+    contract: steps/elaboration/19-phase-close.md
+    produces: []
+    gates: []
+    persist: none
+    close: true
