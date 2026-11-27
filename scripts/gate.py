@@ -22,6 +22,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -32,6 +33,7 @@ from migrate_state import parse_artifacts, parse_scalar, read_state, read_state_
 from _metrics import record_event  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+SCRIPTS = Path(__file__).resolve().parent
 GATES_PATH = REPO_ROOT / ".agents" / "flows" / "gates.json"
 ARTIFACTS_DIR = REPO_ROOT / "openspec" / "artifacts"
 UI_SUBGATES = {"DESIGN SYSTEM": "SYSTEM"}
@@ -160,24 +162,39 @@ def append_or_update_approval(state_path: Path, entry: dict, persist: bool) -> d
 
     if block_start is not None and not lines[block_start].strip().endswith("[]"):
         for index in range(block_start + 1, block_end):
-            if re.match(rf"\s*-\s*phase:\s*{re.escape(entry['phase'])}\s*$", lines[index]) and index + 1 < block_end:
-                for offset in range(index, min(index + 6, block_end)):
-                    if re.match(rf'\s+step:\s*"?{re.escape(str(entry["step"]))}"?\s*$', lines[offset]):
-                        for target in range(index, min(index + 8, block_end)):
-                            if persist and entry.get("persisted_hash") and re.match(r"\s+persisted_hash:\s*", lines[target]):
-                                lines[target] = f"    persisted_hash: {entry['persisted_hash']}"
-                            elif not persist and entry.get("draft_hash") and re.match(r"\s+draft_hash:\s*", lines[target]):
-                                lines[target] = f"    draft_hash: {entry['draft_hash']}"
-                        state_path.write_text(
-                            state["newline"].join(lines) + state["newline"], encoding="utf-8", newline=""
-                        )
-                        return {"action": "updated", "entry": entry}
-                break
+            if not re.match(rf"\s*-\s*phase:\s*{re.escape(entry['phase'])}\s*$", lines[index]):
+                continue
+            entry_end = block_end
+            for probe in range(index + 1, block_end):
+                if re.match(r"\s*-\s*phase:\s*", lines[probe]):
+                    entry_end = probe
+                    break
+            canonical_match = any(
+                re.match(rf'\s+canonical:\s*"?{re.escape(entry["canonical"])}"?\s*$', lines[probe])
+                for probe in range(index, entry_end)
+            )
+            canonical_present = any(re.match(r"\s+canonical:\s*", lines[probe]) for probe in range(index, entry_end))
+            step_match = any(
+                re.match(rf'\s+step:\s*"?{re.escape(str(entry["step"]))}"?\s*$', lines[probe])
+                for probe in range(index, entry_end)
+            )
+            if not (canonical_match or (not canonical_present and step_match)):
+                continue
+            for target in range(index, entry_end):
+                if persist and entry.get("persisted_hash") and re.match(r"\s+persisted_hash:\s*", lines[target]):
+                    lines[target] = f"    persisted_hash: {entry['persisted_hash']}"
+                elif not persist and entry.get("draft_hash") and re.match(r"\s+draft_hash:\s*", lines[target]):
+                    lines[target] = f"    draft_hash: {entry['draft_hash']}"
+            state_path.write_text(
+                state["newline"].join(lines) + state["newline"], encoding="utf-8", newline=""
+            )
+            return {"action": "updated", "entry": entry}
 
     block = [
         "approvals:" if block_start is None or lines[block_start].strip().endswith("[]") else None,
         f"  - phase: {entry['phase']}",
         f"    step: \"{entry['step']}\"",
+        f"    canonical: \"{entry['canonical']}\"",
         f"    token: \"{entry['token']}\"",
         f"    draft_hash: {entry.get('draft_hash') or 'null'}",
         f"    persisted_hash: {entry.get('persisted_hash') or 'null'}",
@@ -216,6 +233,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--allow-any", action="store_true", help="skip order and gate-declaration checks")
     parser.add_argument("--record", action="store_true")
     parser.add_argument("--persist", action="store_true")
+    parser.add_argument("--guard", action="store_true", help="verify the feature and test baselines")
     parser.add_argument("--list", action="store_true")
     args = parser.parse_args(argv)
 
@@ -307,19 +325,59 @@ def main(argv: list[str] | None = None) -> int:
             block_start, block_end = approvals_block_bounds(state["lines"])
             if block_start is not None:
                 for index in range(block_start + 1, block_end):
-                    if re.match(rf'\s+step:\s*"?{re.escape(str(result["step"]))}"?\s*$', state["lines"][index]):
-                        for offset in range(index, min(index + 6, block_end)):
-                            match = re.match(r"\s+draft_hash:\s*(\S+)", state["lines"][offset])
-                            if match:
-                                approved_hash = match.group(1).strip('"')
-                                break
-                        break
+                    if not re.match(r"\s*-\s*phase:\s*", state["lines"][index]):
+                        continue
+                    entry_end = block_end
+                    for probe in range(index + 1, block_end):
+                        if re.match(r"\s*-\s*phase:\s*", state["lines"][probe]):
+                            entry_end = probe
+                            break
+                    canonical_present = any(
+                        re.match(r"\s+canonical:\s*", state["lines"][probe]) for probe in range(index, entry_end)
+                    )
+                    canonical_match = any(
+                        re.match(rf'\s+canonical:\s*"?{re.escape(result["canonical"])}"?\s*$', state["lines"][probe])
+                        for probe in range(index, entry_end)
+                    )
+                    step_match = any(
+                        re.match(rf'\s+step:\s*"?{re.escape(str(result["step"]))}"?\s*$', state["lines"][probe])
+                        for probe in range(index, entry_end)
+                    )
+                    if canonical_present and not canonical_match:
+                        continue
+                    if not canonical_present and not step_match:
+                        continue
+                    for offset in range(index, entry_end):
+                        match = re.match(r"\s+draft_hash:\s*(\S+)", state["lines"][offset])
+                        if match:
+                            approved_hash = match.group(1).strip('"')
+                            break
+                    break
             if approved_hash is None:
                 result["ok"] = False
                 result["errors"].append("no recorded approval for this step; record it before persisting")
             elif approved_hash != draft_hash:
                 result["ok"] = False
                 result["errors"].append(f"persisted content differs from the approved draft ({approved_hash})")
+
+    if args.guard and phase == "elaboration" and str(result["step"]) in {"14B", "14C", "14D"}:
+        for kind in ("features", "tests"):
+            command = [
+                sys.executable,
+                str(SCRIPTS / "test_guard.py"),
+                "--state",
+                str(state_path),
+                "--phase",
+                phase,
+                "--step",
+                str(result["step"]),
+                f"--{kind}",
+                "--verify",
+            ]
+            proc = subprocess.run(command, capture_output=True, text=True, encoding="utf-8")
+            if proc.returncode != 0:
+                result["ok"] = False
+                result["errors"].append(f"test_guard {kind} failed: {proc.stdout.strip()[:400]}")
 
     if args.record:
         if not result["ok"]:
@@ -328,6 +386,8 @@ def main(argv: list[str] | None = None) -> int:
             entry = {
                 "phase": phase,
                 "step": str(result["step"]),
+                "subgate": result.get("subgate"),
+                "canonical": result.get("canonical"),
                 "token": collapse(args.token),
                 "draft_hash": draft_hash,
                 "persisted_hash": draft_hash if (args.persist and not batch_mode) else None,

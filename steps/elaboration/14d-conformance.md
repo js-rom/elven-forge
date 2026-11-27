@@ -5,6 +5,7 @@
 - `Test Plan`: Test IDs, Scope IDs, Status, Test file and Evidence.
 - `Acceptance Test Plan`: A-IDs, Scope IDs, Feature file, Executed and Result.
 - Approved `Logical View` diagrams, `Use Case Realization`, `Domain-to-Design Transition Map`, `SW Architecture Document`.
+- Feature and test baselines from 14A and 14B.
 - Production source tree and the project build layout.
 
 ## Output contract
@@ -17,6 +18,7 @@
 
 ## Preconditions
 - `OK 14C` approved.
+- `test_guard.py --features --verify` and `test_guard.py --tests --verify` pass.
 - The build tree compiles before reviewing: run the project's compile command.
 - Scope IDs and exit criteria are present in the Iteration Plan.
 
@@ -33,6 +35,7 @@
 - Design conformance matrix.
 - Plan coverage matrix.
 - Exit criteria table.
+- Test and feature guard OK; the orchestrator runs `gate.py --guard` for `OK 14D`.
 - `up-reviewer` verdict using `rubrics/conformance.md`; a `NO` blocks the gate.
 - Non-`MATCH` rows with route: 14B TDD item, 9B, 9A or 8.
 - `OK 14D` request.
@@ -43,3 +46,4 @@
 - Re-running test suites here; 14C owns execution and the Test Plan owns unit/integration evidence.
 - Declaring `READY` with an uncovered Scope ID or a `NOT MET` criterion.
 - Reviewing the whole Logical View folder on every iteration.
+- A test or feature changed after approval.

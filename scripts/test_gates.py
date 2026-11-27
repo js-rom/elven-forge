@@ -323,6 +323,47 @@ UC01.
             "--file", str(verification_positive), "--state", str(state_elaboration(base, "14D"))),
     )
 
+    guard_root = base / "source"
+    write(guard_root / "src/test/resources/features/a.feature", "Feature: A\n")
+    write(guard_root / "src/test/java/A.java", "class A {}\n")
+    guard_state = write(
+        base / "state-guard.yaml",
+        "phase: elaboration\niteration: I9\ndomain: test\nstatus: in_progress\ncurrent_step: 14B\njournal: journal/I9\n",
+    )
+    record(
+        "guard features record",
+        0,
+        run("test_guard.py", "--state", str(guard_state), "--source-root", str(guard_root), "--features", "--record"),
+    )
+    record(
+        "guard features verify",
+        0,
+        run("test_guard.py", "--state", str(guard_state), "--source-root", str(guard_root), "--features", "--verify"),
+    )
+    write(guard_root / "src/test/resources/features/a.feature", "Feature: A changed\n")
+    record(
+        "guard feature change",
+        1,
+        run("test_guard.py", "--state", str(guard_state), "--source-root", str(guard_root), "--features", "--verify"),
+    )
+    record(
+        "guard tests record",
+        0,
+        run("test_guard.py", "--state", str(guard_state), "--source-root", str(guard_root), "--tests", "--record"),
+    )
+    write(guard_root / "src/test/java/A.java", "class A { int x; }\n")
+    record(
+        "guard test change",
+        1,
+        run("test_guard.py", "--state", str(guard_state), "--source-root", str(guard_root), "--tests", "--verify"),
+    )
+    write(guard_root / "src/test/java/A.java", "class A {}\n")
+    record(
+        "guard test restore",
+        0,
+        run("test_guard.py", "--state", str(guard_state), "--source-root", str(guard_root), "--tests", "--verify"),
+    )
+
     failed = [case for case in cases if not case["ok"]]
     print(json.dumps({"ok": not failed, "cases": cases}, indent=2, ensure_ascii=False))
     return 0 if not failed else 1

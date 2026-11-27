@@ -1,6 +1,6 @@
 # Abstract roles for the UP agent system.
 # Adapters map these roles to a concrete runtime (see adapters/opencode.md).
-version: 1
+version: 2
 roles:
   orchestrator:
     can_edit: false
@@ -11,6 +11,20 @@ roles:
     can_edit: true
     writes: [.atl/staging]
     owns: [drafting]
+  test-author:
+    can_edit: true
+    writes: [.atl/staging, "**/src/test"]
+    cannot_edit: ["**/src/main", openspec, .agents]
+    owns: [acceptance_features, step_definitions, test_plan, test_code, red_evidence]
+  implementer:
+    can_edit: true
+    writes: ["**/src/main"]
+    cannot_edit: ["**/src/test", openspec, .agents]
+    owns: [production_code, green_evidence]
+  runner:
+    can_edit: false
+    runs: [mvn test, mvn test -Pacceptance, .agents/scripts/test_guard.py]
+    owns: [execution_evidence]
   reviewer:
     can_edit: false
     reads: [openspec, .atl/staging, .agents/rubrics, .agents/contracts]

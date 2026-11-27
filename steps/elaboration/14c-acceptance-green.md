@@ -1,5 +1,11 @@
 # Step 14C — Acceptance Execution (GREEN)
 
+## Roles
+
+- Runner: executes the acceptance suite; never edits.
+- Test author: reconciles the scenarios; fixes glue with a new `OK 14A`/`OK 14B` if needed.
+- Implementer: not involved.
+
 ## Inputs
 - `Acceptance Test Plan` from 14A and the implemented slice from 14B.
 - Acceptance suite command from the domain config (`mvn test -Pacceptance` by default).
@@ -10,6 +16,7 @@
 - Build `Scenario Reconciliation (14C)`: every `A-xx` from 14A with its feature file, `Executed = yes`, `Result = GREEN` and evidence.
 - RED scenarios are defects: route each one through the 14B TDD loop (failing test -> fix -> green), then re-run the suite.
 - Update `Acceptance Test Plan` with defects found (RED evidence + resolution) and final execution evidence: acceptance command and full unit suite.
+- Verify the feature baseline with `test_guard.py --features --verify`; any change blocks.
 - Do not change an approved scenario to make it pass.
 
 ## Preconditions
@@ -25,6 +32,7 @@
 ## Evidence required
 - Acceptance command output with scenario and step counts.
 - Reconciliation table and scenario counts: agreed vs executed.
+- Feature guard OK; the orchestrator runs `gate.py --guard` for `OK 14C`.
 - Full test suite output.
 - Defect list with resolution.
 - `OK 14C` request.
@@ -34,3 +42,4 @@
 - Editing scenarios to match the implementation.
 - Hiding a RED scenario as "flaky" without evidence.
 - A scenario that never appears in a feature file passing silently.
+- The implementer editing features or tests to make the suite pass.

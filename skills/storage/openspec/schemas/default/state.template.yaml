@@ -41,7 +41,7 @@ pending_steps: []                     # steps yet to be completed (populated at 
 
 # --- Approvals (gate binding) ---
 
-approvals: []                         # one entry per gate: {phase, step, token, draft_hash, persisted_hash, at}
+approvals: []                         # one entry per gate: {phase, step, canonical, token, draft_hash, persisted_hash, at}
 
 # --- Iteration Scope ---
 scope: ""                             # brief description of iteration focus

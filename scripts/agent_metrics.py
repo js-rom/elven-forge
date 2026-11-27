@@ -105,7 +105,15 @@ def build(state_path: Path, iteration: str | None, events_path: Path = EVENTS_PA
 
     def entry(step: str) -> dict:
         if step not in steps:
-            steps[step] = {"step": str(step), "gate_rejections": 0, "validator_errors": 0, "routes_back": 0}
+            steps[step] = {
+                "step": str(step),
+                "gate_rejections": 0,
+                "validator_errors": 0,
+                "routes_back": 0,
+                "test_guard_failures": 0,
+                "test_changes_after_approval": 0,
+                "feature_changes_after_approval": 0,
+            }
         return steps[step]
 
     for event in events:
@@ -117,6 +125,12 @@ def build(state_path: Path, iteration: str | None, events_path: Path = EVENTS_PA
             target["gate_rejections"] += 1
         if event.get("tool") == "validate":
             target["validator_errors"] += int(event.get("errors", 0) or 0)
+        if event.get("tool") == "test_guard" and event.get("ok") is False:
+            target["test_guard_failures"] += 1
+            if event.get("kind") == "tests":
+                target["test_changes_after_approval"] += 1
+            if event.get("kind") == "features":
+                target["feature_changes_after_approval"] += 1
 
     for step in read_journal_routes(state_path.parent, journal):
         entry(step)["routes_back"] += 1
@@ -125,6 +139,9 @@ def build(state_path: Path, iteration: str | None, events_path: Path = EVENTS_PA
         "gate_rejections": sum(item["gate_rejections"] for item in steps.values()),
         "validator_errors": sum(item["validator_errors"] for item in steps.values()),
         "routes_back": sum(item["routes_back"] for item in steps.values()),
+        "test_guard_failures": sum(item["test_guard_failures"] for item in steps.values()),
+        "test_changes_after_approval": sum(item["test_changes_after_approval"] for item in steps.values()),
+        "feature_changes_after_approval": sum(item["feature_changes_after_approval"] for item in steps.values()),
         "state_read_bytes": state_path.stat().st_size,
     }
 
@@ -144,6 +161,9 @@ def build(state_path: Path, iteration: str | None, events_path: Path = EVENTS_PA
             "gate_rejections": "gate.py runs with ok=false",
             "validator_errors": "sum of errors reported by validate_step.py",
             "routes_back": "journal records matching route back / reopen wording",
+            "test_guard_failures": "test_guard.py --verify failures",
+            "test_changes_after_approval": "test tree changed after the 14B baseline",
+            "feature_changes_after_approval": "features changed after the 14A baseline",
             "state_read_bytes": "state.yaml size at measurement time",
         },
     }

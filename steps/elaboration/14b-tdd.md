@@ -1,5 +1,11 @@
 # Step 14B — TDD (code + tests)
 
+## Roles
+
+- Test author: writes the `Test Plan` and the test code, and produces RED.
+- Implementer: writes production code only after `OK 14B.IMPL`; tests and features are read-only.
+- The test author never writes `src/main`; the implementer never writes `src/test`.
+
 ## Inputs
 - `Iteration Plan` as a hard scope gate: implement only the approved use cases, scenarios or slices.
 - `Use Case Realization` and the reviewed `Logical View` from steps 8-11, as the design-to-code contract.
@@ -15,10 +21,12 @@
 - The final review covers the whole scope, not only UI: implemented, deferred and not covered items.
 - For UI scope: at least one fidelity item per target view, traced to `state_id`, `transition.id`, the Vaadin Mapping section and the mock path.
 - Code and tests are file-based TDD outputs; only `Test Plan` is a persisted artifact.
-- For multi-batch TDD, the worker drafts the test slice and batch plan under `.atl/staging/{domain}/{iteration}/14B/`; the orchestrator presents it, and storage persists the approved `Test Plan`. Code and tests are written in place only after `OK 14B.IMPL`.
+- For multi-batch TDD, the test author drafts the batch plan under `.atl/staging/{domain}/{iteration}/14B/`; the orchestrator presents it, and storage persists the approved `Test Plan`.
+- After `OK 14B`, the test author writes the tests in place and produces RED; the implementer starts only after `OK 14B.IMPL`.
 
 ## Preconditions
 - `OK 14A` approved.
+- The feature baseline exists from 14A.
 - Selected scenario passed step 11 with no blocking design issue.
 - `design-consistency.ps1` re-run over the iteration slice with updated `-NewPackages`: zero `[ERROR]`.
 - For UI scope: present the implementation baseline (views, state ids, mocks, transitions, Vaadin sections, deferred states) before the gate.
@@ -31,8 +39,11 @@
 
 ## Evidence required
 - Test slice and TDD plan, then `OK 14B` (or `OK 14B.CASES` when automatic case selection is requested).
-- After `Test Plan` is persisted: `OK 14B.IMPL` before real edits and test execution.
-- RED/GREEN evidence per cycle, with commands and counts.
+- After `OK 14B`: the test author writes the tests and runs RED; record the test baseline with `test_guard.py --tests --record`.
+- After `Test Plan` is persisted: `OK 14B.IMPL` before production edits; tests and features are read-only.
+- RED evidence produced by the test author (command + output).
+- GREEN evidence from the implementer.
+- `test_guard.py --features --verify` and `test_guard.py --tests --verify` OK; the orchestrator runs `gate.py --guard` for `OK 14B.IMPL` and the final `OK 14B`.
 - Re-persisted `Test Plan` with status and evidence for every item; no `planned` item remains.
 - Final `OK 14B` when the implementation is complete, before 14C.
 
@@ -41,3 +52,6 @@
 - Writing tests after the code in the same cycle.
 - Editing code before `OK 14B.IMPL`.
 - Leaving `planned` or `pending` items in the Test Plan at the close.
+- The implementer editing tests or features.
+- The test author writing production code.
+- Changing a test after `OK 14B` without a new approval.
