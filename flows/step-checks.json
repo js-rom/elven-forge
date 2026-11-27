@@ -47,23 +47,147 @@
       ],
       "rubric": "rubrics/logical-view.md"
     },
+    "14A": {
+      "artifact": "Acceptance Test Plan",
+      "checks": [
+        {
+          "kind": "headings",
+          "level": 2,
+          "require": [
+            "Scenario List (Agreed Acceptance List — 14A Output)",
+            "Invariant Coverage Matrix",
+            "Domain Rules Compliance Matrix"
+          ]
+        },
+        {
+          "kind": "table_columns",
+          "require": ["Scenario ID", "Scope ID", "Feature file", "Planned execution"]
+        }
+      ]
+    },
     "14B": {
       "artifact": "Test Plan",
       "checks": [
         {
           "kind": "headings",
           "level": 2,
-          "require": ["Revision History", "Planning Context", "Agreed Test List (Step 1 Output)", "Traceability"]
+          "require": ["Agreed Test List (Step 1 Output)", "Deferred Items", "Traceability"]
+        },
+        {
+          "kind": "table_columns",
+          "require": ["Test ID", "Scope IDs", "Status", "Test file", "Evidence"]
+        },
+        {
+          "kind": "table_rows",
+          "section": "Agreed Test List (Step 1 Output)",
+          "columns": ["Test ID", "Status", "Evidence"],
+          "allow_dash": ["Test file", "Scope IDs"]
+        },
+        {
+          "kind": "allowed_values",
+          "section": "Agreed Test List (Step 1 Output)",
+          "column": "Status",
+          "values": ["implemented", "deferred"]
+        },
+        {
+          "kind": "forbid_values",
+          "section": "Agreed Test List (Step 1 Output)",
+          "column": "Status",
+          "values": ["planned", "pending", ""]
         },
         { "kind": "trace", "from": "Iteration Plan", "to": "Test Plan", "strict": false }
       ],
       "rubric": "rubrics/test-plan.md"
     },
-    "14D": {
-      "artifact": "Test Plan",
+    "14C": {
+      "artifact": "Acceptance Test Plan",
       "checks": [
-        { "kind": "headings", "level": 2, "require": ["Implementation Conformance Review (14D)"] },
-        { "kind": "pattern", "regex": "\\bMATCH\\b", "min": 1 }
+        {
+          "kind": "headings",
+          "level": 2,
+          "require": ["Scenario Reconciliation (14C)", "Execution Evidence (14C)"]
+        },
+        {
+          "kind": "table_columns",
+          "require": ["Scenario ID", "Feature file", "Executed", "Result"]
+        },
+        {
+          "kind": "forbid_values",
+          "section": "Scenario Reconciliation (14C)",
+          "column": "Executed",
+          "values": ["no", "skip", ""]
+        },
+        {
+          "kind": "forbid_values",
+          "section": "Scenario Reconciliation (14C)",
+          "column": "Result",
+          "values": ["RED", "not run", ""]
+        },
+        {
+          "kind": "reconcile_table",
+          "source": { "section": "Scenario List (Agreed Acceptance List — 14A Output)", "column": "Scenario ID" },
+          "target": { "section": "Scenario Reconciliation (14C)", "column": "Scenario ID" },
+          "direction": "equal"
+        }
+      ],
+      "rubric": "rubrics/acceptance-execution.md"
+    },
+    "14D": {
+      "artifact": "Iteration Verification",
+      "checks": [
+        {
+          "kind": "headings",
+          "level": 2,
+          "require": [
+            "Design Conformance (14D)",
+            "Iteration Plan Coverage (14D)",
+            "Iteration Exit Criteria (14D)",
+            "Build Evidence",
+            "Verdict"
+          ]
+        },
+        {
+          "kind": "table_columns",
+          "require": ["Scope ID", "Implementation", "Test IDs", "Evidence", "Verdict"]
+        },
+        {
+          "kind": "table_rows",
+          "section": "Iteration Plan Coverage (14D)",
+          "columns": ["Scope ID", "Evidence", "Verdict"],
+          "allow_dash": ["Implementation", "Test IDs", "A-IDs"]
+        },
+        {
+          "kind": "allowed_values",
+          "section": "Iteration Plan Coverage (14D)",
+          "column": "Verdict",
+          "values": ["COVERED", "DEFERRED"]
+        },
+        {
+          "kind": "table_rows",
+          "section": "Iteration Exit Criteria (14D)",
+          "columns": ["Criterion", "Evidence", "Verdict"]
+        },
+        {
+          "kind": "allowed_values",
+          "section": "Iteration Exit Criteria (14D)",
+          "column": "Verdict",
+          "values": ["MET"]
+        },
+        {
+          "kind": "row_value",
+          "section": "Verdict",
+          "key_column": "Check",
+          "key_value": "Overall",
+          "value_column": "Verdict",
+          "equals": "READY"
+        },
+        {
+          "kind": "reconcile_table",
+          "source": { "file": "{Iteration Plan}", "section": "Selected Scope Summary", "column": "Scope ID" },
+          "target": { "section": "Iteration Plan Coverage (14D)", "column": "Scope ID" },
+          "direction": "equal",
+          "allow_missing": ["EP-DPIA-01"]
+        }
       ],
       "rubric": "rubrics/conformance.md"
     }

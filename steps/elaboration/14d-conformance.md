@@ -1,32 +1,45 @@
-# Step 14D — Conformance (implementation vs Logical View)
+# Step 14D — Iteration Verification
 
 ## Inputs
-- Approved `Logical View` diagrams for the scope: `*.packageDiagram.plantuml`, `*.classDiagram.plantuml`, `*.sequenceDiagram.plantuml`.
-- `Use Case Realization` from 10, `Domain-to-Design Transition Map` from 9A, `Iteration Plan`, `SW Architecture Document`.
-- The project build layout: production source tree and build command.
+- `Iteration Plan`: Scope IDs and Iteration Exit Criteria.
+- `Test Plan`: Test IDs, Scope IDs, Status, Test file and Evidence.
+- `Acceptance Test Plan`: A-IDs, Scope IDs, Feature file, Executed and Result.
+- Approved `Logical View` diagrams, `Use Case Realization`, `Domain-to-Design Transition Map`, `SW Architecture Document`.
+- Production source tree and the project build layout.
 
 ## Output contract
-- Conformance matrix, one row per checked element: diagram element | `.plantuml` source | implemented counterpart (namespaced id or operation) | verdict (`MATCH`, `MISSING`, `EXTRA`, `DIVERGENT`) | action.
-- Scope: packages/subsystems and scenarios selected by the Iteration Plan, plus any package touched by 14B or 14C.
-- No code edits in this step.
+- Produce the `Iteration Verification` artifact for the iteration (master path, iteration-scoped). Do not write it into the Test Plan.
+- **Design Conformance**: one row per checked element: element | source | implementation | verdict (`MATCH`, `MISSING`, `EXTRA`, `DIVERGENT`) | action.
+- **Iteration Plan Coverage**: one row per `Scope ID`: UC/scenario | design | implementation | Test IDs | A-IDs | evidence | verdict (`COVERED`, `DEFERRED`, `MISSING`, `PARTIAL`).
+- **Iteration Exit Criteria**: one row per criterion: evidence | verdict (`MET`, `NOT MET`).
+- **Build Evidence** and **Verdict** (`Overall: READY` or `NOT READY`).
+- No code edits. The Test Plan is not modified here; it closes in 14B.
 
 ## Preconditions
 - `OK 14C` approved.
-- Build tree compiles before reviewing: run the project's compile command.
+- The build tree compiles before reviewing: run the project's compile command.
+- Scope IDs and exit criteria are present in the Iteration Plan.
 
 ## Rubric
-- Package conformance: declared packages exist with the same namespaced identifier; no implemented classifier in an undeclared package; layer rules hold.
-- Classifier conformance: same identifier and kind; visible operations and attributes cover those invoked by the DSDs; relationships match.
-- Interaction conformance: every lifeline and message resolves to an existing classifier and operation.
-- `OK 14D` is valid only with a fully `MATCH` matrix.
+- Design Conformance: every row `MATCH`; no `MISSING`, `EXTRA` or `DIVERGENT`.
+- Plan Coverage: every Scope ID `COVERED` or `DEFERRED` with approval; no `MISSING` or `PARTIAL`.
+- Exit Criteria: every criterion `MET`.
+- `Overall: READY` only when the three checks above are green.
+- A `COVERED` item without tests is valid only with an explicit no-test rationale in `Evidence`.
+- A design element that contradicts an approved postcondition is a stale diagram: route it to 9B, not to code.
 
 ## Evidence required
-- Build evidence (compile command and result).
-- Conformance matrix.
+- Build command and result.
+- Design conformance matrix.
+- Plan coverage matrix.
+- Exit criteria table.
 - `up-reviewer` verdict using `rubrics/conformance.md`; a `NO` blocks the gate.
-- Non-`MATCH` rows with route: new TDD item in `Test Plan` -> 14B -> 14C -> 14D.
+- Non-`MATCH` rows with route: 14B TDD item, 9B, 9A or 8.
+- `OK 14D` request.
 
 ## Anti-patterns
-- Bending code to a stale diagram that contradicts an approved postcondition; route it to 9B instead.
+- Using the Test Plan as the home of the coverage matrix.
+- Marking a `MISSING` item as `DEFERRED` without approval.
+- Re-running test suites here; 14C owns execution and the Test Plan owns unit/integration evidence.
+- Declaring `READY` with an uncovered Scope ID or a `NOT MET` criterion.
 - Reviewing the whole Logical View folder on every iteration.
-- Declaring 14B/14C complete without this gate.

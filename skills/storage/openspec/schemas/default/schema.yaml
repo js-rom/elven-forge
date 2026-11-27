@@ -112,6 +112,12 @@ artifacts:
     template: iteration-plan.md
     instruction: INVOKE this link -> "./instructions/iteration-plan.md"
     requires: [requirements-ranking, use-case-model]
+  - id: Iteration Verification
+    path: 08 Project Management/{{#}} {{Iteration}} Verification.md
+    description: Iteration-level verification of design conformance, plan coverage, exit criteria and build evidence.
+    template: iteration-verification.md
+    instruction: INVOKE this link -> "./instructions/iteration-verification.md"
+    requires: [iteration-plan, test-plan, acceptance-test-plan, logical-view-class-diagram, design-sequence-diagram]
   - id: Elaboration Iterations Ledger
     path: 08 Project Management/Elaboration Iterations Ledger.json
     description: Machine-readable source of truth for iteration dates, git evidence, effective days, UC classification, reliability, and average eligibility.

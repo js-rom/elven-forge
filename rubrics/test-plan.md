@@ -7,9 +7,9 @@ Use with `.opencode/agents/up-reviewer.md`. The Test Plan is the TDD contract fo
 | Criterion | Weight | Evidence required |
 |---|---|---|
 | Scope traceability | 25 | Every iteration item has a test item; no out-of-scope item |
-| Technique coverage | 25 | Factors, equivalence classes, boundaries and reduction documented |
+| Technique coverage | 20 | Factors, equivalence classes, boundaries and reduction documented |
 | Contract traceability | 25 | Item -> UC/scenario -> UCR -> SSD -> postcondition |
-| Conformance section | 15 | 14D matrix present and consistent with the last run |
+| Status and evidence | 20 | Every item has `Status` (`implemented`/`deferred`) and non-empty evidence; deferred items justified |
 | Execution evidence | 10 | RED/GREEN commands and counts per cycle |
 
 ## Verdict

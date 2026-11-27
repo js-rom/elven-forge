@@ -96,9 +96,10 @@ def check_headings(text: str, spec: dict) -> list[str]:
     optional = {heading.lower() for heading in spec.get("optional", [])}
 
     def present(name: str) -> bool:
+        escaped = re.sub(r"[—–-]", "[-—–]", re.escape(name))
         for level in levels:
             prefix = "#" * int(level)
-            if re.search(rf"(?mi)^{re.escape(prefix)}\s+{re.escape(name)}\s*$", text):
+            if re.search(rf"(?mi)^{re.escape(prefix)}\s+{escaped}\s*$", text):
                 return True
         return False
 
@@ -218,6 +219,198 @@ def check_state_field(lines: list[str], spec: dict) -> list[str]:
     return [f"state field '{field}' not found"]
 
 
+def section_tables(text: str, heading: str):
+    lines = text.splitlines()
+    target = re.sub(r"[—–-]", "-", heading).strip().lower()
+    start = None
+    for index, line in enumerate(lines):
+        match = re.match(r"^##\s+(.+?)\s*$", line)
+        if match and re.sub(r"[—–-]", "-", match.group(1)).strip().lower() == target:
+            start = index + 1
+            break
+    if start is None:
+        return []
+    end = len(lines)
+    for index in range(start, len(lines)):
+        if re.match(r"^##\s+", lines[index]):
+            end = index
+            break
+
+    blocks: list[list[str]] = []
+    current: list[str] = []
+    for line in lines[start:end]:
+        if line.strip().startswith("|"):
+            current.append(line)
+        elif current:
+            blocks.append(current)
+            current = []
+    if current:
+        blocks.append(current)
+
+    def cells(line: str) -> list[str]:
+        parts = re.split(r"(?<!\\)\|", line.strip().strip("|"))
+        return [part.strip().replace("\\|", "|") for part in parts]
+
+    tables = []
+    for block in blocks:
+        if len(block) < 2:
+            continue
+        header = cells(block[0])
+        rows = []
+        for line in block[1:]:
+            row = cells(line)
+            if all(re.fullmatch(r":?-{2,}:?", cell) for cell in row):
+                continue
+            rows.append(row)
+        tables.append((header, rows))
+    return tables
+
+
+def section_table(text: str, heading: str):
+    tables = section_tables(text, heading)
+    return tables[0] if tables else None
+
+
+def column_index(header: list[str], name: str):
+    for index, cell in enumerate(header):
+        if cell.strip().lower() == name.strip().lower():
+            return index
+    return None
+
+
+def check_table_rows(text: str, spec: dict) -> list[str]:
+    tables = section_tables(text, spec.get("section", ""))
+    if not tables:
+        return [f"section '{spec.get('section')}' or its table not found"]
+    columns = spec.get("columns", [])
+    allow_dash = {item.lower() for item in spec.get("allow_dash", [])}
+    errors = []
+    for table_index, (header, rows) in enumerate(tables, start=1):
+        for index, row in enumerate(rows, start=1):
+            for column in columns:
+                position = column_index(header, column)
+                if position is None:
+                    errors.append(f"table {table_index}: column '{column}' not found")
+                    continue
+                value = row[position].strip() if position < len(row) else ""
+                if value == "":
+                    errors.append(f"table {table_index} row {index}: empty '{column}'")
+                elif value == "-" and column.lower() not in allow_dash:
+                    errors.append(f"table {table_index} row {index}: '-' not allowed in '{column}'")
+                elif value.startswith("<") and value.endswith(">"):
+                    errors.append(f"table {table_index} row {index}: placeholder in '{column}'")
+                elif value.upper() in ("TBD", "PENDING", "PLANNED"):
+                    errors.append(f"table {table_index} row {index}: unresolved value '{value}' in '{column}'")
+    return errors
+
+
+def check_values(text: str, spec: dict, mode: str) -> list[str]:
+    tables = section_tables(text, spec.get("section", ""))
+    if not tables:
+        return [f"section '{spec.get('section')}' or its table not found"]
+    values = {str(item).strip().lower() for item in spec.get("values", [])}
+    errors = []
+    found_column = False
+    for table_index, (header, rows) in enumerate(tables, start=1):
+        position = column_index(header, spec.get("column", ""))
+        if position is None:
+            continue
+        found_column = True
+        for index, row in enumerate(rows, start=1):
+            value = row[position].strip().strip("`") if position < len(row) else ""
+            normalized = value.lower()
+            if mode == "allowed" and normalized not in values:
+                errors.append(
+                    f"table {table_index} row {index}: '{value}' is not allowed; expected one of {sorted(values)}"
+                )
+            if mode == "forbidden" and normalized in values:
+                errors.append(f"table {table_index} row {index}: forbidden value '{value}'")
+    if not found_column:
+        errors.append(f"column '{spec.get('column')}' not found in section '{spec.get('section')}'")
+    return errors
+
+
+def resolve_ref(ref, domain_dir: Path, lines: list[str], fields: dict, default_file: Path | None):
+    if not ref or ref == "self":
+        return default_file
+    match = re.fullmatch(r"\{(.+)\}", ref)
+    if match:
+        return artifact_path(domain_dir, lines, match.group(1), fields)
+    path = Path(ref)
+    return path if path.is_absolute() else (domain_dir / path)
+
+
+def check_reconcile(spec: dict, domain_dir: Path, lines: list[str], fields: dict,
+                    default_file: Path | None) -> list[str]:
+    source_spec = spec.get("source", {})
+    target_spec = spec.get("target", {})
+    source_file = resolve_ref(source_spec.get("file"), domain_dir, lines, fields, default_file)
+    target_file = resolve_ref(target_spec.get("file"), domain_dir, lines, fields, default_file)
+    errors = []
+    if source_file is None or not source_file.is_file():
+        errors.append(f"reconcile source not found: {source_file}")
+        return errors
+    if target_file is None or not target_file.is_file():
+        errors.append(f"reconcile target not found: {target_file}")
+        return errors
+
+    def values(file: Path, ref: dict) -> tuple[set[str], list[str]]:
+        tables = section_tables(file.read_text(encoding="utf-8"), ref.get("section", ""))
+        if not tables:
+            return set(), [f"section '{ref.get('section')}' or its table not found in {file.name}"]
+        found: set[str] = set()
+        matched_column = False
+        for header, rows in tables:
+            position = column_index(header, ref.get("column", ""))
+            if position is None:
+                continue
+            matched_column = True
+            for row in rows:
+                raw = row[position].strip() if position < len(row) else ""
+                parts = raw.split(ref["split"]) if ref.get("split") else [raw]
+                for part in parts:
+                    part = part.strip().strip("`")
+                    if part and part != "-":
+                        found.add(part)
+        if not matched_column:
+            return set(), [f"column '{ref.get('column')}' not found in {file.name}"]
+        return found, []
+
+    source, source_errors = values(source_file, source_spec)
+    target, target_errors = values(target_file, target_spec)
+    errors.extend(source_errors)
+    errors.extend(target_errors)
+    if source_errors or target_errors:
+        return errors
+
+    allowed = set(spec.get("allow_missing", []))
+    missing = sorted(source - target - allowed)
+    extra = sorted(target - source)
+    if missing:
+        errors.append(f"missing in '{target_spec.get('section')}': {missing}")
+    if spec.get("direction", "source_in_target") == "equal" and extra:
+        errors.append(f"unexpected in '{target_spec.get('section')}': {extra}")
+    return errors
+
+
+def check_row_value(text: str, spec: dict) -> list[str]:
+    table = section_table(text, spec.get("section", ""))
+    if table is None:
+        return [f"section '{spec.get('section')}' or its table not found"]
+    header, rows = table
+    key = column_index(header, spec.get("key_column", ""))
+    value = column_index(header, spec.get("value_column", ""))
+    if key is None or value is None:
+        return ["key or value column not found"]
+    for row in rows:
+        if key < len(row) and row[key].strip().lower() == str(spec.get("key_value", "")).lower():
+            actual = row[value].strip() if value < len(row) else ""
+            if actual.lower() != str(spec.get("equals", "")).lower():
+                return [f"'{spec.get('key_value')}' is '{actual}', expected '{spec.get('equals')}'"]
+            return []
+    return [f"row '{spec.get('key_value')}' not found"]
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate a step artifact against its checks.")
     parser.add_argument("--step", required=True)
@@ -295,6 +488,26 @@ def main(argv: list[str] | None = None) -> int:
                 check_errors_trace, check_warnings_trace = check_trace(to_text, from_text, check)
                 check_errors.extend(check_errors_trace)
                 check_warnings.extend(check_warnings_trace)
+        elif kind == "reconcile_table":
+            default_file = files[0] if files else None
+            check_errors = check_reconcile(check, domain_dir, state["lines"], fields, default_file)
+        elif kind in ("table_rows", "allowed_values", "forbid_values", "row_value"):
+            if not files:
+                check_errors.append(f"check '{kind}' needs an artifact file; pass --file")
+            else:
+                for file in files:
+                    if not file.is_file():
+                        check_errors.append(f"file not found: {file}")
+                        continue
+                    content = file.read_text(encoding="utf-8")
+                    if kind == "table_rows":
+                        check_errors.extend(f"{file.name}: {item}" for item in check_table_rows(content, check))
+                    elif kind == "allowed_values":
+                        check_errors.extend(f"{file.name}: {item}" for item in check_values(content, check, "allowed"))
+                    elif kind == "forbid_values":
+                        check_errors.extend(f"{file.name}: {item}" for item in check_values(content, check, "forbidden"))
+                    else:
+                        check_errors.extend(f"{file.name}: {item}" for item in check_row_value(content, check))
         elif not files:
             check_errors.append(f"check '{kind}' needs an artifact file; pass --file")
         else:

@@ -35,21 +35,23 @@
 
 ## Selected Scope Summary
 
-| Priority | Planning Unit | Scope Item | Why Selected | Planned Outcome |
-| :--- | :--- | :--- | :--- |
-| High | <Scenario \| Use Case \| Feature> | <Use case, scenario, or feature name> | <Risk, coverage, or criticality reason> | <What should be demonstrated or completed this iteration> |
-| High | <Scenario \| Use Case \| Feature> | <Name> | <Reason> | <Outcome> |
-| Medium | <Scenario \| Use Case \| Feature> | <Name> | <Reason> | <Outcome> |
-| ... | ... | ... | ... | ... |
+| Scope ID | Priority | Planning Unit | Scope Item | Why Selected | Planned Outcome |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| <S1> | High | <Scenario \| Use Case \| Feature> | <Use case, scenario, or feature name> | <Risk, coverage, or criticality reason> | <What should be demonstrated or completed this iteration> |
+| <S2> | High | <Scenario \| Use Case \| Feature> | <Name> | <Reason> | <Outcome> |
+| <S3> | Medium | <Scenario \| Use Case \| Feature> | <Name> | <Reason> | <Outcome> |
+| ... | ... | ... | ... | ... | ... |
+
+The `Scope ID` is stable for the iteration. The Test Plan, the Acceptance Test Plan and the Iteration Verification use it as the traceability key.
 
 ---
 
 ## History Tracking
 
-| Scope Item | UC ID | Delivery Type | Counts for average |
-| :--- | :--- | :--- | :--- |
-| <Use case, scenario, slice, or feature> | <UCxx or empty> | <full \| slice \| refactor \| support \| retired> | <Yes \| No> |
-| ... | ... | ... | ... |
+| Scope ID | Scope Item | UC ID | Delivery Type | Counts for average |
+| :--- | :--- | :--- | :--- | :--- |
+| <S1> | <Use case, scenario, slice, or feature> | <UCxx or empty> | <full \| slice \| refactor \| support \| retired> | <Yes \| No> |
+| ... | ... | ... | ... | ... |
 
 ---
 
@@ -74,7 +76,7 @@
 
 ## Selected Work Detail
 
-### <Use Case, Scenario, or Feature 1>
+### <Scope ID> — <Use Case, Scenario, or Feature>
 
 - **Planning Unit:** <Scenario | Use Case | Feature>
 - **Parent Use Case:** <Name of the parent use case when planning a scenario. Leave blank if not applicable.>

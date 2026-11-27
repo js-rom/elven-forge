@@ -26,8 +26,12 @@ Applies to: elaboration 14A, 14B, 14C, 14D.
 | RED | Failing command and output, or a documented reason why RED materializes later |
 | GREEN | Command and result (`N tests, 0 failures`) |
 | Coverage of contracts | Mapping item -> Operation Contract postcondition |
-| Conformance | Matrix `element | source | implementation | verdict` for 14D |
+| Test status and evidence (14B) | Every Test Plan item has `Status` (`implemented`/`deferred`) and non-empty `Evidence`; deferred items are listed |
+| Scenario reconciliation (14C) | Every `A-xx` appears with feature file, `Executed=yes`, `Result=GREEN` and evidence |
+| Iteration Verification (14D) | Design conformance + plan coverage (`COVERED`/`DEFERRED`) + exit criteria (`MET`) + `Overall: READY` |
 | Gate request | `OK <STEP>` or `OK <STEP>.<SUBGATE>` |
+
+A gate cannot pass with an unreconciled `Scope ID`, a `planned` test item, a skipped acceptance scenario, or a `NOT MET` exit criterion.
 
 ## Review gates
 

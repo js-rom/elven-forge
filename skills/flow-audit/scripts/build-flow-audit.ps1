@@ -1,4 +1,4 @@
-param(
+﻿param(
     [Parameter(Mandatory = $true)][string]$LedgerPath,
     [string]$Repository = "."
 )
@@ -52,7 +52,7 @@ $stepNames = @{
     "9A" = "Domain-to-Design"; "9B" = "Scenario design"; "10" = "Use Case Realization";
     "11" = "Reviewer pass"; "12" = "Data Model"; "13" = "SW Architecture";
     "14A" = "Acceptance plan"; "14B" = "TDD"; "14C" = "Acceptance execution";
-    "14D" = "Conformance"; "15" = "Requirements Ranking"; "16" = "Fully dressed UC";
+    "14D" = "Iteration Verification"; "15" = "Requirements Ranking"; "16" = "Fully dressed UC";
     "17" = "Cycle close"; "18" = "Elaboration history"
 }
 $rules = @(
@@ -68,6 +68,7 @@ $rules = @(
     [pscustomobject]@{ Step = "10"; Pattern = '03 Design/Use Case Realization/'; Priority = 70 },
     [pscustomobject]@{ Step = "12"; Pattern = '03 Design/Data Model/'; Priority = 70 },
     [pscustomobject]@{ Step = "13"; Pattern = '03 Design/SW Architecture Document\.md$'; Priority = 70 },
+    [pscustomobject]@{ Step = "14D"; Pattern = '08 Project Management/.*Verification\.md$'; Priority = 75 },
     [pscustomobject]@{ Step = "14A"; Pattern = '05 Test/.*Acceptance plan\.md$'; Priority = 60 },
     [pscustomobject]@{ Step = "14B"; Pattern = '05 Test/.*Test plan\.md$|src/test/|src/main/'; Priority = 50 },
     [pscustomobject]@{ Step = "15"; Pattern = '08 Project Management/Requirements Ranking\.md$'; Priority = 70 },

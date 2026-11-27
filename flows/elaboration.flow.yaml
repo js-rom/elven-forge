@@ -195,13 +195,13 @@ steps:
       design: "9B"
 
   - id: "14D"
-    title: Conformance (implementation vs Logical View)
+    title: Iteration Verification
     contract: steps/elaboration/14d-conformance.md
-    produces: [Test Plan]
+    produces: [Iteration Verification]
     gates: ["OK 14D"]
     pre: [design_consistency]
     inputs:
-      require: [Logical View, Use Case Realization, Iteration Plan, SW Architecture Document]
+      require: [Iteration Plan, Test Plan, Acceptance Test Plan, Logical View, Use Case Realization, SW Architecture Document]
     on_fail:
       implementation: "14B"
       design: "9B"

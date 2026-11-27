@@ -58,6 +58,13 @@ journal: journal/E99
 approvals: []
 
 artifacts:
+  08 Project Management:
+    - id: Iteration Plan
+      path: plan.md
+      status: persisted
+      created_at_step: 1
+      refined_at_steps: []
+      depends_on: []
   05 Test:
     - id: Test Plan
       path: 05 Test/99 E99 Test plan.md
@@ -186,6 +193,134 @@ def main() -> int:
         0,
         run("gate.py", "--state", str(persist_state), "--token", "OK PASO 14D",
             "--draft", str(approved), "--persist"),
+    )
+
+    plan_fixture = write(
+        base / "plan.md",
+        """# Plan
+
+## Selected Scope Summary
+
+| Scope ID | Priority | Planning Unit | Scope Item | Why Selected | Planned Outcome |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| S1 | High | Refactor | S1 | reason | outcome |
+
+UC01.
+""",
+    )
+
+    test_plan_fixture = write(
+        base / "test-plan-14b.md",
+        """# Test Plan
+
+## Agreed Test List (Step 1 Output)
+
+| Test ID | Scope IDs | Scenario Slice | Preconditions | Input / Trigger | Expected Result | Selection Rationale | Priority | Status | Test file | Evidence |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| T-01 | S1 | UC01 slice | pre | in | out | why | High | planned | - | cmd |
+
+## Deferred Items
+
+| Test ID | Reason | Approved by |
+| :--- | :--- | :--- |
+| - | none | - |
+
+## Traceability
+
+UC01.
+""",
+    )
+    record(
+        "14B planned status",
+        1,
+        run("validate_step.py", "--phase", "elaboration", "--step", "14B",
+            "--file", str(test_plan_fixture), "--state", str(state_elaboration(base, "14B")),
+            "--from-file", str(plan_fixture), "--to-file", str(test_plan_fixture)),
+    )
+
+    acceptance_fixture = write(
+        base / "acceptance-14c.md",
+        """# Acceptance
+
+## Scenario List (Agreed Acceptance List - 14A Output)
+
+| Scenario ID | Scope ID | Gherkin | UC Step / Extension | Domain Invariant | Interaction Spec | Feature file | Planned execution | Priority |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| A-01 | S1 | s | UC01 | I1 | N/A | f | yes | High |
+| A-02 | S1 | s | UC01 | I1 | N/A | f | yes | High |
+
+## Scenario Reconciliation (14C)
+
+| Scenario ID | Feature file | Executed | Result | Evidence |
+| :--- | :--- | :--- | :--- | :--- |
+| A-01 | f | skip | GREEN | cmd |
+
+## Execution Evidence (14C)
+
+| Run | Result |
+| :--- | :--- |
+| cmd | 1 |
+""",
+    )
+    record(
+        "14C skipped scenario",
+        1,
+        run("validate_step.py", "--phase", "elaboration", "--step", "14C",
+            "--file", str(acceptance_fixture), "--state", str(state_elaboration(base, "14C"))),
+    )
+
+    verification_text = """# Verification
+
+## Design Conformance (14D)
+
+| Element | Source | Implementation | Verdict | Action |
+| :--- | :--- | :--- | :--- | :--- |
+| e | s | i | MISSING | fix |
+
+## Iteration Plan Coverage (14D)
+
+| Scope ID | UC/Scenario | Design | Implementation | Test IDs | A-IDs | Evidence | Verdict |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| S1 | UC01 | d | i | T-01 | A-01 | cmd | MISSING |
+
+## Iteration Exit Criteria (14D)
+
+| Criterion | Evidence | Verdict |
+| :--- | :--- | :--- |
+| c | e | NOT MET |
+
+## Build Evidence
+
+- ok
+
+## Verdict
+
+| Check | Verdict |
+| :--- | :--- |
+| Design Conformance | MISSING |
+| Iteration Plan Coverage | MISSING |
+| Iteration Exit Criteria | NOT MET |
+| Overall | NOT READY |
+"""
+    verification_negative = write(base / "verification-14d.md", verification_text)
+    record(
+        "14D missing coverage",
+        1,
+        run("validate_step.py", "--phase", "elaboration", "--step", "14D",
+            "--file", str(verification_negative), "--state", str(state_elaboration(base, "14D"))),
+    )
+
+    verification_positive = write(
+        base / "verification-14d-ok.md",
+        verification_text.replace("| MISSING |", "| COVERED |")
+        .replace("| NOT MET |", "| MET |")
+        .replace("| Overall | NOT READY |", "| Overall | READY |"),
+    )
+    record(
+        "14D ready",
+        0,
+        run("validate_step.py", "--phase", "elaboration", "--step", "14D",
+            "--file", str(verification_positive), "--state", str(state_elaboration(base, "14D"))),
     )
 
     failed = [case for case in cases if not case["ok"]]

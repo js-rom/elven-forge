@@ -29,11 +29,11 @@
 
 ## Scenario List (Agreed Acceptance List — 14A Output)
 
-| Scenario ID | Gherkin | UC Step / Extension | Domain Invariant | Interaction Spec | Priority |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| A-01 | <scenario name> | <step/ext> | <I#> | <state/transition id> | <High/Medium/Low> |
+| Scenario ID | Scope ID | Gherkin | UC Step / Extension | Domain Invariant | Interaction Spec | Feature file | Planned execution | Priority |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| A-01 | <S1> | <scenario name> | <step/ext> | <I#> | <state/transition id> | <path under src/test/resources/features> | <yes> | <High/Medium/Low> |
 
-Feature file(s): <path(s) under src/test/resources/features>
+Each scenario declares its feature file and planned execution so 14C can reconcile what was agreed with what ran.
 
 ---
 
@@ -60,6 +60,16 @@ Criterio de promoción a aceptación (puerta de decisión): (1) traza a regla le
 | Defect | Evidence | Resolution |
 | :--- | :--- | :--- |
 | <D-01 description> | <RED evidence> | <GREEN fix> |
+
+---
+
+## Scenario Reconciliation (14C)
+
+| Scenario ID | Feature file | Executed | Result | Evidence |
+| :--- | :--- | :--- | :--- | :--- |
+| A-01 | <path under src/test/resources/features> | <yes \| no \| skip> | <GREEN \| RED \| not run> | <command / report> |
+
+The gate accepts only `Executed = yes` and `Result = GREEN`. Every scenario in the Scenario List must appear here.
 
 ---
 

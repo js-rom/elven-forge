@@ -70,6 +70,12 @@ PHASES = {
     },
 }
 
+PARITY_OVERRIDES = {
+    "elaboration": {
+        "14D": {"drop": ["Test Plan"], "add": ["Iteration Verification"]},
+    }
+}
+
 
 def normalize(name: str) -> str:
     key = re.sub(r"\s+", " ", name.strip()).lower()
@@ -177,6 +183,14 @@ def check_phase(name: str, cfg: dict, schema_ids: set[str], gates: dict, args) -
     for step in sorted(old_ids & new_ids):
         old_artifacts = artifacts_in_cell(old_mapping.get(step, ""), schema_ids, ALIASES)
         new_artifacts = {normalize(item) for item in new_steps[step].get("produces", [])}
+        override = PARITY_OVERRIDES.get(name, {}).get(step)
+        if override:
+            old_artifacts = set(old_artifacts)
+            for item in override.get("drop", []):
+                old_artifacts.discard(item)
+            for item in override.get("add", []):
+                old_artifacts.add(item)
+            warnings.append(f"step {step}: parity override applied ({override})")
         if old_artifacts != new_artifacts:
             errors.append(
                 f"step {step}: artifacts differ; missing {sorted(old_artifacts - new_artifacts)}, "

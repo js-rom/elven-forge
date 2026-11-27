@@ -244,6 +244,13 @@ artifacts:
       refined_at_steps: []
       depends_on: [Requirements Ranking, Use Case Model]
 
+    - id: Iteration Verification
+      path: 08 Project Management/{{#}} {{Iteration}} Verification.md
+      status: not_started
+      created_at_step: null
+      refined_at_steps: []
+      depends_on: [Iteration Plan, Test Plan, Acceptance Test Plan]
+
     - id: Elaboration Iterations Ledger
       path: 08 Project Management/Elaboration Iterations Ledger.json
       status: not_started

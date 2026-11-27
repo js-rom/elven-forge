@@ -8,6 +8,8 @@
 
 ## Output contract
 - Master `Iteration Plan` for the iteration: scope, selected use cases or scenarios, tasks, estimates, risks and buffer.
+- Every scope item has a stable `Scope ID` (`S1`, `S2`, ...). The Test Plan, the Acceptance Test Plan and the Iteration Verification use it as the traceability key.
+- Deferred or out-of-scope items are listed with a `Scope ID` and a reason.
 - `Historical Calibration` section with sample size, confidence and the three references; or `no historical baseline`.
 - A task-based estimate outside 30% of the historical range must be justified, or the estimate adjusted before the gate.
 - Refine `Requirements Ranking` if priorities changed.
@@ -20,6 +22,7 @@
 ## Rubric
 - Scope selects the riskiest, most valuable and least covered items (the 10% rule).
 - Every scope item traces to a use case or scenario and to a ranking row.
+- Every scope item has a unique `Scope ID`; deferred items have a reason.
 - Estimates follow the calibration contract, not intuition.
 
 ## Evidence required

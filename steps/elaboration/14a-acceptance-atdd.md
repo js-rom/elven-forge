@@ -11,6 +11,7 @@
 
 ## Output contract
 - One Gherkin feature per use case in scope, with one scenario per main-success step group and per extension, in domain vocabulary.
+- Every `A-xx` row declares its `Scope ID`, `Feature file` and `Planned execution`, so 14C can reconcile what was agreed with what ran.
 - Invariant coverage matrix: every in-scope invariant recorded with a decision (acceptance scenario or unit-only + rationale).
 - Rules compliance matrix: `Cubierto`, `Pendiente` or `N-A`, with evidence. Organizational rules are traced, never faked as tests.
 - RED evidence when the slice modifies existing code; for brand-new functionality, document the RED and materialize it in 14B.
@@ -21,6 +22,7 @@
 
 ## Rubric
 - Every acceptance scenario traces to a UC step or extension and to a contract postcondition.
+- Every scenario has a `Scope ID` and a feature file that 14C can reconcile.
 - The promotion gate is applied; not every invariant becomes an acceptance test.
 - Features are executable in principle, but not executed before the gate.
 

@@ -84,11 +84,23 @@
 
 ## Agreed Test List (Step 1 Output)
 
-| Test ID | Scenario Slice | Preconditions | Input / Trigger | Expected Result | Selection Rationale | Priority |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| T-01 | <slice> | <state> | <input> | <expected behavior> | <risk/boundary/class reason> | High |
-| T-02 | <slice> | <state> | <input> | <expected behavior> | <reason> | Medium |
-| ... | ... | ... | ... | ... | ... | ... |
+| Test ID | Scope IDs | Scenario Slice | Preconditions | Input / Trigger | Expected Result | Selection Rationale | Priority | Status | Test file | Evidence |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| T-01 | <S1> | <slice> | <state> | <input> | <expected behavior> | <risk/boundary/class reason> | High | <implemented \| deferred> | <path or -> | <RED/GREEN command or report> |
+| T-02 | <S2> | <slice> | <state> | <input> | <expected behavior> | <reason> | Medium | <implemented \| deferred> | <path or -> | <evidence> |
+| ... | ... | ... | ... | ... | ... | ... | ... | ... | ... | ... |
+
+**Status:** `implemented` means the test exists and is green; `deferred` requires a row in Deferred Items. `planned` and `pending` are not accepted at the 14B gate.
+**Scope IDs:** plan scope items covered by the test, comma-separated; `-` for regression or cross-cutting tests.
+**Evidence:** the command, report or commit that proves RED and GREEN; `-` only when the item is deferred.
+
+---
+
+## Deferred Items
+
+| Test ID | Reason | Approved by |
+| :--- | :--- | :--- |
+| <T-xx> | <why it is deferred> | <user / date> |
 
 ---
 
@@ -133,21 +145,6 @@
 | T-01 | <reference or N/A> | <reference or N/A> | <note> |
 | T-02 | <reference or N/A> | <reference or N/A> | <note> |
 | ... | ... | ... | ... |
-
----
-
-## Implementation Conformance Review (14D)
-
-| Diagram Element | Diagram Source (`.plantuml`) | Implemented Counterpart (namespaced identifier / operation) | Verdict | Action |
-| :--- | :--- | :--- | :--- | :--- |
-| <package / classifier / message> | <file + line> | <namespaced identifier#operation> | MATCH / MISSING / EXTRA / DIVERGENT | <none / TDD item / route to 9B / route to 8> |
-| ... | ... | ... | ... | ... |
-
-- **Review scope (packages / scenarios):** {{review-scope}}
-- **Out of scope (untouched packages validated in prior iterations):** {{out-of-scope}}
-- **Build / compile evidence:** {{build-command + result}}
-- **Verdict:** {{PASS | FAIL}}
-- **Deviations routed to:** {{14B TDD items / 9B / 11 / 8 / none}}
 
 ---
 

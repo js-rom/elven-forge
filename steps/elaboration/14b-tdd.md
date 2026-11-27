@@ -10,6 +10,9 @@
 ## Output contract
 - `Test Plan` with test items grouped by scenario. Each item records the acceptance scenario(s) from 14A that it satisfies.
 - Every item traces to: Iteration Plan item, use case/scenario, UCR section, SSD reference, Operation Contract postcondition; plus architecture, persistence or UI references when applicable.
+- Every item declares `Scope IDs`, `Status` (`implemented` or `deferred`), `Test file` and `Evidence`. Deferred items appear in `Deferred Items` with a reason and approval.
+- At the final `OK 14B`, re-persist the `Test Plan` with the actual status and evidence of every item.
+- The final review covers the whole scope, not only UI: implemented, deferred and not covered items.
 - For UI scope: at least one fidelity item per target view, traced to `state_id`, `transition.id`, the Vaadin Mapping section and the mock path.
 - Code and tests are file-based TDD outputs; only `Test Plan` is a persisted artifact.
 - For multi-batch TDD, the worker drafts the test slice and batch plan under `.atl/staging/{domain}/{iteration}/14B/`; the orchestrator presents it, and storage persists the approved `Test Plan`. Code and tests are written in place only after `OK 14B.IMPL`.
@@ -22,6 +25,7 @@
 
 ## Rubric
 - Each cycle has a failing test first, a minimal change, and a green suite with evidence.
+- Every approved test item has a status and evidence at close; deferred items are justified.
 - No behavior outside the approved scenario slice.
 - A discovered issue is routed to its owning artifact instead of being absorbed into code silently.
 
@@ -29,9 +33,11 @@
 - Test slice and TDD plan, then `OK 14B` (or `OK 14B.CASES` when automatic case selection is requested).
 - After `Test Plan` is persisted: `OK 14B.IMPL` before real edits and test execution.
 - RED/GREEN evidence per cycle, with commands and counts.
+- Re-persisted `Test Plan` with status and evidence for every item; no `planned` item remains.
 - Final `OK 14B` when the implementation is complete, before 14C.
 
 ## Anti-patterns
 - Implementing out-of-scope work because "it was easy".
 - Writing tests after the code in the same cycle.
 - Editing code before `OK 14B.IMPL`.
+- Leaving `planned` or `pending` items in the Test Plan at the close.
