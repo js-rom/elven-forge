@@ -4,12 +4,15 @@
 - 14A: --features --record   after OK 14A (test author wrote the features)
 - 14B: --tests --record      after the test author's RED
 - 14B.IMPL / 14C / 14D: --features --verify and --tests --verify
+- Mutation re-open: --tests --record --reopen --reason "..." (test author only)
 
 Baselines live under journal/{iteration}/feature-baseline.json and
-test-baseline.json. The implementer cannot edit tests by permission; this
-script makes any change detectable even if it happens through another tool.
+test-baseline.json. Re-recording an existing baseline fails unless --reopen is
+given with a reason; the reason is appended to the baseline history. The
+implementer cannot edit tests by permission; this script makes any change
+detectable even if it happens through another tool.
 
-Stdlib only. Exit codes: 0 = ok, 1 = changed/missing baseline.
+Stdlib only. Exit codes: 0 = ok, 1 = changed/missing baseline, 2 = usage.
 """
 
 from __future__ import annotations
@@ -82,7 +85,29 @@ def baseline_path(journal_dir: Path, kind: str) -> Path:
     return journal_dir / name
 
 
-def record_baseline(path: Path, kind: str, source_root: Path, files: dict[str, str], iteration: str) -> dict:
+def record_baseline(
+    path: Path,
+    kind: str,
+    source_root: Path,
+    files: dict[str, str],
+    iteration: str,
+    reopen_reason: str | None = None,
+    step: str | None = None,
+) -> dict:
+    history: list[dict] = []
+    if path.is_file():
+        try:
+            history = list(load_json(path).get("reopen", []))
+        except (OSError, ValueError):
+            history = []
+    if reopen_reason:
+        history.append(
+            {
+                "at": datetime.now().isoformat(timespec="seconds"),
+                "step": step,
+                "reason": reopen_reason,
+            }
+        )
     payload = {
         "iteration": iteration,
         "kind": kind,
@@ -90,6 +115,8 @@ def record_baseline(path: Path, kind: str, source_root: Path, files: dict[str, s
         "recorded_at": datetime.now().isoformat(timespec="seconds"),
         "files": files,
     }
+    if history:
+        payload["reopen"] = history
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     return payload
@@ -125,12 +152,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--all", action="store_true")
     parser.add_argument("--record", action="store_true")
     parser.add_argument("--verify", action="store_true")
+    parser.add_argument("--reopen", action="store_true", help="re-record an existing baseline deliberately")
+    parser.add_argument("--reason", help="why the baseline is reopened")
     parser.add_argument("--phase", default="elaboration")
     parser.add_argument("--step")
     args = parser.parse_args(argv)
 
     if args.record == args.verify:
         parser.error("use exactly one of --record or --verify")
+    if args.reopen and not args.record:
+        parser.error("--reopen requires --record")
+    if args.reopen and not (args.reason or "").strip():
+        parser.error("--reopen requires a non-empty --reason")
 
     state_path = resolve_state(args.domain, args.state)
     if not state_path.is_file():
@@ -169,8 +202,49 @@ def main(argv: list[str] | None = None) -> int:
         files = hash_tree(root)
         path = baseline_path(journal_dir, kind)
         if args.record:
-            record_baseline(path, kind, source_root, files, iteration)
-            reports.append({"kind": kind, "ok": True, "recorded": str(path), "files": len(files)})
+            if path.is_file() and not args.reopen:
+                reports.append(
+                    {
+                        "kind": kind,
+                        "ok": False,
+                        "baseline": str(path),
+                        "errors": [f"baseline already exists: {path}; re-record with --reopen --reason"],
+                    }
+                )
+                ok = False
+                continue
+            payload = record_baseline(
+                path,
+                kind,
+                source_root,
+                files,
+                iteration,
+                args.reason.strip() if args.reopen else None,
+                step,
+            )
+            reports.append(
+                {
+                    "kind": kind,
+                    "ok": True,
+                    "recorded": str(path),
+                    "files": len(files),
+                    "reopened": bool(args.reopen),
+                    "reopen_count": len(payload.get("reopen", [])),
+                }
+            )
+            if args.reopen:
+                record_event(
+                    state_path,
+                    {
+                        "tool": "test_guard",
+                        "phase": args.phase,
+                        "step": step,
+                        "iteration": iteration,
+                        "kind": kind,
+                        "ok": True,
+                        "reopen": True,
+                    },
+                )
         else:
             result = verify_baseline(path, files)
             reports.append({"kind": kind, "baseline": str(path), **result})

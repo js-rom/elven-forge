@@ -143,6 +143,18 @@ def check_table_columns(text: str, spec: dict) -> list[str]:
     return [f"no table contains all columns: {required}"]
 
 
+def check_optional_section(text: str, spec: dict) -> list[str]:
+    heading = spec.get("heading", "")
+    if not re.search(rf"(?mi)^##\s+{re.escape(heading)}\s*$", text):
+        return []
+    errors = []
+    if spec.get("columns"):
+        errors.extend(check_table_columns(text, {"require": spec["columns"]}))
+    if spec.get("column") and spec.get("values"):
+        errors.extend(check_values(text, {**spec, "section": heading}, "allowed"))
+    return errors
+
+
 def check_links(text: str, file: Path, spec: dict) -> list[str]:
     errors = []
     for match in LINK_RE.finditer(text):
@@ -524,6 +536,8 @@ def main(argv: list[str] | None = None) -> int:
                     check_errors.extend(f"{file.name}: {item}" for item in check_pattern(text, check))
                 elif kind == "table_columns":
                     check_errors.extend(f"{file.name}: {item}" for item in check_table_columns(text, check))
+                elif kind == "optional_section":
+                    check_errors.extend(f"{file.name}: {item}" for item in check_optional_section(text, check))
                 elif kind == "links":
                     check_errors.extend(f"{file.name}: {item}" for item in check_links(text, file, check))
                 else:

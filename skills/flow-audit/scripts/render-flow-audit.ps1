@@ -105,14 +105,18 @@ if (Test-Path -LiteralPath $agentMetricsPath) {
     [void]$sb.AppendLine("- Rutas atras: **$(Format-Text $agent.summary.routes_back)**.")
     [void]$sb.AppendLine("- Cambios de test tras aprobacion: **$(Format-Text $agent.summary.test_changes_after_approval)**.")
     [void]$sb.AppendLine("- Cambios de feature tras aprobacion: **$(Format-Text $agent.summary.feature_changes_after_approval)**.")
+    [void]$sb.AppendLine("- Reaperturas de test: **$(Format-Text $agent.summary.test_reopens)**.")
+    [void]$sb.AppendLine("- Mutation score: **$(Format-Text $agent.summary.mutation_score)**.")
+    [void]$sb.AppendLine("- Supervivientes de mutacion: **$(Format-Text $agent.summary.mutation_survived)**.")
+    [void]$sb.AppendLine("- Mutantes sin cobertura: **$(Format-Text $agent.summary.mutation_no_coverage)**.")
     [void]$sb.AppendLine("- Bytes de state: **$(Format-Text $agent.summary.state_read_bytes)**.")
     [void]$sb.AppendLine("- Eventos registrados: **$(Format-Text $agent.events.total)**.")
     [void]$sb.AppendLine("")
     if (@($agent.steps).Count -gt 0) {
-        [void]$sb.AppendLine("| Paso | Gate rechazados | Errores de validador | Rutas atras | Cambios test | Cambios feature |")
-        [void]$sb.AppendLine("| :--- | ---: | ---: | ---: | ---: | ---: |")
+        [void]$sb.AppendLine("| Paso | Gate rechazados | Errores de validador | Rutas atras | Cambios test | Cambios feature | Reopens | Mut score |")
+        [void]$sb.AppendLine("| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
         foreach ($row in @($agent.steps)) {
-            [void]$sb.AppendLine("| $(Format-Text $row.step) | $(Format-Text $row.gate_rejections) | $(Format-Text $row.validator_errors) | $(Format-Text $row.routes_back) | $(Format-Text $row.test_changes_after_approval) | $(Format-Text $row.feature_changes_after_approval) |")
+            [void]$sb.AppendLine("| $(Format-Text $row.step) | $(Format-Text $row.gate_rejections) | $(Format-Text $row.validator_errors) | $(Format-Text $row.routes_back) | $(Format-Text $row.test_changes_after_approval) | $(Format-Text $row.feature_changes_after_approval) | $(Format-Text $row.test_reopens) | $(Format-Text $row.mutation_score) |")
         }
         [void]$sb.AppendLine("")
     }

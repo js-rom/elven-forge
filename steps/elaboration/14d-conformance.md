@@ -7,6 +7,7 @@
 - Approved `Logical View` diagrams, `Use Case Realization`, `Domain-to-Design Transition Map`, `SW Architecture Document`.
 - Feature and test baselines from 14A and 14B.
 - Production source tree and the project build layout.
+- If mutation is enabled: the `Test Quality` block of the Iteration Plan, the PIT report from 14B, `mutation-baseline.json`, the allowlist and the triage table.
 
 ## Output contract
 - Produce the `Iteration Verification` artifact for the iteration (master path, iteration-scoped). Do not write it into the Test Plan.
@@ -14,6 +15,7 @@
 - **Iteration Plan Coverage**: one row per `Scope ID`: UC/scenario | design | implementation | Test IDs | A-IDs | evidence | verdict (`COVERED`, `DEFERRED`, `MISSING`, `PARTIAL`).
 - **Iteration Exit Criteria**: one row per criterion: evidence | verdict (`MET`, `NOT MET`).
 - **Build Evidence** and **Verdict** (`Overall: READY` or `NOT READY`).
+- **Test Quality (Mutation)** when the Iteration Plan enables it: one row per slice with score, target, killed, survived, no coverage, trend and verdict; a survivor triage with class, measure, owner and status. Omit the section when mutation is off.
 - No code edits. The Test Plan is not modified here; it closes in 14B.
 
 ## Preconditions
@@ -21,6 +23,7 @@
 - `test_guard.py --features --verify` and `test_guard.py --tests --verify` pass.
 - The build tree compiles before reviewing: run the project's compile command.
 - Scope IDs and exit criteria are present in the Iteration Plan.
+- If mutation is enabled: `mutation_report.py` produced a triage with no `UNCLASSIFIED` survivor and the protected invariants are clean.
 
 ## Rubric
 - Design Conformance: every row `MATCH`; no `MISSING`, `EXTRA` or `DIVERGENT`.
@@ -29,6 +32,8 @@
 - `Overall: READY` only when the three checks above are green.
 - A `COVERED` item without tests is valid only with an explicit no-test rationale in `Evidence`.
 - A design element that contradicts an approved postcondition is a stale diagram: route it to 9B, not to code.
+- Test Quality: the `rubrics/mutation-quality.md` verdict is `YES`, or `CONDITIONAL` with recorded debt under advisory. Under blocking, `CRITICAL` or `REGRESSION` blocks `READY`.
+- A high score with high `no_coverage` is `BLIND_SPOTS`, not `PASS`.
 
 ## Evidence required
 - Build command and result.
@@ -37,6 +42,7 @@
 - Exit criteria table.
 - Test and feature guard OK; the orchestrator runs `gate.py --guard` for `OK 14D`.
 - `up-reviewer` verdict using `rubrics/conformance.md`; a `NO` blocks the gate.
+- If mutation is enabled: the report path, the triage table and the effect evidence per measure; `up-reviewer` verdict using `rubrics/mutation-quality.md`.
 - Non-`MATCH` rows with route: 14B TDD item, 9B, 9A or 8.
 - `OK 14D` request.
 
@@ -47,3 +53,4 @@
 - Declaring `READY` with an uncovered Scope ID or a `NOT MET` criterion.
 - Reviewing the whole Logical View folder on every iteration.
 - A test or feature changed after approval.
+- Hiding blind spots behind a high score, or allowlisting without evidence.

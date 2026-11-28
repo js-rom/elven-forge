@@ -46,6 +46,22 @@ The `Scope ID` is stable for the iteration. The Test Plan, the Acceptance Test P
 
 ---
 
+## Test Quality
+
+| Field | Value |
+| :--- | :--- |
+| Mutation testing | <on \| off> |
+| Target classes | <packages or classes; the iteration slice only> |
+| Target tests | <test classes that cover the slice> |
+| Target score (`T`) | <70 default; 80 for domain-critical code> |
+| Policy | <advisory \| blocking> |
+| Protected invariants | <INV ids or `class#method`> |
+| Runtime budget | <minutes> |
+
+When `off`, 14B and 14D do not run mutation and the section does not appear in the Iteration Verification.
+
+---
+
 ## History Tracking
 
 | Scope ID | Scope Item | UC ID | Delivery Type | Counts for average |

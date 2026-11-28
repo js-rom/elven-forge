@@ -351,6 +351,44 @@ UC01.
         0,
         run("test_guard.py", "--state", str(guard_state), "--source-root", str(guard_root), "--tests", "--record"),
     )
+    record(
+        "guard record refuses silent overwrite",
+        1,
+        run("test_guard.py", "--state", str(guard_state), "--source-root", str(guard_root), "--tests", "--record"),
+    )
+    record(
+        "guard reopen requires reason",
+        2,
+        run("test_guard.py", "--state", str(guard_state), "--source-root", str(guard_root), "--tests", "--record", "--reopen"),
+    )
+    record(
+        "guard reopen with reason",
+        0,
+        run(
+            "test_guard.py",
+            "--state",
+            str(guard_state),
+            "--source-root",
+            str(guard_root),
+            "--tests",
+            "--record",
+            "--reopen",
+            "--reason",
+            "MUT: weak assertion",
+        ),
+    )
+    guard_baseline = base / "journal" / "I9" / "test-baseline.json"
+    reopen_history = json.loads(guard_baseline.read_text(encoding="utf-8")).get("reopen", [])
+    has_reason = any("weak assertion" in item.get("reason", "") for item in reopen_history)
+    cases.append(
+        {
+            "case": "guard reopen history",
+            "expected_exit": 0,
+            "actual_exit": 0 if has_reason else 1,
+            "ok": has_reason,
+            "note": f"reason recorded: {has_reason}",
+        }
+    )
     write(guard_root / "src/test/java/A.java", "class A { int x; }\n")
     record(
         "guard test change",
@@ -362,6 +400,146 @@ UC01.
         "guard test restore",
         0,
         run("test_guard.py", "--state", str(guard_state), "--source-root", str(guard_root), "--tests", "--verify"),
+    )
+
+    mutation_dir = base / "mutation"
+    mutation_dir.mkdir(parents=True, exist_ok=True)
+
+    def mutation_node(status: str, cls: str, method: str, line: int, mutator: str, tests: int = 1) -> str:
+        detected = "true" if status == "KILLED" else "false"
+        return (
+            f"<mutation detected='{detected}' status='{status}' numberOfTestsRun='{tests}'>"
+            f"<sourceFile>X.java</sourceFile><mutatedClass>{cls}</mutatedClass>"
+            f"<mutatedMethod>{method}</mutatedMethod><lineNumber>{line}</lineNumber>"
+            f"<mutator>org.pitest.mutationtest.engine.gregor.mutators.{mutator}</mutator>"
+            "<killingTest/><description>d</description></mutation>"
+        )
+
+    def write_mutations(name: str, nodes: list[str]) -> Path:
+        return write(mutation_dir / name, "<mutations partial='false'>" + "".join(nodes) + "</mutations>")
+
+    policy = "com.x.Policy"
+    mixed = write_mutations(
+        "mixed.xml",
+        [
+            mutation_node("KILLED", policy, "check", 5, "NegateConditionalsMutator"),
+            mutation_node("SURVIVED", policy, "check", 10, "NegateConditionalsMutator"),
+            mutation_node("NO_COVERAGE", policy, "check", 12, "NullReturnValsMutator", tests=0),
+            mutation_node("NO_COVERAGE", policy, "other", 20, "NegateConditionalsMutator", tests=0),
+        ],
+    )
+    survivor = write_mutations(
+        "survivor.xml",
+        [
+            mutation_node("KILLED", policy, "check", 5, "NegateConditionalsMutator"),
+            mutation_node("SURVIVED", policy, "check", 10, "NegateConditionalsMutator"),
+        ],
+    )
+    mutation_allowlist = write(
+        mutation_dir / "allowlist.json",
+        json.dumps(
+            {
+                "version": 1,
+                "entries": [
+                    {
+                        "id": "MUT-001",
+                        "class": policy,
+                        "method": "check",
+                        "line": 10,
+                        "mutator": "NegateConditionalsMutator",
+                        "reason": "Equivalent",
+                        "approved_by": "test",
+                        "date": "2026-11-27",
+                    }
+                ],
+            }
+        ),
+    )
+    mutation_triage = write(
+        mutation_dir / "triage.json",
+        json.dumps(
+            {
+                "entries": [
+                    {"key": f"{policy}#check:10:NegateConditionalsMutator", "class": "WEAK_ASSERTION"},
+                    {"key": f"{policy}#check:12:NullReturnValsMutator", "class": "MISSING_BEHAVIOR_TEST"},
+                    {"key": f"{policy}#other:20:NegateConditionalsMutator", "class": "DEAD_CODE"},
+                ]
+            }
+        ),
+    )
+    mutation_baseline = write(mutation_dir / "baseline.json", json.dumps({"score": 90.0}))
+
+    record(
+        "mutation mixed report",
+        0,
+        run(
+            "mutation_report.py",
+            "--xml",
+            str(mixed),
+            "--iteration",
+            "E0",
+            "--out-dir",
+            str(mutation_dir / "out-mixed"),
+        ),
+    )
+    record(
+        "mutation allowlist accepts",
+        0,
+        run("mutation_report.py", "--xml", str(survivor), "--iteration", "E0", "--allowlist", str(mutation_allowlist)),
+    )
+    record(
+        "mutation blocking invariant",
+        1,
+        run(
+            "mutation_report.py",
+            "--xml",
+            str(survivor),
+            "--iteration",
+            "E0",
+            "--policy",
+            "blocking",
+            "--protected-invariants",
+            f"{policy}#check",
+        ),
+    )
+    record(
+        "mutation regression",
+        1,
+        run(
+            "mutation_report.py",
+            "--xml",
+            str(survivor),
+            "--iteration",
+            "E0",
+            "--policy",
+            "blocking",
+            "--baseline",
+            str(mutation_baseline),
+        ),
+    )
+    record(
+        "mutation strict needs triage",
+        1,
+        run("mutation_report.py", "--xml", str(mixed), "--iteration", "E0", "--strict-triage"),
+    )
+    record(
+        "mutation strict with triage",
+        0,
+        run(
+            "mutation_report.py",
+            "--xml",
+            str(mixed),
+            "--iteration",
+            "E0",
+            "--strict-triage",
+            "--triage",
+            str(mutation_triage),
+        ),
+    )
+    record(
+        "mutation missing report",
+        2,
+        run("mutation_report.py", "--xml", str(mutation_dir / "nope.xml"), "--iteration", "E0"),
     )
 
     failed = [case for case in cases if not case["ok"]]

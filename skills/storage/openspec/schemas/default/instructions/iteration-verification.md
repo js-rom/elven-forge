@@ -22,7 +22,8 @@ Produce the iteration-level verification at step 14D. This artifact answers one 
    - `Evidence` with the command, commit or inspection that proves it.
    - `Verdict`: `COVERED`, `DEFERRED`, `MISSING` or `PARTIAL`.
 3. **Iteration Exit Criteria:** one row per criterion in the plan. Evidence must be a command, report or inspection, not a claim.
-4. **Verdict:** `READY` only when Design Conformance is all `MATCH`, Plan Coverage has no `MISSING`/`PARTIAL`, and every criterion is `MET`.
+4. **Test Quality (Mutation):** only when the Iteration Plan enables it. Copy the score row and the survivor triage from the `mutation_report.py` output. Do not invent a verdict: the script computes it. Omit the section when mutation is off.
+5. **Verdict:** `READY` only when Design Conformance is all `MATCH`, Plan Coverage has no `MISSING`/`PARTIAL`, and every criterion is `MET`.
 
 ## Rules
 
@@ -30,6 +31,8 @@ Produce the iteration-level verification at step 14D. This artifact answers one 
 - A `DEFERRED` item must appear in Uncovered and Deferred with a reason and approval.
 - Do not edit code in this step.
 - Do not re-run the test suites; 14C owns execution and the Test Plan owns unit/integration evidence.
+- Do not re-run PIT here either; 14B owns the mutation run and 14D only reports and applies the veto.
+- Omit the Test Quality section when mutation is off. A high score with high `No coverage` is `BLIND_SPOTS`, not `PASS`.
 - If a design element is stale, route it to 9B; if a package or layer is wrong, route it to 8.
 
 ## Anti-patterns

@@ -60,6 +60,29 @@ All criteria must be `MET` for the gate.
 
 ---
 
+## Test Quality (Mutation)
+
+Omit this section when the Iteration Plan sets mutation to `off`.
+
+| Slice | Score | Target | Killed | Survived | No coverage | Trend | Verdict |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
+| <slice> | <0.0>% | <70> | <n> | <n> | <n> | <delta> | <PASS \| IMPROVE \| REINFORCE \| REGRESSION \| BLIND_SPOTS \| CRITICAL \| ACCEPT> |
+| ... | ... | ... | ... | ... | ... | ... | ... |
+
+| Mutant | Class | Line | Mutator | Status | Triaged as | Confirmed | Measure | Owner |
+| :--- | :--- | ---: | :--- | :--- | :--- | :--- | :--- | :--- |
+| `<method>` | `<class>` | <line> | <mutator> | <SURVIVED \| NO_COVERAGE> | <class> | <yes \| no> | <measure> | <owner> |
+| ... | ... | ... | ... | ... | ... | ... | ... | ... |
+
+Rules:
+
+- `PASS` requires zero survivors on protected invariants and a complete triage.
+- `PASS` with a high `No coverage` is `BLIND_SPOTS`, not `PASS`.
+- Every measure closes with evidence that the mutant died or was allowlisted.
+- `CRITICAL` or `REGRESSION` blocks the gate under `blocking`; under `advisory` it is recorded as debt with a Scope ID.
+
+---
+
 ## Build Evidence
 
 - **Compile command:** `<command>`

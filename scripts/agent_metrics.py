@@ -10,6 +10,8 @@ Metrics per step:
   gate_rejections    gate runs with ok=false
   validator_errors   errors reported by validate_step.py
   routes_back        journal records that mention a route back or a reopen
+  test_reopens       recorded test re-opens after a mutation finding
+  mutation_score     last mutation score reported for the iteration
   state_read_bytes   size of state.yaml at measurement time (iteration level)
 
 Stdlib only. Exit codes: 0 = ok, 1 = --check mismatch or bad input.
@@ -113,6 +115,10 @@ def build(state_path: Path, iteration: str | None, events_path: Path = EVENTS_PA
                 "test_guard_failures": 0,
                 "test_changes_after_approval": 0,
                 "feature_changes_after_approval": 0,
+                "test_reopens": 0,
+                "mutation_score": None,
+                "mutation_survived": 0,
+                "mutation_no_coverage": 0,
             }
         return steps[step]
 
@@ -131,9 +137,18 @@ def build(state_path: Path, iteration: str | None, events_path: Path = EVENTS_PA
                 target["test_changes_after_approval"] += 1
             if event.get("kind") == "features":
                 target["feature_changes_after_approval"] += 1
+        if event.get("tool") == "test_guard" and event.get("reopen") is True:
+            target["test_reopens"] += 1
+        if event.get("tool") == "mutation":
+            target["mutation_score"] = float(event.get("score", 0) or 0)
+            target["mutation_survived"] += int(event.get("survived", 0) or 0)
+            target["mutation_no_coverage"] += int(event.get("no_coverage", 0) or 0)
 
     for step in read_journal_routes(state_path.parent, journal):
         entry(step)["routes_back"] += 1
+
+    mutation_events = [event for event in events if event.get("tool") == "mutation"]
+    latest_mutation = max(mutation_events, key=lambda item: item.get("ts", "")) if mutation_events else None
 
     summary = {
         "gate_rejections": sum(item["gate_rejections"] for item in steps.values()),
@@ -142,6 +157,10 @@ def build(state_path: Path, iteration: str | None, events_path: Path = EVENTS_PA
         "test_guard_failures": sum(item["test_guard_failures"] for item in steps.values()),
         "test_changes_after_approval": sum(item["test_changes_after_approval"] for item in steps.values()),
         "feature_changes_after_approval": sum(item["feature_changes_after_approval"] for item in steps.values()),
+        "test_reopens": sum(item["test_reopens"] for item in steps.values()),
+        "mutation_score": latest_mutation.get("score") if latest_mutation else None,
+        "mutation_survived": sum(item["mutation_survived"] for item in steps.values()),
+        "mutation_no_coverage": sum(item["mutation_no_coverage"] for item in steps.values()),
         "state_read_bytes": state_path.stat().st_size,
     }
 
@@ -164,6 +183,10 @@ def build(state_path: Path, iteration: str | None, events_path: Path = EVENTS_PA
             "test_guard_failures": "test_guard.py --verify failures",
             "test_changes_after_approval": "test tree changed after the 14B baseline",
             "feature_changes_after_approval": "features changed after the 14A baseline",
+            "test_reopens": "test_guard.py --record --reopen events with a reason",
+            "mutation_score": "last mutation_report.py score for the iteration",
+            "mutation_survived": "sum of survived mutants reported",
+            "mutation_no_coverage": "sum of no-coverage mutants reported",
             "state_read_bytes": "state.yaml size at measurement time",
         },
     }
