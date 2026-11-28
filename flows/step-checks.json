@@ -206,6 +206,10 @@
         }
       ],
       "rubric": "rubrics/conformance.md"
+    },
+    "15": {
+      "artifact": "Requirements Ranking",
+      "checks": [{ "use": "Requirements Ranking" }]
     }
   },
   "inception": {
