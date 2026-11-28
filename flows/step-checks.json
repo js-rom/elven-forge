@@ -182,6 +182,14 @@
           "values": ["PASS", "IMPROVE", "REINFORCE", "REGRESSION", "BLIND_SPOTS", "CRITICAL", "ACCEPT"]
         },
         {
+          "kind": "optional_section",
+          "heading": "Code Quality",
+          "section": "Code Quality",
+          "columns": ["Gate", "Coverage", "Duplication", "Issues", "Critical", "Verdict"],
+          "column": "Verdict",
+          "values": ["PASS", "IMPROVE", "BLOCK", "REGRESSION", "ACCEPT", "BASELINE"]
+        },
+        {
           "kind": "row_value",
           "section": "Verdict",
           "key_column": "Check",

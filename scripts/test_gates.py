@@ -542,6 +542,125 @@ UC01.
         run("mutation_report.py", "--xml", str(mutation_dir / "nope.xml"), "--iteration", "E0"),
     )
 
+    quality_dir = base / "quality"
+    quality_dir.mkdir(parents=True, exist_ok=True)
+
+    def quality_snapshot(name: str, issues: list[dict], coverage: str = "85", duplication: str = "1") -> Path:
+        payload = {
+            "project": "com.x",
+            "version": "E0",
+            "scope": "new",
+            "gate": {"status": "OK", "conditions": []},
+            "measures": [
+                {"metric": "new_coverage", "value": coverage},
+                {"metric": "new_duplicated_lines_density", "value": duplication},
+                {"metric": "new_lines", "value": "100"},
+            ],
+            "issues": {"total": len(issues), "list": issues},
+        }
+        return write(quality_dir / name, json.dumps(payload))
+
+    def quality_issue(rule: str = "java:S123", kind: str = "BUG", severity: str = "CRITICAL") -> dict:
+        return {
+            "key": f"issue-{rule}",
+            "rule": rule,
+            "type": kind,
+            "severity": severity,
+            "component": "com.x:src/main/java/A.java",
+            "line": 10,
+            "message": "finding",
+            "impacts": [],
+        }
+
+    quality_pass = quality_snapshot("pass.json", [])
+    quality_critical = quality_snapshot("critical.json", [quality_issue()], coverage="90")
+    quality_gap = quality_snapshot("gap.json", [], coverage="70")
+    quality_regression = quality_snapshot("regression.json", [], coverage="80")
+    quality_allowlist = write(
+        quality_dir / "allowlist.json",
+        json.dumps(
+            {
+                "version": 1,
+                "entries": [
+                    {
+                        "id": "Q1",
+                        "rule": "java:S123",
+                        "component": "src/main/java/A.java",
+                        "line": 10,
+                        "reason": "false positive",
+                        "approved_by": "test",
+                        "date": "2026-11-28",
+                    }
+                ],
+            }
+        ),
+    )
+    quality_baseline = write(quality_dir / "baseline.json", json.dumps({"coverage": 90, "duplication": 1}))
+    quality_triage = write(
+        quality_dir / "triage.json",
+        json.dumps({"entries": [{"key": "java:S123#src/main/java/A.java:10", "class": "BUG"}]}),
+    )
+
+    record(
+        "quality pass",
+        0,
+        run("quality_report.py", "--snapshot", str(quality_pass), "--iteration", "E0"),
+    )
+    record(
+        "quality critical blocks",
+        1,
+        run("quality_report.py", "--snapshot", str(quality_critical), "--iteration", "E0", "--policy", "blocking"),
+    )
+    record(
+        "quality coverage gap advisory",
+        0,
+        run("quality_report.py", "--snapshot", str(quality_gap), "--iteration", "E0"),
+    )
+    record(
+        "quality regression blocks",
+        1,
+        run(
+            "quality_report.py",
+            "--snapshot",
+            str(quality_regression),
+            "--iteration",
+            "E0",
+            "--policy",
+            "blocking",
+            "--baseline",
+            str(quality_baseline),
+        ),
+    )
+    record(
+        "quality allowlist accepts",
+        0,
+        run("quality_report.py", "--snapshot", str(quality_critical), "--iteration", "E0", "--allowlist", str(quality_allowlist)),
+    )
+    record(
+        "quality strict needs triage",
+        1,
+        run("quality_report.py", "--snapshot", str(quality_critical), "--iteration", "E0", "--strict-triage"),
+    )
+    record(
+        "quality strict with triage",
+        0,
+        run(
+            "quality_report.py",
+            "--snapshot",
+            str(quality_critical),
+            "--iteration",
+            "E0",
+            "--strict-triage",
+            "--triage",
+            str(quality_triage),
+        ),
+    )
+    record(
+        "quality missing snapshot",
+        2,
+        run("quality_report.py", "--snapshot", str(quality_dir / "nope.json"), "--iteration", "E0"),
+    )
+
     failed = [case for case in cases if not case["ok"]]
     print(json.dumps({"ok": not failed, "cases": cases}, indent=2, ensure_ascii=False))
     return 0 if not failed else 1

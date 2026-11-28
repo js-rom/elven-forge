@@ -119,6 +119,11 @@ def build(state_path: Path, iteration: str | None, events_path: Path = EVENTS_PA
                 "mutation_score": None,
                 "mutation_survived": 0,
                 "mutation_no_coverage": 0,
+                "quality_gate": None,
+                "quality_verdict": None,
+                "quality_critical": 0,
+                "quality_coverage": None,
+                "quality_duplication": None,
             }
         return steps[step]
 
@@ -143,12 +148,20 @@ def build(state_path: Path, iteration: str | None, events_path: Path = EVENTS_PA
             target["mutation_score"] = float(event.get("score", 0) or 0)
             target["mutation_survived"] += int(event.get("survived", 0) or 0)
             target["mutation_no_coverage"] += int(event.get("no_coverage", 0) or 0)
+        if event.get("tool") == "quality":
+            target["quality_gate"] = event.get("gate")
+            target["quality_verdict"] = event.get("verdict")
+            target["quality_critical"] += int(event.get("critical", 0) or 0)
+            target["quality_coverage"] = event.get("coverage")
+            target["quality_duplication"] = event.get("duplication")
 
     for step in read_journal_routes(state_path.parent, journal):
         entry(step)["routes_back"] += 1
 
     mutation_events = [event for event in events if event.get("tool") == "mutation"]
     latest_mutation = max(mutation_events, key=lambda item: item.get("ts", "")) if mutation_events else None
+    quality_events = [event for event in events if event.get("tool") == "quality"]
+    latest_quality = max(quality_events, key=lambda item: item.get("ts", "")) if quality_events else None
 
     summary = {
         "gate_rejections": sum(item["gate_rejections"] for item in steps.values()),
@@ -161,6 +174,11 @@ def build(state_path: Path, iteration: str | None, events_path: Path = EVENTS_PA
         "mutation_score": latest_mutation.get("score") if latest_mutation else None,
         "mutation_survived": sum(item["mutation_survived"] for item in steps.values()),
         "mutation_no_coverage": sum(item["mutation_no_coverage"] for item in steps.values()),
+        "quality_gate": latest_quality.get("gate") if latest_quality else None,
+        "quality_verdict": latest_quality.get("verdict") if latest_quality else None,
+        "quality_critical": sum(item["quality_critical"] for item in steps.values()),
+        "quality_coverage": latest_quality.get("coverage") if latest_quality else None,
+        "quality_duplication": latest_quality.get("duplication") if latest_quality else None,
         "state_read_bytes": state_path.stat().st_size,
     }
 
@@ -187,6 +205,11 @@ def build(state_path: Path, iteration: str | None, events_path: Path = EVENTS_PA
             "mutation_score": "last mutation_report.py score for the iteration",
             "mutation_survived": "sum of survived mutants reported",
             "mutation_no_coverage": "sum of no-coverage mutants reported",
+            "quality_gate": "last Sonar quality gate for the iteration",
+            "quality_verdict": "last quality_report.py verdict",
+            "quality_critical": "sum of critical code-quality findings",
+            "quality_coverage": "last new-code coverage reported",
+            "quality_duplication": "last new-code duplication reported",
             "state_read_bytes": "state.yaml size at measurement time",
         },
     }

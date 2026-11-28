@@ -28,6 +28,10 @@
   - `test-author` strengthens weak tests under a recorded re-open; `implementer` removes dead code; `orchestrator` owns equivalents and design gaps.
   - Re-run the affected tests and the affected mutation classes; a measure closes only when the survivor dies.
   - The re-open **strengthens, never widens scope**: a new scenario returns to 14A.
+- If the Iteration Plan enables `Code Quality`, the quality loop runs after GREEN and before mutation:
+  - `runner` runs the Sonar analysis over the new code, plus ArchUnit and Trivy, and `quality_report.py` emits the scorecard and the triage.
+  - `implementer` fixes critical bugs and vulnerabilities; `test-author` closes coverage gaps; `orchestrator` owns allowlists, architecture routing and debt IDs.
+  - Re-run the analysis; a finding closes only when it disappears or is allowlisted with evidence. The baseline is not a pass.
 
 ## Preconditions
 - `OK 14A` approved.
@@ -51,6 +55,7 @@
 - `test_guard.py --features --verify` and `test_guard.py --tests --verify` OK; the orchestrator runs `gate.py --guard` for `OK 14B.IMPL` and the final `OK 14B`.
 - Re-persisted `Test Plan` with status and evidence for every item; no `planned` item remains.
 - If mutation is enabled: the PIT report path, `mutation_report.py` summary, the triage table and the effect evidence per measure.
+- If quality is enabled: the Sonar gate, the `quality_report.py` scorecard, the triage and the effect evidence per measure.
 - Test changes after the 14B baseline only through `test_guard.py --tests --record --reopen --reason`; the reason stays in the baseline.
 - Final `OK 14B` when the implementation is complete, before 14C.
 
@@ -64,3 +69,4 @@
 - Changing a test after `OK 14B` without a new approval.
 - Silently re-baselining tests to hide a mutation finding.
 - Chasing 100% mutation score or allowlisting without evidence.
+- Treating the first quality baseline as a pass or blocking on legacy debt.

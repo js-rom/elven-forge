@@ -109,14 +109,19 @@ if (Test-Path -LiteralPath $agentMetricsPath) {
     [void]$sb.AppendLine("- Mutation score: **$(Format-Text $agent.summary.mutation_score)**.")
     [void]$sb.AppendLine("- Supervivientes de mutacion: **$(Format-Text $agent.summary.mutation_survived)**.")
     [void]$sb.AppendLine("- Mutantes sin cobertura: **$(Format-Text $agent.summary.mutation_no_coverage)**.")
+    [void]$sb.AppendLine("- Quality gate: **$(Format-Text $agent.summary.quality_gate)**.")
+    [void]$sb.AppendLine("- Quality verdict: **$(Format-Text $agent.summary.quality_verdict)**.")
+    [void]$sb.AppendLine("- Hallazgos criticos: **$(Format-Text $agent.summary.quality_critical)**.")
+    [void]$sb.AppendLine("- Cobertura: **$(Format-Text $agent.summary.quality_coverage)**.")
+    [void]$sb.AppendLine("- Duplicacion: **$(Format-Text $agent.summary.quality_duplication)**.")
     [void]$sb.AppendLine("- Bytes de state: **$(Format-Text $agent.summary.state_read_bytes)**.")
     [void]$sb.AppendLine("- Eventos registrados: **$(Format-Text $agent.events.total)**.")
     [void]$sb.AppendLine("")
     if (@($agent.steps).Count -gt 0) {
-        [void]$sb.AppendLine("| Paso | Gate rechazados | Errores de validador | Rutas atras | Cambios test | Cambios feature | Reopens | Mut score |")
-        [void]$sb.AppendLine("| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
+        [void]$sb.AppendLine("| Paso | Gate rechazados | Errores de validador | Rutas atras | Cambios test | Cambios feature | Reopens | Mut score | Quality | Crit |")
+        [void]$sb.AppendLine("| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | :--- | ---: |")
         foreach ($row in @($agent.steps)) {
-            [void]$sb.AppendLine("| $(Format-Text $row.step) | $(Format-Text $row.gate_rejections) | $(Format-Text $row.validator_errors) | $(Format-Text $row.routes_back) | $(Format-Text $row.test_changes_after_approval) | $(Format-Text $row.feature_changes_after_approval) | $(Format-Text $row.test_reopens) | $(Format-Text $row.mutation_score) |")
+            [void]$sb.AppendLine("| $(Format-Text $row.step) | $(Format-Text $row.gate_rejections) | $(Format-Text $row.validator_errors) | $(Format-Text $row.routes_back) | $(Format-Text $row.test_changes_after_approval) | $(Format-Text $row.feature_changes_after_approval) | $(Format-Text $row.test_reopens) | $(Format-Text $row.mutation_score) | $(Format-Text $row.quality_gate) | $(Format-Text $row.quality_critical) |")
         }
         [void]$sb.AppendLine("")
     }

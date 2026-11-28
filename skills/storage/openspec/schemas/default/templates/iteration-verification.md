@@ -83,6 +83,29 @@ Rules:
 
 ---
 
+## Code Quality
+
+Omit this section when the Iteration Plan sets code quality to `off`.
+
+| Gate | Coverage | Duplication | Issues | Critical | Verdict |
+| :--- | ---: | ---: | ---: | ---: | :--- |
+| <OK \| ERROR> | <0.0>% | <0.0>% | <n> | <n> | <PASS \| IMPROVE \| BLOCK \| REGRESSION \| ACCEPT \| BASELINE> |
+| ... | ... | ... | ... | ... | ... |
+
+| Issue | Type | Severity | File | Line | Triaged as | Confirmed | Measure | Owner |
+| :--- | :--- | :--- | :--- | ---: | :--- | :--- | :--- | :--- |
+| `<rule>` | <BUG \| VULNERABILITY \| CODE_SMELL \| SECURITY_HOTSPOT> | <BLOCKER \| CRITICAL \| MAJOR \| MINOR \| INFO> | `<path>` | <line> | <class> | <yes \| no> | <measure> | <owner> |
+| ... | ... | ... | ... | ... | ... | ... | ... | ... |
+
+Rules:
+
+- `PASS` requires a green gate, zero new critical findings and new-code coverage at or above the floor.
+- The first `BASELINE` is a debt record, not a pass.
+- Every measure closes with evidence that the finding disappeared or was allowlisted.
+- New critical bugs/vulnerabilities, ArchUnit violations and coverage below the floor block under `blocking`.
+
+---
+
 ## Build Evidence
 
 - **Compile command:** `<command>`

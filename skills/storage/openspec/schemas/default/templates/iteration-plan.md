@@ -62,6 +62,25 @@ When `off`, 14B and 14D do not run mutation and the section does not appear in t
 
 ---
 
+## Code Quality
+
+| Field | Value |
+| :--- | :--- |
+| Code quality | <on \| off> |
+| Project key | <sonar project key> |
+| Sonar host | <http://localhost:9000> |
+| Scope | <new \| all> (`all` only for the first baseline) |
+| Target coverage | <80> |
+| Max duplication | <3> |
+| Policy | <advisory \| blocking> |
+| Architecture | ArchUnit |
+| Dependencies | Trivy |
+| Runtime budget | <minutes> |
+
+When `off`, 14B and 14D do not run Sonar and the section does not appear in the Iteration Verification. The first analysis with `scope=all` is a baseline: it records legacy debt and is not a pass.
+
+---
+
 ## History Tracking
 
 | Scope ID | Scope Item | UC ID | Delivery Type | Counts for average |
